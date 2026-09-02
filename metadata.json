@@ -1,0 +1,6 @@
+{
+  "name": "Naija Tech Guide",
+  "description": "A platform providing tech career pathways, practical resources, and constraint-first roadmaps for Nigerian tech enthusiasts.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
