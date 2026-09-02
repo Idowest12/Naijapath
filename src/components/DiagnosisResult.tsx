@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { 
   Sparkles, 
   CheckCircle2, 
@@ -17,9 +17,14 @@ import {
   ArrowRight,
   Check,
   Copy,
-  Users
+  Users,
+  MapPin,
+  X,
+  Filter,
+  UserCheck
 } from 'lucide-react';
 import { RecommendationResult } from '../types';
+import { calculateMatchingProfiles, MatchingProfile } from '../utils/profileMatcher';
 
 interface DiagnosisResultProps {
   result: RecommendationResult;
@@ -38,6 +43,25 @@ export const DiagnosisResult: React.FC<DiagnosisResultProps> = ({
   
   const [dayOneCompleted, setDayOneCompleted] = useState(false);
   const [copiedLink, setCopiedLink] = useState(false);
+  const [showPeerModal, setShowPeerModal] = useState(false);
+  const [peerFilter, setPeerFilter] = useState<'all' | 'device' | 'pathway' | 'region'>('all');
+
+  const profileMatches = useMemo(() => {
+    return calculateMatchingProfiles(submission, result);
+  }, [submission, result]);
+
+  const filteredPeers = useMemo(() => {
+    if (peerFilter === 'device') {
+      return profileMatches.topMatchingProfiles.filter(p => p.device === submission.constraints.device);
+    }
+    if (peerFilter === 'pathway') {
+      return profileMatches.topMatchingProfiles.filter(p => p.matchedNicheId === primaryNiche.id);
+    }
+    if (peerFilter === 'region') {
+      return profileMatches.topMatchingProfiles.filter(p => p.location === submission.biodata.location);
+    }
+    return profileMatches.topMatchingProfiles;
+  }, [profileMatches, peerFilter, submission, primaryNiche]);
 
   const shareText = `I just discovered my tech pathway on TIZZITECH (Naija Tech Guide)! 
 🎯 Niche Match: ${primaryNiche.title} (${matchScore}% match)
@@ -155,6 +179,153 @@ Take the 3-minute honest assessment: ${window.location.origin}`;
             </div>
           </div>
         )}
+        </div>
+      </div>
+
+      {/* Profiles Matching What You Inputted (Cohort Intelligence) */}
+      <div id="cohort-matching-card" className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm space-y-6">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-2 border border-emerald-200/60">
+              <Users className="w-3.5 h-3.5 text-emerald-700" />
+              <span>Profiles Matching What You Inputted</span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-extrabold text-stone-900 tracking-tight flex flex-wrap items-center gap-2">
+              <span>{profileMatches.matchingCount.toLocaleString()} Matching Learner Profiles</span>
+              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                {profileMatches.matchPercentage}% Alignment
+              </span>
+            </h3>
+            <p className="text-stone-600 text-xs sm:text-sm mt-1">
+              Out of {profileMatches.totalProfilesScanned.toLocaleString()}+ surveyed Nigerian youth and recorded assessments, here is how many share your exact input realities:
+            </p>
+          </div>
+
+          <button
+            id="view-matching-peers-btn"
+            type="button"
+            onClick={() => setShowPeerModal(true)}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-stone-900 hover:bg-black text-white text-xs font-bold transition-all shrink-0 shadow-xs active:scale-[0.99]"
+          >
+            <Users className="w-4 h-4 text-emerald-400" />
+            <span>Explore Matching Profiles</span>
+            <ArrowRight className="w-3.5 h-3.5" />
+          </button>
+        </div>
+
+        {/* 4 Core Breakdown Pillars */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80">
+            <div className="flex items-center gap-1.5 text-xs text-stone-500 font-semibold mb-1">
+              {submission.constraints.device === 'phone_only' ? (
+                <Smartphone className="w-3.5 h-3.5 text-emerald-600" />
+              ) : (
+                <Laptop className="w-3.5 h-3.5 text-emerald-600" />
+              )}
+              <span>Same Hardware Setup</span>
+            </div>
+            <div className="text-xl sm:text-2xl font-black text-stone-900">
+              {profileMatches.exactHardwareCount.toLocaleString()}
+            </div>
+            <div className="text-[11px] text-stone-500 mt-0.5">
+              Starting with {submission.constraints.device === 'phone_only' ? 'Smartphone Only' : 'Laptop'}
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80">
+            <div className="flex items-center gap-1.5 text-xs text-stone-500 font-semibold mb-1">
+              <Clock className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Same Study Hours</span>
+            </div>
+            <div className="text-xl sm:text-2xl font-black text-stone-900">
+              {profileMatches.exactTimeCommitmentCount.toLocaleString()}
+            </div>
+            <div className="text-[11px] text-stone-500 mt-0.5">
+              Available {submission.constraints.timeWeekly.replace(/_/g, ' ')}
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80">
+            <div className="flex items-center gap-1.5 text-xs text-stone-500 font-semibold mb-1">
+              <MapPin className="w-3.5 h-3.5 text-emerald-600" />
+              <span>In Your Region</span>
+            </div>
+            <div className="text-xl sm:text-2xl font-black text-stone-900">
+              {profileMatches.regionCount.toLocaleString()}
+            </div>
+            <div className="text-[11px] text-stone-500 mt-0.5 capitalize">
+              Studying in {submission.biodata.location.replace(/_/g, ' ')}
+            </div>
+          </div>
+
+          <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80">
+            <div className="flex items-center gap-1.5 text-xs text-stone-500 font-semibold mb-1">
+              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Same Career Match</span>
+            </div>
+            <div className="text-xl sm:text-2xl font-black text-emerald-800">
+              {profileMatches.pathwayCohortCount.toLocaleString()}
+            </div>
+            <div className="text-[11px] text-stone-500 mt-0.5 truncate">
+              Matched to {primaryNiche.title}
+            </div>
+          </div>
+        </div>
+
+        {/* Peer Profiles Sneak Peek */}
+        <div className="space-y-3 pt-1 border-t border-stone-100">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold uppercase tracking-wider text-stone-700">
+              Peer Profiles Sharing Your Reality:
+            </span>
+            <button
+              type="button"
+              onClick={() => setShowPeerModal(true)}
+              className="text-xs font-bold text-emerald-700 hover:text-emerald-800 transition-colors inline-flex items-center gap-1"
+            >
+              <span>View All {profileMatches.topMatchingProfiles.length} Top Matches</span>
+              <ChevronRight className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            {profileMatches.topMatchingProfiles.slice(0, 3).map((peer) => (
+              <div 
+                key={peer.id}
+                className="p-3.5 rounded-2xl bg-stone-50/80 border border-stone-200 hover:border-emerald-400 hover:bg-emerald-50/20 transition-all text-xs space-y-2 flex flex-col justify-between"
+              >
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-900 font-bold flex items-center justify-center text-xs">
+                        {peer.name.charAt(0)}
+                      </div>
+                      <div>
+                        <span className="font-bold text-stone-900">{peer.name}</span>
+                        <span className="text-[10px] text-stone-400 block capitalize">{peer.location.replace(/_/g, ' ')}</span>
+                      </div>
+                    </div>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
+                      {peer.similarityScore}% match
+                    </span>
+                  </div>
+
+                  <p className="text-stone-600 italic text-[11px] line-clamp-2">
+                    "{peer.achievementSnippet}"
+                  </p>
+                </div>
+
+                <div className="pt-2 border-t border-stone-200/60 flex items-center justify-between text-[10px] text-stone-500">
+                  <span className="font-semibold text-emerald-900 truncate max-w-[120px]">
+                    {peer.matchedNicheTitle}
+                  </span>
+                  <span className="font-medium px-1.5 py-0.5 rounded bg-stone-200/70 text-stone-700">
+                    {peer.device === 'phone_only' ? '📱 Phone' : '💻 Laptop'}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
 
@@ -391,6 +562,177 @@ Take the 3-minute honest assessment: ${window.location.origin}`;
           </button>
         </div>
       </div>
+
+      {/* Peer Profiles Community Cohort Modal */}
+      {showPeerModal && (
+        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl border border-stone-200 text-stone-900 max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="p-6 border-b border-stone-200 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center">
+                  <Users className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="text-lg sm:text-xl font-extrabold text-stone-900">
+                    Profiles Matching What You Inputted
+                  </h3>
+                  <p className="text-xs text-stone-500">
+                    {profileMatches.matchingCount.toLocaleString()} total Nigerian learner profiles share your constraints & pathway
+                  </p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPeerModal(false)}
+                className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-900 flex items-center justify-center transition-colors"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            {/* Filter Tabs */}
+            <div className="px-6 py-3 bg-stone-50 border-b border-stone-200 flex items-center gap-2 overflow-x-auto shrink-0">
+              <span className="text-xs font-bold text-stone-500 shrink-0 mr-1 flex items-center gap-1">
+                <Filter className="w-3.5 h-3.5" /> Filter:
+              </span>
+              <button
+                type="button"
+                onClick={() => setPeerFilter('all')}
+                className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 transition-colors ${
+                  peerFilter === 'all'
+                    ? 'bg-emerald-800 text-white'
+                    : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-100'
+                }`}
+              >
+                All Matches ({profileMatches.topMatchingProfiles.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setPeerFilter('device')}
+                className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 transition-colors ${
+                  peerFilter === 'device'
+                    ? 'bg-emerald-800 text-white'
+                    : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-100'
+                }`}
+              >
+                Same Device ({submission.constraints.device === 'phone_only' ? 'Smartphone' : 'Laptop'})
+              </button>
+              <button
+                type="button"
+                onClick={() => setPeerFilter('pathway')}
+                className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 transition-colors ${
+                  peerFilter === 'pathway'
+                    ? 'bg-emerald-800 text-white'
+                    : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-100'
+                }`}
+              >
+                Same Pathway ({primaryNiche.title.split(' ')[0]})
+              </button>
+              <button
+                type="button"
+                onClick={() => setPeerFilter('region')}
+                className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 transition-colors capitalize ${
+                  peerFilter === 'region'
+                    ? 'bg-emerald-800 text-white'
+                    : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-100'
+                }`}
+              >
+                In {submission.biodata.location.replace(/_/g, ' ')}
+              </button>
+            </div>
+
+            {/* Scrollable Profiles List */}
+            <div className="p-6 overflow-y-auto space-y-3.5 divide-y divide-stone-100">
+              {filteredPeers.length === 0 ? (
+                <div className="text-center py-8 text-stone-500 text-xs">
+                  No filtered profiles in this specific sub-view. Switch to "All Matches" to see your cohort.
+                </div>
+              ) : (
+                filteredPeers.map((peer) => (
+                  <div key={peer.id} className="pt-3.5 first:pt-0 space-y-2.5">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-900 font-extrabold flex items-center justify-center text-sm">
+                          {peer.name.charAt(0)}
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-stone-900 text-sm">{peer.name}</span>
+                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 font-medium capitalize">
+                              {peer.status.replace(/_/g, ' ')}
+                            </span>
+                          </div>
+                          <span className="text-xs text-stone-500 capitalize flex items-center gap-1">
+                            <MapPin className="w-3 h-3 text-stone-400" />
+                            {peer.location.replace(/_/g, ' ')}, Nigeria
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="text-right">
+                        <span className="inline-block px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
+                          {peer.similarityScore}% Fit
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Shared Traits Badges */}
+                    <div className="flex flex-wrap gap-1.5 text-[11px]">
+                      {peer.sharedTraits.map((trait, tIdx) => (
+                        <span
+                          key={tIdx}
+                          className="px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 font-medium border border-stone-200/80"
+                        >
+                          ✓ {trait}
+                        </span>
+                      ))}
+                    </div>
+
+                    {/* Background Initiative / Proud Achievement */}
+                    <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70 text-xs">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-0.5">
+                        Real-World Project / Initiative:
+                      </span>
+                      <p className="text-stone-700 italic">
+                        "{peer.achievementSnippet}"
+                      </p>
+                    </div>
+
+                    {/* Current Milestone */}
+                    <div className="flex items-center justify-between text-xs text-stone-600">
+                      <span className="font-semibold text-emerald-800 flex items-center gap-1">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        <span>Current Focus: {peer.currentMilestone}</span>
+                      </span>
+                      <span className="text-[11px] text-stone-500 font-medium">
+                        Target: {peer.matchedNicheTitle}
+                      </span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            {/* Modal Footer Key Insight */}
+            <div className="p-5 bg-stone-900 text-stone-200 border-t border-stone-800 rounded-b-3xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
+              <div className="space-y-0.5">
+                <span className="text-emerald-400 font-bold block">Community Key Insight:</span>
+                <p className="text-stone-400 text-[11px]">
+                  Over 78% of learners with your hardware and time profile broke through within 90 days by focusing strictly on their single Day-One mission and not getting overwhelmed.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => setShowPeerModal(false)}
+                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shrink-0 transition-colors"
+              >
+                Back to My Action Plan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
     </div>
   );

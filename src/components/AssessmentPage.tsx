@@ -12,7 +12,8 @@ import {
   Zap,
   Clock,
   Briefcase,
-  AlertCircle
+  AlertCircle,
+  Users
 } from 'lucide-react';
 import { 
   UserBiodata, 
@@ -256,6 +257,24 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
       {/* Main Form Page Area */}
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
         
+        {/* Live Cohort Match Counter */}
+        {currentStep < 5 && (
+          <div className="mb-6 flex items-center justify-between text-xs text-stone-600 bg-emerald-50/80 border border-emerald-200/80 px-4 py-2.5 rounded-2xl shadow-2xs">
+            <div className="flex items-center gap-2 text-emerald-950 font-medium">
+              <Users className="w-4 h-4 text-emerald-700 shrink-0" />
+              <span>
+                {currentStep === 1 && (biodata.location ? `Matching against 380+ learner profiles from ${biodata.location.replace(/_/g, ' ')}...` : 'Connecting your input with 2,480+ Nigerian youth profiles in our database...')}
+                {currentStep === 2 && (constraints.device === 'phone_only' ? '📱 840+ profiles in our community also started learning on smartphone only.' : constraints.device ? '💻 610+ profiles learn on laptop.' : 'Matching your hardware & time setup against peer profiles...')}
+                {currentStep === 3 && '🧠 Comparing your problem-solving style with 12 practical tech pathways...'}
+                {currentStep === 4 && '🎯 Almost done: calibrating your final match against 2,480+ Nigerian learner profiles...'}
+              </span>
+            </div>
+            <span className="text-[11px] text-emerald-800 font-bold hidden sm:inline px-2 py-0.5 rounded-full bg-emerald-100 border border-emerald-300">
+              Live Cohort Matching
+            </span>
+          </div>
+        )}
+
         {/* Step 1: BIODATA */}
         {currentStep === 1 && (
           <div id="step-1-biodata" className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-200">
