@@ -37,6 +37,7 @@ export interface AptitudeScores {
 export interface QualitativeAnswers {
   proudAchievement: string;
   targetIndustry: string;
+  preferredDailyActivity?: string;
 }
 
 export interface FullAssessmentSubmission {
@@ -87,13 +88,31 @@ export interface PathwayNiche {
   relevantCommunities: string[];
 }
 
+export interface ScoreBreakdown {
+  aptitudeFit: number;         // e.g., 84%
+  resourceFeasibility: number; // e.g., 90%
+  marketDemand: number;        // e.g., 88%
+  honestCaveat: string;        // Specific realistic hurdle / reason not 100%
+  detectedKeywords: string[];  // Extracted from open-ended reflection
+}
+
+export interface PriorityComparison {
+  primaryTitle: string;
+  secondaryTitle: string;
+  edgeReason: string;
+  practicalDifferentiator: string;
+  learningVelocityNote: string;
+}
+
 export interface RecommendationResult {
   primaryNiche: PathwayNiche;
   matchScore: number;
+  scoreBreakdown?: ScoreBreakdown;
   rationale: string;
   constraintFeasibilityNotes: string[];
   secondaryNiche: PathwayNiche;
   secondaryMatchScore: number;
+  priorityComparison?: PriorityComparison;
   submission: FullAssessmentSubmission;
 }
 

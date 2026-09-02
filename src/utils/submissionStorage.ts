@@ -21,11 +21,18 @@ export interface StoredAssessmentRecord {
   qualitative: {
     proudAchievement: string;
     targetIndustry: string;
+    preferredDailyActivity?: string;
   };
   recommendation: {
     primaryNicheId: string;
     primaryNicheTitle: string;
     matchScore: number;
+    scoreBreakdown?: {
+      aptitudeFit: number;
+      resourceFeasibility: number;
+      marketDemand: number;
+      honestCaveat: string;
+    };
     secondaryNicheId?: string;
     secondaryNicheTitle?: string;
   };
@@ -61,11 +68,18 @@ export function saveAssessmentRecord(
     qualitative: {
       proudAchievement: submission.qualitative.proudAchievement.trim(),
       targetIndustry: submission.qualitative.targetIndustry || 'unspecified',
+      preferredDailyActivity: submission.qualitative.preferredDailyActivity || undefined,
     },
     recommendation: {
       primaryNicheId: result.primaryNiche.id,
       primaryNicheTitle: result.primaryNiche.title,
       matchScore: result.matchScore,
+      scoreBreakdown: result.scoreBreakdown ? {
+        aptitudeFit: result.scoreBreakdown.aptitudeFit,
+        resourceFeasibility: result.scoreBreakdown.resourceFeasibility,
+        marketDemand: result.scoreBreakdown.marketDemand,
+        honestCaveat: result.scoreBreakdown.honestCaveat,
+      } : undefined,
       secondaryNicheId: result.secondaryNiche?.id,
       secondaryNicheTitle: result.secondaryNiche?.title,
     },

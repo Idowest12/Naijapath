@@ -117,7 +117,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
     if (currentStep === 3) {
       const answeredAll = SCENARIO_QUESTIONS.every(q => scenarioAnswers[q.id] !== undefined);
       if (!answeredAll) {
-        setValidationError('Please pick an answer for each of the 4 questions above.');
+        setValidationError(`Please pick an answer for all ${SCENARIO_QUESTIONS.length} questions above.`);
         return;
       }
       setCurrentStep(4);
@@ -131,14 +131,14 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
         return;
       }
 
-      // Calculate aptitude scores
-      const aptitudeTotals: AptitudeScores = {
-        visualCreative: 3,
-        logicalStructural: 3,
-        peopleCommunication: 3,
-        analyticalDetail: 3,
-        organizationOps: 3,
-        securityCuriosity: 2,
+      // Tally raw weighted points across the 6 cognitive domains
+      const points: Record<keyof AptitudeScores, number> = {
+        visualCreative: 0,
+        logicalStructural: 0,
+        peopleCommunication: 0,
+        analyticalDetail: 0,
+        organizationOps: 0,
+        securityCuriosity: 0,
       };
 
       SCENARIO_QUESTIONS.forEach((q) => {
@@ -148,11 +148,24 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
           if (option && option.weights) {
             Object.entries(option.weights).forEach(([key, val]) => {
               const k = key as keyof AptitudeScores;
-              aptitudeTotals[k] = Math.min(5, Math.max(1, aptitudeTotals[k] + (val ?? 0) - 2));
+              points[k] += (val ?? 0);
             });
           }
         }
       });
+
+      // Dynamic contrast normalization: scale relative to user's highest point domain
+      // to preserve authentic spikes in strength rather than flattening everyone to average
+      const maxPointVal = Math.max(...Object.values(points), 1);
+
+      const aptitudeTotals: AptitudeScores = {
+        visualCreative: Math.max(1, Math.min(5, Math.round((points.visualCreative / maxPointVal) * 5))),
+        logicalStructural: Math.max(1, Math.min(5, Math.round((points.logicalStructural / maxPointVal) * 5))),
+        peopleCommunication: Math.max(1, Math.min(5, Math.round((points.peopleCommunication / maxPointVal) * 5))),
+        analyticalDetail: Math.max(1, Math.min(5, Math.round((points.analyticalDetail / maxPointVal) * 5))),
+        organizationOps: Math.max(1, Math.min(5, Math.round((points.organizationOps / maxPointVal) * 5))),
+        securityCuriosity: Math.max(1, Math.min(5, Math.round((points.securityCuriosity / maxPointVal) * 5))),
+      };
 
       const submission: FullAssessmentSubmission = {
         biodata,
@@ -710,17 +723,46 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
                   className="w-full px-4 py-3 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
                 >
                   <option value="">-- Pick an area that interests you (Optional) --</option>
+                  <option value="Digital Marketing & Growth">Digital Marketing & Performance Growth (Ads, SEO, Funnels, Email Campaigns)</option>
+                  <option value="Branding & Creative Design">Branding & Creative Design (Logos, Visual Identity, Brand Kits, Art Direction)</option>
+                  <option value="Education & EdTech">Education & EdTech (Online Learning, Teaching, Training, Course Creation)</option>
                   <option value="Fintech & Mobile Money">Banking & Money Apps (Fintech, savings, payments)</option>
                   <option value="E-commerce & Logistics">Shopping & Delivery Apps (Jumia, Chowdeck, logistics)</option>
                   <option value="Creator Economy & Media">Social Media & Creators (TikTok, YouTube, Instagram, X)</option>
-                  <option value="Health & EdTech">Healthcare & Online Learning</option>
+                  <option value="Health & EdTech">Healthcare & Biotechnology</option>
                   <option value="Global Remote Freelancing">Working for Foreign Clients & Companies (Remote Freelancing)</option>
                 </select>
               </div>
 
+              <div className="space-y-2">
+                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700">
+                  3. Which day-to-day task sounds most appealing to you? (Optional)
+                </label>
+                <select
+                  id="qualitative-activity-select"
+                  value={qualitative.preferredDailyActivity || ''}
+                  onChange={(e) => setQualitative({ ...qualitative, preferredDailyActivity: e.target.value })}
+                  className="w-full px-4 py-3 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                >
+                  <option value="">-- Choose what kind of day-to-day work you enjoy most --</option>
+                  <option value="digital_marketing">Digital Marketing: Running paid ad campaigns, driving customer traffic, and optimizing funnels</option>
+                  <option value="branding">Branding & Visual Identity: Crafting logos, color palettes, brand guideline decks, and visual styling</option>
+                  <option value="education">Education & Teaching: Designing online lessons, creating tutorials, and training learners</option>
+                  <option value="design">UI/UX Design: Designing mobile app screens, web layouts, and interactive wireframes</option>
+                  <option value="writing">Technical Writing: Writing clear articles, step-by-step guides, and documentation</option>
+                  <option value="operations">Virtual Operations: Organizing calendars, managing client tasks, and coordinating projects</option>
+                  <option value="data">Data & Analytics: Analyzing numbers, spotting sales trends, and creating charts in spreadsheets</option>
+                  <option value="testing_security">QA & Security: Testing apps for bugs, finding mistakes, and keeping accounts safe</option>
+                  <option value="coding">Software Development: Writing code, solving technical puzzles, and building app features</option>
+                </select>
+                <p className="text-[11px] text-stone-400">
+                  Directly weights your daily preference into the diagnostic matching matrix.
+                </p>
+              </div>
+
               <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs sm:text-sm text-emerald-900 flex items-center gap-3">
                 <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0" />
-                <span>All set! Click below to see your matched tech career and your Day-One mission.</span>
+                <span>All set! Click below to see your realistic tech career match and Day-One roadmap.</span>
               </div>
             </div>
           </div>

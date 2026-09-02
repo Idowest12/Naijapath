@@ -428,11 +428,157 @@ export const ALL_NICHES: PathwayNiche[] = [
     relevantCommunities: ['Google Developer Groups (GDG) Nigeria', 'Consonance Club', 'She Code Africa Dev']
   },
   {
+    id: 'niche-backend',
+    title: 'Backend Software Engineering & APIs',
+    category: 'technical',
+    deviceRequirement: 'laptop_required',
+    supportedOnPhone: false,
+    imageUrl: 'https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=800&q=80',
+    shortTagline: 'Build server logic, databases, secure authentication, and scalable REST/GraphQL APIs',
+    description: 'Backend software engineers construct the server engine that powers modern applications. They design relational databases, secure payment gateways, build REST APIs, and manage server infrastructure using Node.js, Python, PostgreSQL, and cloud tools.',
+    timeCommitment: '12-16 hrs/week',
+    earningHorizon: '5-8 months',
+    dayOneAction: 'Install Node.js or Python on your computer. Write a simple 12-line server script using Express or FastAPI that outputs a JSON response with status "API active" and user data when loaded in your browser at http://localhost:5000.',
+    dayOneEstimatedMins: 25,
+    typicalTools: ['Node.js / Express', 'Python / Django / FastAPI', 'PostgreSQL / Supabase', 'Postman', 'Git & GitHub', 'Docker'],
+    traitProfile: {
+      visualCreative: 1,
+      logicalStructural: 5,
+      peopleCommunication: 2,
+      analyticalDetail: 5,
+      organizationOps: 3,
+      securityCuriosity: 4,
+    },
+    milestones: [
+      {
+        period: 'Week 1',
+        goal: 'Server Basics & HTTP Requests',
+        tasks: [
+          'Understand how the internet works: Client-Server model, HTTP methods (GET, POST, PUT, DELETE)',
+          'Build a basic REST API server with 3 endpoints using Node.js/Express or Python/FastAPI',
+          'Test and debug endpoints using Postman or Thunder Client'
+        ]
+      },
+      {
+        period: 'Month 1',
+        goal: 'Databases & CRUD Operations',
+        tasks: [
+          'Connect your server to PostgreSQL or MongoDB',
+          'Write database schemas, models, and queries for a functional store inventory or user system',
+          'Implement user password hashing with bcrypt and JSON Web Tokens (JWT) for secure authentication'
+        ]
+      },
+      {
+        period: 'Month 3',
+        goal: 'Production APIs, Deployment & Cloud Integration',
+        tasks: [
+          'Integrate a Paystack / Flutterwave webhook to handle automated payment verification',
+          'Deploy your backend live to Render, Railway, or AWS with environment variable secrets',
+          'Build a public API documentation page using Swagger / Postman Docs to showcase to recruiters'
+        ]
+      }
+    ],
+    resources: [
+      {
+        name: 'freeCodeCamp: Back End Development and APIs Certification',
+        type: 'free_course',
+        description: 'Comprehensive hands-on training with Node.js, Express, MongoDB, and microservices.',
+        lowDataFriendly: true
+      },
+      {
+        name: 'Roadmap.sh: Backend Developer Roadmap',
+        type: 'doc',
+        description: 'Visual step-by-step roadmap to becoming a modern backend engineer.',
+        lowDataFriendly: true
+      },
+      {
+        name: 'The Odin Project: NodeJS Course',
+        type: 'free_course',
+        description: 'In-depth guide covering Express, PostgreSQL, Prisma, authentication, and deployment.',
+        lowDataFriendly: true
+      }
+    ],
+    relevantCommunities: ['Python Nigeria', 'Node.js Africa Community', 'Backend Developers NG', 'GDG Lagos']
+  },
+  {
+    id: 'niche-fullstack',
+    title: 'Full-Stack Software Engineering',
+    category: 'technical',
+    deviceRequirement: 'laptop_required',
+    supportedOnPhone: false,
+    imageUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80',
+    shortTagline: 'Build complete web platforms end-to-end—from sleek user interfaces to robust database backends',
+    description: 'Full-stack engineers have the versatile superpower to build entire digital products from scratch. They seamlessly connect React / Next.js client frontends with Node/Python backend APIs, database schemas, and cloud deployment.',
+    timeCommitment: '15-20 hrs/week',
+    earningHorizon: '6-9 months',
+    dayOneAction: 'Map out an end-to-end app architecture on paper: sketch the frontend screen (e.g. a student meal ordering form), list the JSON payload sent to the backend API, and draw the database table schema where orders will be stored.',
+    dayOneEstimatedMins: 25,
+    typicalTools: ['React / Next.js', 'Node.js / TypeScript', 'PostgreSQL / Prisma', 'Tailwind CSS', 'Git & GitHub', 'Vercel & Supabase'],
+    traitProfile: {
+      visualCreative: 3,
+      logicalStructural: 5,
+      peopleCommunication: 3,
+      analyticalDetail: 4,
+      organizationOps: 4,
+      securityCuriosity: 3,
+    },
+    milestones: [
+      {
+        period: 'Week 1',
+        goal: 'Connecting Frontend UI with Dynamic Server Data',
+        tasks: [
+          'Create a React interface that fetches and renders live records from a public API',
+          'Implement full form submission with client-side validation and responsive loading states',
+          'Deploy both parts on Vercel and check network requests in Chrome DevTools'
+        ]
+      },
+      {
+        period: 'Month 1',
+        goal: 'Complete End-to-End CRUD Application',
+        tasks: [
+          'Build a full web application with Next.js, Tailwind, and a PostgreSQL database (via Supabase or Neon)',
+          'Implement complete Create, Read, Update, Delete functionality for user accounts and posts/products',
+          'Secure route handlers with user session cookies and role-based permissions'
+        ]
+      },
+      {
+        period: 'Month 3',
+        goal: 'Production SaaS MVP & Junior Developer Portfolio',
+        tasks: [
+          'Build and launch a real-world SaaS MVP for a local Nigerian problem (e.g. apartment rental finder or artisan directory)',
+          'Integrate payments via Paystack, automated emails, and image uploads',
+          'Document the architecture on GitHub with clean READMEs, live demo links, and video walkthroughs'
+        ]
+      }
+    ],
+    resources: [
+      {
+        name: 'The Odin Project: Full Stack JavaScript',
+        type: 'free_course',
+        description: 'World-class free open-source curriculum taking you from zero to full-stack mastery.',
+        lowDataFriendly: true
+      },
+      {
+        name: 'Full Stack Open (University of Helsinki)',
+        type: 'free_course',
+        description: 'Deep, production-grade deep dive into React, Redux, Node.js, MongoDB, GraphQL, and TypeScript.',
+        lowDataFriendly: true
+      },
+      {
+        name: 'Next.js Official Interactive Tutorial',
+        type: 'doc',
+        description: 'Learn modern full-stack React and server-side rendering step-by-step.',
+        lowDataFriendly: true
+      }
+    ],
+    relevantCommunities: ['Consonance Club', 'ALX Alumni Nigeria', 'Google Developer Groups', 'DevCenter Square']
+  },
+  {
     id: 'niche-qa',
     title: 'Quality Assurance & Software Testing',
     category: 'technical',
-    deviceRequirement: 'either',
-    supportedOnPhone: true,
+    deviceRequirement: 'laptop_required',
+    supportedOnPhone: false,
     imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80',
     shortTagline: 'Break software systematically before customers do and ensure high product quality',
     description: 'QA engineers test web and mobile applications for functional bugs, usability flaws, and edge cases. It is one of the most accessible entry points into technical engineering.',
@@ -442,12 +588,12 @@ export const ALL_NICHES: PathwayNiche[] = [
     dayOneEstimatedMins: 25,
     typicalTools: ['Jira / Trello', 'Postman', 'Chrome DevTools', 'TestRail', 'Loom / Screen Recorder'],
     traitProfile: {
-      visualCreative: 2,
+      visualCreative: 1,
       logicalStructural: 4,
-      peopleCommunication: 3,
+      peopleCommunication: 2,
       analyticalDetail: 5,
-      organizationOps: 4,
-      securityCuriosity: 4,
+      organizationOps: 3,
+      securityCuriosity: 5,
     },
     milestones: [
       {
@@ -627,5 +773,224 @@ export const ALL_NICHES: PathwayNiche[] = [
       }
     ],
     relevantCommunities: ['Product Dive Africa', 'Product Peoples Club NG', 'Treford Product School']
+  },
+  {
+    id: 'niche-digital-marketing',
+    title: 'Digital Marketing & Growth Strategy',
+    category: 'non-technical',
+    deviceRequirement: 'phone_only_possible',
+    supportedOnPhone: true,
+    imageUrl: 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80',
+    shortTagline: 'Run high-converting paid ads, optimize sales funnels, and scale customer acquisition',
+    description: 'Digital marketers and growth specialists help startups and businesses acquire paying customers through targeted Meta & Google ads, search engine optimization (SEO), email marketing funnels, and analytics.',
+    timeCommitment: '6-10 hrs/week',
+    earningHorizon: '1-3 months',
+    dayOneAction: 'Pick a popular local brand on Instagram. Use the Meta Ad Library (free website) to view all active ads they are running. Identify their top headline, offer, and write down 2 alternative copy hooks to improve their conversions.',
+    dayOneEstimatedMins: 20,
+    typicalTools: ['Meta Ads Manager', 'Google Ads', 'Google Analytics 4', 'Mailchimp / Brevo', 'Canva Mobile', 'Notion'],
+    traitProfile: {
+      visualCreative: 3,
+      logicalStructural: 3,
+      peopleCommunication: 5,
+      analyticalDetail: 5,
+      organizationOps: 4,
+      securityCuriosity: 1,
+    },
+    milestones: [
+      {
+        period: 'Week 1',
+        goal: 'Ad Strategy & Funnel Architecture',
+        tasks: [
+          'Study Meta Ads Manager setup and understand campaign objectives (Traffic, Leads, Sales)',
+          'Learn the AIDA framework (Attention, Interest, Desire, Action) for copywriting',
+          'Explore Google Analytics 4 basics to see how web visitors convert into buyers'
+        ]
+      },
+      {
+        period: 'Month 1',
+        goal: 'Run a Live Test Campaign & Build Case Study',
+        tasks: [
+          'Help an SME run a small test budget ad (₦5,000 - ₦10,000) targeting specific Lagos or Abuja interests',
+          'Optimize ad creatives, reduce Cost Per Click (CPC), and set up automated WhatsApp click-to-chat links',
+          'Document results in a 1-page PDF growth report showing return on ad spend (ROAS)'
+        ]
+      },
+      {
+        period: 'Month 3',
+        goal: 'Monthly Retainers & International Freelance Gigs',
+        tasks: [
+          'Pitch e-commerce and coaching brands on Upwork and LinkedIn for monthly ad management ($200 - $600/month)',
+          'Create a 3-tier service package (Lead Gen, E-commerce Growth, Retargeting)',
+          'Collect client video testimonials to attract higher-paying agency contracts'
+        ]
+      }
+    ],
+    resources: [
+      {
+        name: 'Google Digital Garage: Fundamentals of Digital Marketing',
+        type: 'free_course',
+        description: 'Free Google-accredited certification on SEO, SEM, and web marketing.',
+        lowDataFriendly: true
+      },
+      {
+        name: 'Meta Blueprint Free Certification Training',
+        type: 'free_course',
+        description: 'Official Meta courses on Instagram, Facebook, and WhatsApp Ads management.',
+        lowDataFriendly: true
+      },
+      {
+        name: 'HubSpot Inbound Marketing Certification',
+        type: 'free_course',
+        description: 'Learn customer funnels, content marketing, and email automation.',
+        lowDataFriendly: true
+      }
+    ],
+    relevantCommunities: ['Digital Marketing Nigeria', 'Growth Africa Network', 'African Freelancers Club']
+  },
+  {
+    id: 'niche-branding',
+    title: 'Brand Identity & Visual Design Specialist',
+    category: 'creative',
+    deviceRequirement: 'phone_only_possible',
+    supportedOnPhone: true,
+    imageUrl: 'https://images.unsplash.com/photo-1542744094-3a31f272c490?auto=format&fit=crop&w=800&q=80',
+    shortTagline: 'Design distinctive logos, color palettes, brand guidelines, and visual storytelling',
+    description: 'Brand identity specialists shape how companies look and feel. They design memorable logos, select cohesive typography and color palettes, craft brand style guides, and ensure visual consistency across social media and packaging.',
+    timeCommitment: '8-12 hrs/week',
+    earningHorizon: '2-4 months',
+    dayOneAction: 'Choose an unbranded Nigerian business (e.g. a local bakery, laundry service, or beauty salon). Create a cohesive 3-color palette on Coolors.co, pair two matching Google Fonts (one display, one body), and design a clean brand moodboard on Canva.',
+    dayOneEstimatedMins: 25,
+    typicalTools: ['Canva Mobile / Pro', 'Figma', 'Coolors.co', 'Pinterest', 'Adobe Illustrator', 'Notion Brand Kit'],
+    traitProfile: {
+      visualCreative: 5,
+      logicalStructural: 2,
+      peopleCommunication: 4,
+      analyticalDetail: 3,
+      organizationOps: 3,
+      securityCuriosity: 1,
+    },
+    milestones: [
+      {
+        period: 'Week 1',
+        goal: 'Brand Psychology, Color Theory & Typography',
+        tasks: [
+          'Study visual hierarchy, color psychology, and font pairing principles',
+          'Analyze the visual identity of iconic global and African brands (Flutterwave, Apple, Nike)',
+          'Create 3 complete brand color palettes with hex codes and typography pairings'
+        ]
+      },
+      {
+        period: 'Month 1',
+        goal: 'Design a Complete Brand Style Guide Deck',
+        tasks: [
+          'Design a fictional fintech or lifestyle startup brand kit: Primary logo, Secondary mark, Color hierarchy, Font rules, and Do/Don’t guidelines',
+          'Package the deliverables into an 8-page brand presentation PDF in Canva or Figma',
+          'Publish the project on Behance and LinkedIn as a case study'
+        ]
+      },
+      {
+        period: 'Month 3',
+        goal: 'Monetize Branding Kits for Startups & SMEs',
+        tasks: [
+          'Offer "Starter Brand Identity Packs" (Logo + Palette + Social Kit) for new Nigerian businesses ($150 - $400)',
+          'Collaborate with web developers and social media managers who need client branding assets',
+          'Showcase before-and-after brand redesigns on X (Twitter) and Instagram'
+        ]
+      }
+    ],
+    resources: [
+      {
+        name: 'The Futur: Building a Brand Identity (YouTube)',
+        type: 'youtube',
+        description: 'World-renowned design business lessons on client discovery, logo design, and brand kits.',
+        lowDataFriendly: false
+      },
+      {
+        name: 'Canva Design School: Graphic Design Basics',
+        type: 'free_course',
+        description: 'Master composition, layout, typography, and contrast.',
+        lowDataFriendly: true
+      },
+      {
+        name: 'Brand New (UnderConsideration)',
+        type: 'doc',
+        description: 'World top archive reviewing modern corporate and startup rebrands.',
+        lowDataFriendly: true
+      }
+    ],
+    relevantCommunities: ['Designers Guild Nigeria', 'Creative Nest Africa', 'African Brand Designers']
+  },
+  {
+    id: 'niche-edtech',
+    title: 'EdTech & Digital Learning Specialist',
+    category: 'non-technical',
+    deviceRequirement: 'phone_only_possible',
+    supportedOnPhone: true,
+    imageUrl: 'https://images.unsplash.com/photo-1501504905252-473c47e087f8?auto=format&fit=crop&w=800&q=80',
+    shortTagline: 'Design digital learning experiences, build online curricula, and train future tech talent',
+    description: 'EdTech specialists and instructional coordinators create engaging digital courses, structure curriculum pathways, build interactive student assessments, manage online classrooms, and facilitate cohorts for schools, academies, and tech programs.',
+    timeCommitment: '6-10 hrs/week',
+    earningHorizon: '2-4 months',
+    dayOneAction: 'Pick one topic you understand well (e.g., how to use Canva, how to budget on PiggyVest, or English grammar). Draft a 3-lesson micro-course outline with lesson titles, 3 learning objectives, and a 2-question quiz.',
+    dayOneEstimatedMins: 20,
+    typicalTools: ['Google Classroom', 'Loom / Screen Recorder', 'Notion', 'Canva', 'YouTube Studio', 'Kahoot / Typeform'],
+    traitProfile: {
+      visualCreative: 3,
+      logicalStructural: 4,
+      peopleCommunication: 5,
+      analyticalDetail: 4,
+      organizationOps: 5,
+      securityCuriosity: 1,
+    },
+    milestones: [
+      {
+        period: 'Week 1',
+        goal: 'Instructional Design Basics & Micro-Learning',
+        tasks: [
+          'Learn Bloom’s Taxonomy for formulating clear student learning objectives',
+          'Design an engaging 5-minute video script or visual slide lesson in Canva',
+          'Test creating an interactive quiz on Google Forms or Typeform'
+        ]
+      },
+      {
+        period: 'Month 1',
+        goal: 'Build and Host a Live Mini-Cohort',
+        tasks: [
+          'Set up a free Google Classroom or WhatsApp learning hub for 5-10 friends or campus peers',
+          'Deliver a 3-day micro-training on a high-demand topic (e.g., smartphone productivity tools)',
+          'Collect feedback ratings and learner completion testimonials'
+        ]
+      },
+      {
+        period: 'Month 3',
+        goal: 'Contract with EdTech Startups & Training Academies',
+        tasks: [
+          'Apply for Community Manager, Course Coordinator, or Teaching Assistant roles at African EdTech startups (uLesson, AltSchool, Decagon, ALX)',
+          'Package your course curriculum outlines as an instructional design portfolio',
+          'Monetize private cohort-based workshops or corporate staff digital training'
+        ]
+      }
+    ],
+    resources: [
+      {
+        name: 'Instructional Design for Beginners (YouTube)',
+        type: 'youtube',
+        description: 'Comprehensive guide to building online courses and student-centered learning paths.',
+        lowDataFriendly: true
+      },
+      {
+        name: 'Coursera: Learning How to Learn',
+        type: 'free_course',
+        description: 'World-famous course on cognitive science and effective teaching methodologies.',
+        lowDataFriendly: true
+      },
+      {
+        name: 'OpenLearn: Introduction to Instructional Design',
+        type: 'doc',
+        description: 'Free curriculum from Open University on designing digital educational content.',
+        lowDataFriendly: true
+      }
+    ],
+    relevantCommunities: ['EdTech Hub Africa', 'EduCreators Community', 'Tech4Dev Mentors']
   }
 ];
