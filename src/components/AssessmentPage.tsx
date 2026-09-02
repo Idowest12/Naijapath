@@ -11,7 +11,8 @@ import {
   Compass,
   Zap,
   Clock,
-  Briefcase
+  Briefcase,
+  AlertCircle
 } from 'lucide-react';
 import { 
   UserBiodata, 
@@ -36,6 +37,7 @@ import {
 } from '../data/assessmentQuestions';
 import { DiagnosisResult } from './DiagnosisResult';
 import { ALL_NICHES } from '../data/nichesData';
+import { saveAssessmentRecord } from '../utils/submissionStorage';
 
 interface AssessmentPageProps {
   onBackToHome: () => void;
@@ -49,49 +51,85 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
   // Step tracker: 1 = Biodata, 2 = Constraints, 3 = Scenarios/Aptitude, 4 = Nuance, 5 = Result
   const [currentStep, setCurrentStep] = useState<number>(1);
 
-  // Form State
+  // Form State: clean slate so the user makes all choices themselves
   const [biodata, setBiodata] = useState<UserBiodata>({
     fullName: '',
-    ageBand: '23_27',
-    gender: 'female',
-    status: 'unemployed_grad',
-    location: 'lagos'
+    ageBand: '',
+    gender: '',
+    status: '',
+    location: ''
   });
 
   const [constraints, setConstraints] = useState<UserConstraints>({
-    device: 'phone_only',
-    timeWeekly: '6_to_10_hrs',
-    powerData: 'mobile_data_unsteady_power',
-    codingAppetite: 'no_code_please',
-    earningUrgency: 'immediate_1_3_months'
+    device: '',
+    timeWeekly: '',
+    powerData: '',
+    codingAppetite: '',
+    earningUrgency: ''
   });
 
-  // Scenario selections
-  const [scenarioAnswers, setScenarioAnswers] = useState<Record<string, number>>({
-    'scenario-app-frustration': 0,
-    'scenario-ideal-output': 0,
-    'scenario-collaboration-style': 0,
-    'scenario-learning-project': 0,
-  });
+  // Scenario selections: start completely blank, no preselected index 0
+  const [scenarioAnswers, setScenarioAnswers] = useState<Record<string, number>>({});
 
   // Qualitative answers
   const [qualitative, setQualitative] = useState({
     proudAchievement: '',
-    targetIndustry: 'Fintech & Mobile Money'
+    targetIndustry: ''
   });
 
   // Result state
   const [diagnosisResult, setDiagnosisResult] = useState<RecommendationResult | null>(null);
 
+  // Validation alert state
+  const [validationError, setValidationError] = useState<string | null>(null);
+
   // Scroll to top when changing steps
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
+    setValidationError(null);
   }, [currentStep]);
 
   const handleNextStep = () => {
-    if (currentStep < 4) {
-      setCurrentStep(currentStep + 1);
-    } else if (currentStep === 4) {
+    setValidationError(null);
+
+    // Step 1 Validation
+    if (currentStep === 1) {
+      if (!biodata.ageBand || !biodata.gender || !biodata.status || !biodata.location) {
+        setValidationError('Please answer all 4 questions above to continue.');
+        return;
+      }
+      setCurrentStep(2);
+      return;
+    }
+
+    // Step 2 Validation
+    if (currentStep === 2) {
+      if (!constraints.device || !constraints.timeWeekly || !constraints.powerData || !constraints.codingAppetite || !constraints.earningUrgency) {
+        setValidationError('Please answer all 5 questions about your device, time, and power setup.');
+        return;
+      }
+      setCurrentStep(3);
+      return;
+    }
+
+    // Step 3 Validation
+    if (currentStep === 3) {
+      const answeredAll = SCENARIO_QUESTIONS.every(q => scenarioAnswers[q.id] !== undefined);
+      if (!answeredAll) {
+        setValidationError('Please pick an answer for each of the 4 questions above.');
+        return;
+      }
+      setCurrentStep(4);
+      return;
+    }
+
+    // Step 4: Submission & Calculation
+    if (currentStep === 4) {
+      if (!qualitative.proudAchievement.trim()) {
+        setValidationError('This question is compulsory: please tell us one thing you fixed, arranged, or helped with recently.');
+        return;
+      }
+
       // Calculate aptitude scores
       const aptitudeTotals: AptitudeScores = {
         visualCreative: 3,
@@ -103,13 +141,15 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
       };
 
       SCENARIO_QUESTIONS.forEach((q) => {
-        const chosenIndex = scenarioAnswers[q.id] ?? 0;
-        const option = q.options[chosenIndex];
-        if (option && option.weights) {
-          Object.entries(option.weights).forEach(([key, val]) => {
-            const k = key as keyof AptitudeScores;
-            aptitudeTotals[k] = Math.min(5, Math.max(1, aptitudeTotals[k] + (val ?? 0) - 2));
-          });
+        const chosenIndex = scenarioAnswers[q.id];
+        if (chosenIndex !== undefined) {
+          const option = q.options[chosenIndex];
+          if (option && option.weights) {
+            Object.entries(option.weights).forEach(([key, val]) => {
+              const k = key as keyof AptitudeScores;
+              aptitudeTotals[k] = Math.min(5, Math.max(1, aptitudeTotals[k] + (val ?? 0) - 2));
+            });
+          }
         }
       });
 
@@ -121,12 +161,14 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
       };
 
       const computed = calculateNicheRecommendation(submission);
+      saveAssessmentRecord(submission, computed);
       setDiagnosisResult(computed);
       setCurrentStep(5);
     }
   };
 
   const handlePrevStep = () => {
+    setValidationError(null);
     if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
@@ -134,6 +176,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
 
   const handleRetake = () => {
     setDiagnosisResult(null);
+    setScenarioAnswers({});
     setCurrentStep(1);
   };
 
@@ -151,11 +194,11 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
   };
 
   const stepLabels = [
-    'Biodata & Stage',
-    'Real Constraints',
-    'Aptitude Scenarios',
-    'Qualitative Nuance',
-    'Diagnosis Result'
+    'About You',
+    'Your Setup & Time',
+    'What You Like',
+    'Final Touch',
+    'Your Result'
   ];
 
   return (
@@ -219,13 +262,13 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold uppercase tracking-wider mb-2">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
-                <span>Layer 0: Biodata & Life Stage</span>
+                <span>Step 1 of 4: About You</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
-                Tell us about where you are right now
+                Tell us a bit about yourself
               </h1>
               <p className="text-stone-600 text-sm sm:text-base mt-2">
-                We use your age group, life stage, and location to tailor recommendations to age-appropriate opportunities, female-in-tech funding, and regional hubs.
+                We use this to find beginner-friendly opportunities, local tech communities, and grants tailored to you.
               </p>
             </div>
 
@@ -233,7 +276,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               {/* Optional Name */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
-                  First Name or Preferred Nickname (Optional)
+                  Your Name or Nickname (Optional)
                 </label>
                 <input
                   id="bio-name-input"
@@ -248,14 +291,17 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               {/* Age Bracket */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
-                  What is your age bracket?
+                  1. What is your age?
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {AGE_BAND_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
                       type="button"
-                      onClick={() => setBiodata({ ...biodata, ageBand: opt.value })}
+                      onClick={() => {
+                        setBiodata({ ...biodata, ageBand: opt.value });
+                        setValidationError(null);
+                      }}
                       className={`p-3.5 rounded-xl border text-left transition-all ${
                         biodata.ageBand === opt.value
                           ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold ring-2 ring-emerald-600/20'
@@ -274,14 +320,17 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               {/* Gender */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
-                  Gender
+                  2. Gender
                 </label>
                 <div className="grid grid-cols-3 gap-3">
                   {GENDER_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
                       type="button"
-                      onClick={() => setBiodata({ ...biodata, gender: opt.value })}
+                      onClick={() => {
+                        setBiodata({ ...biodata, gender: opt.value });
+                        setValidationError(null);
+                      }}
                       className={`p-3.5 rounded-xl border text-center transition-all ${
                         biodata.gender === opt.value
                           ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold ring-2 ring-emerald-600/20'
@@ -297,14 +346,17 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               {/* Current Status */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
-                  Current Daily Life / Occupation
+                  3. What is your current situation?
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {STATUS_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
                       type="button"
-                      onClick={() => setBiodata({ ...biodata, status: opt.value })}
+                      onClick={() => {
+                        setBiodata({ ...biodata, status: opt.value });
+                        setValidationError(null);
+                      }}
                       className={`p-4 rounded-xl border text-left transition-all ${
                         biodata.status === opt.value
                           ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold ring-2 ring-emerald-600/20'
@@ -323,14 +375,18 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               {/* Location */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
-                  Where are you primarily based in Nigeria?
+                  4. Where in Nigeria are you based?
                 </label>
                 <select
                   id="bio-location-select"
                   value={biodata.location}
-                  onChange={(e) => setBiodata({ ...biodata, location: e.target.value as NigerianRegion })}
+                  onChange={(e) => {
+                    setBiodata({ ...biodata, location: e.target.value as NigerianRegion });
+                    setValidationError(null);
+                  }}
                   className="w-full px-4 py-3 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
                 >
+                  <option value="">-- Choose your state or region --</option>
                   {REGION_OPTIONS.map((opt) => (
                     <option key={opt.value} value={opt.value}>
                       {opt.label}
@@ -348,13 +404,13 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold uppercase tracking-wider mb-2">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-                <span>Layer 1: Real-World Constraints</span>
+                <span>Step 2 of 4: Your Tools & Time</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
-                Your Hardware & Power Reality
+                Your Phone, Laptop, and Light
               </h1>
               <p className="text-stone-600 text-sm sm:text-base mt-2">
-                We never recommend high-end 3D or compiler tools if you only have a phone. Tell us what you actually work with today.
+                Be real with us. We will only recommend skills that work with the tools and light you actually have today.
               </p>
             </div>
 
@@ -362,14 +418,17 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               {/* Hardware Device */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
-                  1. What primary device do you have for daily learning?
+                  1. What device will you use for daily learning?
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {DEVICE_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
                       type="button"
-                      onClick={() => setConstraints({ ...constraints, device: opt.value })}
+                      onClick={() => {
+                        setConstraints({ ...constraints, device: opt.value });
+                        setValidationError(null);
+                      }}
                       className={`p-4 rounded-xl border text-left transition-all flex items-start gap-3.5 ${
                         constraints.device === opt.value
                           ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold ring-2 ring-emerald-600/20'
@@ -393,14 +452,17 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               {/* Time Available */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
-                  2. Realistic time available each week
+                  2. How much free time do you realistically have each week?
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                   {TIME_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
                       type="button"
-                      onClick={() => setConstraints({ ...constraints, timeWeekly: opt.value })}
+                      onClick={() => {
+                        setConstraints({ ...constraints, timeWeekly: opt.value });
+                        setValidationError(null);
+                      }}
                       className={`p-3.5 rounded-xl border text-left transition-all ${
                         constraints.timeWeekly === opt.value
                           ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold ring-2 ring-emerald-600/20'
@@ -417,14 +479,17 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               {/* Power & Internet Setup */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
-                  3. Power & Internet Access
+                  3. What is your power and data situation?
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {POWER_DATA_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
                       type="button"
-                      onClick={() => setConstraints({ ...constraints, powerData: opt.value })}
+                      onClick={() => {
+                        setConstraints({ ...constraints, powerData: opt.value });
+                        setValidationError(null);
+                      }}
                       className={`p-4 rounded-xl border text-left transition-all ${
                         constraints.powerData === opt.value
                           ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold ring-2 ring-emerald-600/20'
@@ -441,14 +506,17 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               {/* Coding Appetite */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
-                  4. How do you honestly feel about coding & syntax?
+                  4. How do you feel about writing code?
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {CODING_APPETITE_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
                       type="button"
-                      onClick={() => setConstraints({ ...constraints, codingAppetite: opt.value })}
+                      onClick={() => {
+                        setConstraints({ ...constraints, codingAppetite: opt.value });
+                        setValidationError(null);
+                      }}
                       className={`p-4 rounded-xl border text-left transition-all ${
                         constraints.codingAppetite === opt.value
                           ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold ring-2 ring-emerald-600/20'
@@ -465,14 +533,17 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               {/* Earning Urgency */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
-                  5. How quickly do you need to begin earning income?
+                  5. How soon do you want to start earning income?
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                   {EARNING_URGENCY_OPTIONS.map((opt) => (
                     <button
                       key={opt.value}
                       type="button"
-                      onClick={() => setConstraints({ ...constraints, earningUrgency: opt.value })}
+                      onClick={() => {
+                        setConstraints({ ...constraints, earningUrgency: opt.value });
+                        setValidationError(null);
+                      }}
                       className={`p-4 rounded-xl border text-left transition-all ${
                         constraints.earningUrgency === opt.value
                           ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold ring-2 ring-emerald-600/20'
@@ -495,13 +566,13 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold uppercase tracking-wider mb-2">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
-                <span>Layer 2: Real Product Scenarios</span>
+                <span>Step 3 of 4: What You Like</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
-                How Your Brain Naturally Solves Problems
+                What feels natural or fun for you?
               </h1>
               <p className="text-stone-600 text-sm sm:text-base mt-2">
-                Pick the option that matches what you instinctively do — not what you think sounds most prestigious.
+                No tech jargon! Pick what you actually enjoy doing. There is no right or wrong answer.
               </p>
             </div>
 
@@ -523,12 +594,15 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
 
                   <div className="space-y-2.5 pt-1">
                     {q.options.map((opt, optIdx) => {
-                      const isSelected = (scenarioAnswers[q.id] ?? 0) === optIdx;
+                      const isSelected = scenarioAnswers[q.id] === optIdx;
                       return (
                         <button
                           key={optIdx}
                           type="button"
-                          onClick={() => setScenarioAnswers({ ...scenarioAnswers, [q.id]: optIdx })}
+                          onClick={() => {
+                            setScenarioAnswers({ ...scenarioAnswers, [q.id]: optIdx });
+                            setValidationError(null);
+                          }}
                           className={`w-full p-4 rounded-xl border text-left transition-all flex items-start gap-3 ${
                             isSelected
                               ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold ring-2 ring-emerald-600/20'
@@ -560,37 +634,55 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
             <div>
               <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold uppercase tracking-wider mb-2">
                 <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
-                <span>Layer 3: Nuance & Curiosity</span>
+                <span>Step 4 of 4: Final Touch</span>
               </div>
               <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
-                A Few Personal Touchpoints
+                Almost done! One last question
               </h1>
               <p className="text-stone-600 text-sm sm:text-base mt-2">
-                Multiple-choice tests miss qualitative sparks. These prompts help us craft your personalized Day-One mission.
+                Tell us a bit about what you like so we can craft your personalized Day-One task.
               </p>
             </div>
 
             <div className="bg-white rounded-2xl border border-stone-200 p-6 sm:p-8 shadow-xs space-y-6">
               <div className="space-y-2">
-                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700">
-                  1. Describe something you enjoyed organizing, fixing, or figuring out recently
-                </label>
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-bold uppercase tracking-wider text-stone-800">
+                    1. Tell us one cool thing you fixed, arranged, or helped someone with recently{' '}
+                    <span className="text-rose-600 font-bold ml-1">* (Compulsory)</span>
+                  </label>
+                </div>
                 <p className="text-xs text-stone-500">
-                  Does not have to be technical! Could be planning an event, fixing a phone issue, editing a video, balancing a budget, or writing a guide.
+                  Doesn't have to be tech! Could be planning an event, fixing someone's phone problem, making a short video, organizing orders on WhatsApp, or balancing a budget.
                 </p>
                 <textarea
                   id="qualitative-achievement-input"
                   rows={4}
+                  required
                   value={qualitative.proudAchievement}
-                  onChange={(e) => setQualitative({ ...qualitative, proudAchievement: e.target.value })}
-                  placeholder="e.g., I helped organize my sister's small catering orders with a Google Sheet and WhatsApp catalog..."
-                  className="w-full p-4 rounded-xl border border-stone-300 bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
+                  onChange={(e) => {
+                    setQualitative({ ...qualitative, proudAchievement: e.target.value });
+                    if (validationError) setValidationError(null);
+                  }}
+                  placeholder="e.g., I helped organize orders for a friend's bake shop with a Google Sheet and WhatsApp..."
+                  className={`w-full p-4 rounded-xl border bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:bg-white transition-all ${
+                    validationError && !qualitative.proudAchievement.trim()
+                      ? 'border-rose-400 focus:ring-rose-500 bg-rose-50/30'
+                      : 'border-stone-300 focus:ring-emerald-600'
+                  }`}
                 ></textarea>
+                <p className="text-[11px] text-stone-400">
+                  {qualitative.proudAchievement.trim().length > 0 ? (
+                    <span className="text-emerald-700 font-medium">✓ Thank you! This helps us personalize your Day-One mission.</span>
+                  ) : (
+                    <span>This response is required before you can view your career match.</span>
+                  )}
+                </p>
               </div>
 
               <div className="space-y-2">
                 <label className="block text-xs font-bold uppercase tracking-wider text-stone-700">
-                  2. What industry or field naturally excites you most?
+                  2. What kind of industry or topic sounds exciting to you? (Optional)
                 </label>
                 <select
                   id="qualitative-industry-select"
@@ -598,17 +690,18 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
                   onChange={(e) => setQualitative({ ...qualitative, targetIndustry: e.target.value })}
                   className="w-full px-4 py-3 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
                 >
-                  <option value="Fintech & Mobile Money">Fintech & Mobile Money (Banks, payments, digital savings)</option>
-                  <option value="E-commerce & Logistics">E-commerce & Logistics (Delivery, shopping, retail marketplaces)</option>
-                  <option value="Creator Economy & Media">Creator Economy & Media (Content creators, podcasts, YouTube, X)</option>
-                  <option value="Health & EdTech">Healthcare & Education (Learning platforms, telemedicine)</option>
-                  <option value="Global Remote Freelancing">General Global Remote Freelancing & Agency Operations</option>
+                  <option value="">-- Pick an area that interests you (Optional) --</option>
+                  <option value="Fintech & Mobile Money">Banking & Money Apps (Fintech, savings, payments)</option>
+                  <option value="E-commerce & Logistics">Shopping & Delivery Apps (Jumia, Chowdeck, logistics)</option>
+                  <option value="Creator Economy & Media">Social Media & Creators (TikTok, YouTube, Instagram, X)</option>
+                  <option value="Health & EdTech">Healthcare & Online Learning</option>
+                  <option value="Global Remote Freelancing">Working for Foreign Clients & Companies (Remote Freelancing)</option>
                 </select>
               </div>
 
               <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs sm:text-sm text-emerald-900 flex items-center gap-3">
                 <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0" />
-                <span>All information gathered! Click below to calculate your matching tech niche and immediate Day-One task.</span>
+                <span>All set! Click below to see your matched tech career and your Day-One mission.</span>
               </div>
             </div>
           </div>
@@ -623,6 +716,14 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               onExploreOther={handleExploreOther}
               onReturnHome={onBackToHome}
             />
+          </div>
+        )}
+
+        {/* Validation Alert */}
+        {currentStep < 5 && validationError && (
+          <div className="mt-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm font-semibold flex items-center gap-2.5 animate-in fade-in slide-in-from-top-1">
+            <AlertCircle className="w-5 h-5 text-amber-700 shrink-0" />
+            <span>{validationError}</span>
           </div>
         )}
 
@@ -654,7 +755,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               onClick={handleNextStep}
               className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-700 text-white text-xs sm:text-sm font-bold hover:bg-emerald-800 active:scale-[0.99] transition-all shadow-sm"
             >
-              <span>{currentStep === 4 ? 'Calculate My Pathway' : 'Continue to Next Step'}</span>
+              <span>{currentStep === 4 ? 'See My Career Match' : 'Continue to Next Step'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

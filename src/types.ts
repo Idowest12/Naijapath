@@ -11,18 +11,18 @@ export type EarningUrgency = 'immediate_1_3_months' | 'steady_4_6_months' | 'lon
 
 export interface UserBiodata {
   fullName?: string;
-  ageBand: AgeBand;
-  gender: Gender;
-  status: CurrentStatus;
-  location: NigerianRegion;
+  ageBand: AgeBand | '';
+  gender: Gender | '';
+  status: CurrentStatus | '';
+  location: NigerianRegion | '';
 }
 
 export interface UserConstraints {
-  device: DeviceType;
-  timeWeekly: TimeAvailable;
-  powerData: PowerDataSetup;
-  codingAppetite: CodingAppetite;
-  earningUrgency: EarningUrgency;
+  device: DeviceType | '';
+  timeWeekly: TimeAvailable | '';
+  powerData: PowerDataSetup | '';
+  codingAppetite: CodingAppetite | '';
+  earningUrgency: EarningUrgency | '';
 }
 
 export interface AptitudeScores {

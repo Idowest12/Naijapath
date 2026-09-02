@@ -40,122 +40,122 @@ export interface ScenarioQuestion {
 }
 
 export const AGE_BAND_OPTIONS: BiodataQuestionOption<AgeBand>[] = [
-  { value: 'under_18', label: 'Under 18', sublabel: 'Secondary school student or early starter' },
-  { value: '18_22', label: '18 - 22', sublabel: 'Undergraduate student or fresh school leaver' },
-  { value: '23_27', label: '23 - 27', sublabel: 'Graduate, job seeker, or early-career builder' },
-  { value: '28_34', label: '28 - 34', sublabel: 'Career switcher or mid-career professional' },
-  { value: '35_plus', label: '35+', sublabel: 'Seasoned professional pivoting into digital skills' },
+  { value: 'under_18', label: 'Under 18', sublabel: 'Secondary school or just starting out' },
+  { value: '18_22', label: '18 - 22', sublabel: 'Uni student or fresh school leaver' },
+  { value: '23_27', label: '23 - 27', sublabel: 'Graduate, job seeker, or starting early career' },
+  { value: '28_34', label: '28 - 34', sublabel: 'Switching from another career into tech' },
+  { value: '35_plus', label: '35+', sublabel: 'Experienced worker learning digital skills' },
 ];
 
 export const GENDER_OPTIONS: BiodataQuestionOption<Gender>[] = [
-  { value: 'female', label: 'Female', sublabel: 'Unlocks tailored female-in-tech grants & communities' },
+  { value: 'female', label: 'Female', sublabel: 'Unlocks female-in-tech grants & communities' },
   { value: 'male', label: 'Male' },
   { value: 'prefer_not_to_say', label: 'Prefer not to say' },
 ];
 
 export const STATUS_OPTIONS: BiodataQuestionOption<CurrentStatus>[] = [
-  { value: 'student_undergrad', label: 'Undergraduate Student', sublabel: 'Balancing school lectures, tests & semesters' },
-  { value: 'unemployed_grad', label: 'Recent Graduate / Job Seeker', sublabel: 'Actively searching for income & independence' },
-  { value: 'working_non_tech', label: 'Working a 9-to-5 (Non-Tech)', sublabel: 'In banking, retail, sales, teaching, or admin' },
-  { value: 'self_employed', label: 'Self-Employed / Trader / Hustling', sublabel: 'Running a small business or trade' },
-  { value: 'secondary_school', label: 'Secondary School Leaver', sublabel: 'Awaiting university or choosing alternative routes' },
+  { value: 'student_undergrad', label: 'Student in School', sublabel: 'Balancing school lectures, tests & exams' },
+  { value: 'unemployed_grad', label: 'Recent Graduate / Looking for Work', sublabel: 'Free time and ready to learn skills for income' },
+  { value: 'working_non_tech', label: 'Working a 9-to-5 (Non-Tech)', sublabel: 'Working in bank, sales, teaching, admin, etc.' },
+  { value: 'self_employed', label: 'Business Owner / Hustling', sublabel: 'Running my own business or trade' },
+  { value: 'secondary_school', label: 'Finished Secondary School', sublabel: 'Awaiting admission or exploring tech first' },
 ];
 
 export const REGION_OPTIONS: BiodataQuestionOption<NigerianRegion>[] = [
-  { value: 'lagos', label: 'Lagos State', sublabel: 'Highest density of hubs & tech meetups' },
-  { value: 'abuja', label: 'Abuja / FCT', sublabel: 'Growing tech ecosystem & public sector' },
+  { value: 'lagos', label: 'Lagos State', sublabel: 'Most tech hubs and community events' },
+  { value: 'abuja', label: 'Abuja / FCT', sublabel: 'Growing tech community and hubs' },
   { value: 'south_west', label: 'South-West (Oyo, Ogun, Osun, Ondo, Ekiti)' },
   { value: 'south_south', label: 'South-South (Rivers, Edo, Delta, etc.)' },
   { value: 'south_east', label: 'South-East (Enugu, Anambra, Imo, etc.)' },
   { value: 'north', label: 'Northern States (Kaduna, Kano, Jos, etc.)' },
-  { value: 'outside_nigeria', label: 'Outside Nigeria / Diaspora' },
+  { value: 'outside_nigeria', label: 'Outside Nigeria / Abroad' },
 ];
 
 export const DEVICE_OPTIONS: BiodataQuestionOption<DeviceType>[] = [
-  { value: 'phone_only', label: 'Smartphone Only', sublabel: 'No laptop right now; everything must start on mobile' },
-  { value: 'shared_or_cafe', label: 'Family PC / Shared PC', sublabel: 'Shared access to a desktop or laptop at home' },
-  { value: 'laptop_basic', label: 'Basic Laptop', sublabel: 'Everyday laptop for browsing and core digital tools' },
-  { value: 'laptop_power', label: 'High-Performance Laptop', sublabel: 'Fast computer capable of heavy multitasking and intensive tools' },
+  { value: 'phone_only', label: 'Smartphone Only', sublabel: 'No laptop right now; everything must work on phone' },
+  { value: 'shared_or_cafe', label: 'Shared PC or Cafe', sublabel: 'Can use a family PC, friend laptop, or cyber cafe sometimes' },
+  { value: 'laptop_basic', label: 'Normal Everyday Laptop', sublabel: 'Core i3/i5, 4GB - 8GB RAM for daily work' },
+  { value: 'laptop_power', label: 'Fast Powerful Laptop', sublabel: '16GB RAM or high-speed machine for heavy tasks' },
 ];
 
 export const TIME_OPTIONS: BiodataQuestionOption<TimeAvailable>[] = [
-  { value: '3_to_5_hrs', label: '3 - 5 Hours / Week', sublabel: 'Casual spare-time explorer (under 1 hr/day)' },
-  { value: '6_to_10_hrs', label: '6 - 10 Hours / Week', sublabel: 'Consistent habit (1 - 2 hrs/day)' },
-  { value: '11_to_20_hrs', label: '11 - 20 Hours / Week', sublabel: 'Serious dedicated focus (2 - 3 hrs/day)' },
-  { value: '20_plus_hrs', label: '20+ Hours / Week', sublabel: 'Full-time transition mode' },
+  { value: '3_to_5_hrs', label: '3 - 5 hrs / week', sublabel: 'Quick spare time (under 1 hr a day)' },
+  { value: '6_to_10_hrs', label: '6 - 10 hrs / week', sublabel: 'Steady habit (1 - 2 hrs a day)' },
+  { value: '11_to_20_hrs', label: '11 - 20 hrs / week', sublabel: 'Serious learning (2 - 3 hrs a day)' },
+  { value: '20_plus_hrs', label: '20+ hrs / week', sublabel: 'Full-time focus (all-in on learning)' },
 ];
 
 export const POWER_DATA_OPTIONS: BiodataQuestionOption<PowerDataSetup>[] = [
-  { value: 'night_data_or_powerbank', label: 'Powerbank Dependent', sublabel: 'Relying on powerbanks and charging when power is available' },
-  { value: 'mobile_data_unsteady_power', label: 'Access to Good Internet Service', sublabel: 'Reliable internet connection with occasional power cuts' },
-  { value: 'steady_light_wifi', label: 'Steady Power', sublabel: 'Consistent power via inverter, generator, or stable grid' },
+  { value: 'night_data_or_powerbank', label: 'Powerbank & Night Data', sublabel: 'Charging when light shows up, managing phone data carefully' },
+  { value: 'mobile_data_unsteady_power', label: 'Normal Data & Occasional Light Cuts', sublabel: 'Decent internet connection with light coming and going' },
+  { value: 'steady_light_wifi', label: 'Steady Light & Good Wi-Fi', sublabel: 'Inverter, gen, or steady power with reliable internet' },
 ];
 
 export const CODING_APPETITE_OPTIONS: BiodataQuestionOption<CodingAppetite>[] = [
-  { value: 'no_code_please', label: 'No Code! Keep me far from syntax errors', sublabel: 'I prefer visual, written, organizational, or human tasks' },
-  { value: 'willing_to_try', label: 'Open to light logic & tools if taught practically', sublabel: 'I do not mind formulas, tools, or light scripting' },
-  { value: 'love_logic_math', label: 'I enjoy deep logic, building engines & problem solving', sublabel: 'I want to build software or deep technical systems' },
+  { value: 'no_code_please', label: 'No coding at all! Keep it simple', sublabel: 'I prefer design, writing, managing, organizing, or talking to people' },
+  { value: 'willing_to_try', label: 'Open to light tools & simple steps', sublabel: 'I do not mind Excel formulas, Canva, Notion, or simple setups' },
+  { value: 'love_logic_math', label: 'I want to build software & code!', sublabel: 'Excited to write real code, apps, and solve technical puzzles' },
 ];
 
 export const EARNING_URGENCY_OPTIONS: BiodataQuestionOption<EarningUrgency>[] = [
-  { value: 'immediate_1_3_months', label: 'Immediate (1 - 3 Months)', sublabel: 'I need freelance income or gigs as quickly as possible' },
-  { value: 'steady_4_6_months', label: 'Balanced (4 - 6 Months)', sublabel: 'Willing to build real skills and portfolio before charging' },
-  { value: 'long_term_mastery', label: 'Long-term (6 - 12+ Months)', sublabel: 'Focused on mastering a high-ceiling engineering skill' },
+  { value: 'immediate_1_3_months', label: 'Need money fast (1 - 3 months)', sublabel: 'Want gigs or freelance jobs as soon as possible' },
+  { value: 'steady_4_6_months', label: 'Balanced (4 - 6 months)', sublabel: 'Ready to build solid skills and samples first' },
+  { value: 'long_term_mastery', label: 'Long game (6 - 12+ months)', sublabel: 'Focused on mastering a high-paying skill without rushing' },
 ];
 
 export const SCENARIO_QUESTIONS: ScenarioQuestion[] = [
   {
     id: 'scenario-app-frustration',
-    category: 'Product Breakdown',
-    title: 'The Daily App Frustration',
-    scenario: 'You are using a Nigerian app (like a bank app or shopping site) and something goes wrong or feels clunky. What is your natural first instinct?',
+    category: 'Daily Apps',
+    title: 'When an app annoys you',
+    scenario: 'You are using a Nigerian bank or shopping app and something feels off. What bugs you the most?',
     options: [
       {
-        text: 'Redesign the visuals and layout',
-        description: 'I get annoyed by how ugly the buttons look, poor font sizes, and confusing screen navigation.',
+        text: 'Ugly design and confusing layout',
+        description: 'Hard-to-read text, tiny buttons, or bad colors that make you tap the wrong thing.',
         weights: { visualCreative: 5, organizationOps: 2 }
       },
       {
-        text: 'Figure out the technical breakdown',
-        description: 'I wonder why the server timed out, what API call failed, or how the payment gateway was programmed.',
+        text: 'Technical crash or loading failure',
+        description: 'The app hanging on "Please wait", payment timing out, or network errors.',
         weights: { logicalStructural: 5, securityCuriosity: 3 }
       },
       {
-        text: 'Test all edge cases and find the bug',
-        description: 'I try clicking other buttons to see if I can reproduce the bug and figure out why it slipped past testing.',
+        text: 'Finding errors before others do',
+        description: 'You notice bugs, typos, and weird glitches that should have been caught and fixed.',
         weights: { analyticalDetail: 5, logicalStructural: 3 }
       },
       {
-        text: 'Think about customer communication',
-        description: 'I think about the thousands of confused users and want to write a crystal clear guide explaining what to do.',
+        text: 'Poor customer communication',
+        description: 'Nobody explaining clearly what went wrong or how to get your money back.',
         weights: { peopleCommunication: 5, organizationOps: 3 }
       }
     ]
   },
   {
     id: 'scenario-ideal-output',
-    category: 'Work Output',
-    title: 'Your Satisfying Daily Result',
-    scenario: 'At the end of a productive 4-hour workday, which of these tangible outputs would make you feel most fulfilled?',
+    category: 'Daily Vibe',
+    title: 'Work that feels most satisfying',
+    scenario: 'At the end of a good work day, which result would make you feel happiest?',
     options: [
       {
-        text: 'A clean, beautiful interface or graphic that people can tap and admire',
-        description: 'Creating visual prototypes, branding assets, or polished UI flows.',
+        text: 'A gorgeous design or graphic',
+        description: 'A clean screen, logo, poster, or slide that people look at and say "this is clean".',
         weights: { visualCreative: 5, peopleCommunication: 2 }
       },
       {
-        text: 'A clean spreadsheet or interactive dashboard showing business insights',
-        description: 'Discovering why sales dropped, customer patterns, or profit trends.',
+        text: 'A neat spreadsheet or numbers breakdown',
+        description: 'Spotting sales trends, profit figures, or finding where money is leaking.',
         weights: { analyticalDetail: 5, logicalStructural: 4 }
       },
       {
-        text: 'An organized executive calendar, Notion workspace, and zero-inbox state',
-        description: 'Bringing order to chaos and making a busy team run like clockwork.',
+        text: 'An organized workspace with zero clutter',
+        description: 'Tidying up meeting schedules, emails, and to-do lists so everything flows smoothly.',
         weights: { organizationOps: 5, peopleCommunication: 4 }
       },
       {
-        text: 'A working code feature or script that automates a painful manual task',
-        description: 'Writing code that executes smoothly without error.',
+        text: 'A working app feature or automated shortcut',
+        description: 'Building something that runs by itself and saves hours of manual effort.',
         weights: { logicalStructural: 5, analyticalDetail: 3 }
       }
     ]
@@ -163,55 +163,55 @@ export const SCENARIO_QUESTIONS: ScenarioQuestion[] = [
   {
     id: 'scenario-collaboration-style',
     category: 'Work Style',
-    title: 'Interpersonal Energy vs Deep Focus',
-    scenario: 'How do you prefer to spend the majority of your working energy?',
+    title: 'How you like to work',
+    scenario: 'What kind of work environment feels most natural for you?',
     options: [
       {
-        text: 'Behind the screen in deep, uninterrupted focus with data or code',
-        description: 'I prefer minimal meetings and deep solitary problem solving.',
+        text: 'Quiet focus behind my screen',
+        description: 'Few or no meetings. Just me, my screen, and figuring things out.',
         weights: { logicalStructural: 4, analyticalDetail: 4, securityCuriosity: 3 }
       },
       {
-        text: 'Coordinating with people, solving conflicts, and managing timelines',
-        description: 'I love talking to clients, founders, and community members.',
+        text: 'Chatting, organizing, and helping people',
+        description: 'Connecting with clients, answering questions, and coordinating team tasks.',
         weights: { peopleCommunication: 5, organizationOps: 4 }
       },
       {
-        text: 'Translating between creative visuals and practical user needs',
-        description: 'A balance between independent design craft and listening to feedback.',
+        text: 'Creative visual styling with quick feedback',
+        description: 'Designing layouts, picking colors, and showing people how things look.',
         weights: { visualCreative: 4, peopleCommunication: 3 }
       },
       {
-        text: 'Investigating loopholes, security flaws, and double-checking safety',
-        description: 'I am naturally skeptical, curious about defenses, and love finding weak links.',
+        text: 'Checking safety and catching red flags',
+        description: 'Spotting scams, verifying links, and making sure accounts are safe.',
         weights: { securityCuriosity: 5, analyticalDetail: 4 }
       }
     ]
   },
   {
     id: 'scenario-learning-project',
-    category: 'Curiosity Spark',
-    title: 'Weekend Project Challenge',
-    scenario: 'If you were given 48 hours and high-speed internet to master one fun micro-project, which would you pick?',
+    category: 'Weekend Challenge',
+    title: 'Fun project pick',
+    scenario: 'If you had 2 free days and fast internet to try one thing, what sounds most exciting?',
     options: [
       {
-        text: 'Design a mock mobile app for booking night buses in Lagos/Abuja',
-        description: 'Mapping out screens, colors, and user touchpoints in Figma.',
+        text: 'Design a clean food or ride app on your screen',
+        description: 'Pick colors, draw buttons, and map out what the app should look like.',
         weights: { visualCreative: 5, peopleCommunication: 2 }
       },
       {
-        text: 'Build a social media growth plan and 10 viral hooks for a brand',
-        description: 'Drafting viral Twitter threads, reels, and community engagement tactics.',
+        text: 'Create a viral content plan for TikTok, Instagram or X',
+        description: 'Write catchy video hooks, memes, and posts that get people engaging.',
         weights: { peopleCommunication: 5, visualCreative: 3 }
       },
       {
-        text: 'Analyze 5,000 rows of Nigerian food market prices to find inflation trends',
-        description: 'Using Excel or SQL to find the cheapest market days and price surges.',
+        text: 'Analyze market food prices to find the best deals',
+        description: 'Put numbers into a sheet and spot which days are cheapest to shop.',
         weights: { analyticalDetail: 5, logicalStructural: 4 }
       },
       {
-        text: 'Set up an automated digital office system for a foreign business consultant',
-        description: 'Configuring Zapier, Calendly, Notion, and email sorting rules.',
+        text: 'Set up an automated assistant system for a busy boss',
+        description: 'Organize calendars, auto-replies, and clean notes using smart tools.',
         weights: { organizationOps: 5, peopleCommunication: 3 }
       }
     ]

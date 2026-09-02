@@ -69,7 +69,7 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment }) =
 
             {/* Subtitle */}
             <p className="max-w-2xl mx-auto text-base sm:text-lg text-stone-600 leading-relaxed mb-8 sm:mb-10">
-              Over 50% of high-paying tech roles do not require writing code. Naija Tech Guide assesses your real constraints—<strong>device (phone vs. laptop)</strong>, <strong>weekly hours</strong>, and <strong>aptitude</strong>—then gives you a concrete <strong>Day-One action</strong> you can do today.
+              Over 50% of high-paying tech roles do not require writing code. Naija Tech Guide assesses your real constraints like your <strong>device (phone vs. laptop)</strong>, <strong>weekly hours</strong>, and <strong>aptitude</strong>, then gives you a concrete <strong>Day-One action</strong> you can do today.
             </p>
 
             {/* Action CTAs */}
@@ -670,7 +670,7 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment }) =
           <div className="mt-12 p-8 rounded-3xl bg-stone-900 text-white text-center max-w-4xl mx-auto border border-stone-800 shadow-sm">
             <h3 className="text-xl sm:text-2xl font-bold tracking-tight">Ready to find out which door to walk through?</h3>
             <p className="text-stone-400 text-sm mt-2 max-w-xl mx-auto">
-              Take the 3-minute assessment. No sign-up, no hype—just honest guidance with your day-one task.
+              Take the 3-minute assessment. No sign-up, no hype, just honest guidance with your day-one task.
             </p>
             <div className="mt-6">
               <button

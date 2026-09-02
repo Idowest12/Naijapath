@@ -113,6 +113,20 @@ Take the 3-minute honest assessment: ${window.location.origin}`;
                 Target Horizon: {primaryNiche.earningHorizon}
               </span>
             </div>
+
+            {/* User's Compulsory Experience Reflection */}
+            {submission.qualitative.proudAchievement && submission.qualitative.proudAchievement.trim().length > 0 && (
+              <div className="mt-4 p-3.5 rounded-xl bg-amber-50/80 border border-amber-200/80 text-xs text-amber-900 flex items-start gap-2.5">
+                <Sparkles className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+                <div>
+                  <span className="font-bold text-amber-950">Your Real-World Strength: </span>
+                  <span className="italic text-stone-700">"{submission.qualitative.proudAchievement.trim()}"</span>
+                  <p className="mt-1 text-[11px] text-amber-900/80 font-medium">
+                    This practical initiative is a direct transferable asset for succeeding as a {primaryNiche.title}.
+                  </p>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Match Score Gauge Card */}
