@@ -450,18 +450,22 @@ export function calculateNicheRecommendation(submission: FullAssessmentSubmissio
 
   // Preferred Daily Activity Direct Alignment
   const dailyPref = qualitative.preferredDailyActivity || '';
-  if (dailyPref === 'backend_dev') {
+  if (dailyPref === 'backend_dev' || dailyPref === 'backend_systems') {
     semanticBoosts['niche-backend'] += 26;
     semanticBoosts['niche-fullstack'] += 16;
     semanticBoosts['niche-data'] += 8;
-  } else if (dailyPref === 'fullstack_dev') {
+  } else if (dailyPref === 'fullstack_dev' || dailyPref === 'fullstack_building') {
     semanticBoosts['niche-fullstack'] += 26;
     semanticBoosts['niche-frontend'] += 16;
     semanticBoosts['niche-backend'] += 16;
-  } else if (dailyPref === 'frontend_dev') {
+  } else if (dailyPref === 'frontend_dev' || dailyPref === 'frontend_coding') {
     semanticBoosts['niche-frontend'] += 26;
     semanticBoosts['niche-fullstack'] += 14;
     semanticBoosts['niche-uiux'] += 8;
+  } else if (dailyPref === 'mobile_building') {
+    semanticBoosts['niche-frontend'] += 20;
+    semanticBoosts['niche-fullstack'] += 18;
+    semanticBoosts['niche-uiux'] += 10;
   } else if (dailyPref === 'digital_marketing') {
     semanticBoosts['niche-digital-marketing'] += 24;
     semanticBoosts['niche-smm'] += 10;

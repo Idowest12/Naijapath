@@ -13,7 +13,8 @@ import {
   Clock,
   Briefcase,
   AlertCircle,
-  Users
+  Users,
+  Bot
 } from 'lucide-react';
 import { 
   UserBiodata, 
@@ -21,7 +22,8 @@ import {
   AptitudeScores, 
   FullAssessmentSubmission, 
   RecommendationResult,
-  NigerianRegion
+  NigerianRegion,
+  QualitativeAnswers
 } from '../types';
 import { 
   AGE_BAND_OPTIONS, 
@@ -39,15 +41,18 @@ import {
 import { DiagnosisResult } from './DiagnosisResult';
 import { ALL_NICHES } from '../data/nichesData';
 import { saveAssessmentRecord } from '../utils/submissionStorage';
+import { trackAssessmentStart, trackAssessmentComplete, trackPageView, syncLocalRecordsToServer } from '../utils/analytics';
 
 interface AssessmentPageProps {
   onBackToHome: () => void;
   initialNicheId?: string | null;
+  onOpenChatbot?: (prompt?: string, context?: any) => void;
 }
 
 export const AssessmentPage: React.FC<AssessmentPageProps> = ({
   onBackToHome,
-  initialNicheId
+  initialNicheId,
+  onOpenChatbot
 }) => {
   // Step tracker: 1 = Biodata, 2 = Constraints, 3 = Scenarios/Aptitude, 4 = Nuance, 5 = Result
   const [currentStep, setCurrentStep] = useState<number>(1);
@@ -73,9 +78,10 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
   const [scenarioAnswers, setScenarioAnswers] = useState<Record<string, number>>({});
 
   // Qualitative answers
-  const [qualitative, setQualitative] = useState({
+  const [qualitative, setQualitative] = useState<QualitativeAnswers>({
     proudAchievement: '',
-    targetIndustry: ''
+    targetIndustry: '',
+    preferredDailyActivity: ''
   });
 
   // Result state
@@ -88,6 +94,12 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setValidationError(null);
+    if (currentStep === 1) {
+      trackPageView('/assessment');
+      trackAssessmentStart();
+    } else if (currentStep === 5) {
+      trackPageView('/result');
+    }
   }, [currentStep]);
 
   const handleNextStep = () => {
@@ -175,7 +187,17 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
       };
 
       const computed = calculateNicheRecommendation(submission);
-      saveAssessmentRecord(submission, computed);
+      const savedRecord = saveAssessmentRecord(submission, computed);
+      trackAssessmentComplete({
+        recordId: savedRecord.id,
+        nicheId: computed.primaryNiche.id,
+        nicheTitle: computed.primaryNiche.title,
+        matchScore: computed.matchScore,
+        device: submission.constraints.device,
+        weeklyHours: submission.constraints.timeWeekly,
+        location: submission.biodata.location || 'Nigeria',
+      });
+      syncLocalRecordsToServer();
       setDiagnosisResult(computed);
       setCurrentStep(5);
     }
@@ -239,6 +261,18 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
           </div>
 
           <div className="flex items-center gap-3">
+            {onOpenChatbot && (
+              <button
+                type="button"
+                onClick={() => onOpenChatbot("I'm currently taking the assessment and have a question about tech career paths in Nigeria:")}
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-700 hover:text-emerald-800 hover:border-emerald-300 text-xs font-semibold transition-all"
+                title="Ask AI Mentor if you have questions"
+              >
+                <Bot className="w-3.5 h-3.5 text-emerald-700" />
+                <span>Ask AI Mentor</span>
+              </button>
+            )}
+
             {currentStep < 5 ? (
               <div className="flex items-center gap-2">
                 <span className="text-xs text-stone-500 font-medium hidden sm:inline">
@@ -723,11 +757,12 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
                   className="w-full px-4 py-3 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
                 >
                   <option value="">-- Pick an area that interests you (Optional) --</option>
+                  <option value="Software & SaaS Platforms">Software & Cloud Tech (Web apps, SaaS platforms, developer tools)</option>
+                  <option value="Fintech & Mobile Money">Banking & Money Apps (Fintech, savings, payments)</option>
+                  <option value="E-commerce & Logistics">Shopping & Delivery Apps (Jumia, Chowdeck, logistics)</option>
                   <option value="Digital Marketing & Growth">Digital Marketing & Performance Growth (Ads, SEO, Funnels, Email Campaigns)</option>
                   <option value="Branding & Creative Design">Branding & Creative Design (Logos, Visual Identity, Brand Kits, Art Direction)</option>
                   <option value="Education & EdTech">Education & EdTech (Online Learning, Teaching, Training, Course Creation)</option>
-                  <option value="Fintech & Mobile Money">Banking & Money Apps (Fintech, savings, payments)</option>
-                  <option value="E-commerce & Logistics">Shopping & Delivery Apps (Jumia, Chowdeck, logistics)</option>
                   <option value="Creator Economy & Media">Social Media & Creators (TikTok, YouTube, Instagram, X)</option>
                   <option value="Health & EdTech">Healthcare & Biotechnology</option>
                   <option value="Global Remote Freelancing">Working for Foreign Clients & Companies (Remote Freelancing)</option>
@@ -742,18 +777,30 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
                   id="qualitative-activity-select"
                   value={qualitative.preferredDailyActivity || ''}
                   onChange={(e) => setQualitative({ ...qualitative, preferredDailyActivity: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                  className="w-full px-4 py-3 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium"
                 >
                   <option value="">-- Choose what kind of day-to-day work you enjoy most --</option>
-                  <option value="digital_marketing">Digital Marketing: Running paid ad campaigns, driving customer traffic, and optimizing funnels</option>
-                  <option value="branding">Branding & Visual Identity: Crafting logos, color palettes, brand guideline decks, and visual styling</option>
-                  <option value="education">Education & Teaching: Designing online lessons, creating tutorials, and training learners</option>
-                  <option value="design">UI/UX Design: Designing mobile app screens, web layouts, and interactive wireframes</option>
-                  <option value="writing">Technical Writing: Writing clear articles, step-by-step guides, and documentation</option>
-                  <option value="operations">Virtual Operations: Organizing calendars, managing client tasks, and coordinating projects</option>
-                  <option value="data">Data & Analytics: Analyzing numbers, spotting sales trends, and creating charts in spreadsheets</option>
-                  <option value="testing_security">QA & Security: Testing apps for bugs, finding mistakes, and keeping accounts safe</option>
-                  <option value="coding">Software Development: Writing code, solving technical puzzles, and building app features</option>
+                  <optgroup label="💻 Software Building & Coding (High Variety)">
+                    <option value="fullstack_building">Full-Stack Web App Building: Coding complete web apps from scratch (connecting UI to live databases & user logins)</option>
+                    <option value="frontend_coding">Frontend Web Development: Coding interactive, sleek web apps with modern React, JavaScript & responsive animations</option>
+                    <option value="backend_systems">Backend & API Engineering: Writing server code, designing databases, and handling secure payment gateways (Paystack/Flutterwave)</option>
+                    <option value="coding">Software Engineering & Problem-Solving: Writing clean code, building automated scripts, and cracking technical puzzles</option>
+                    <option value="mobile_building">Mobile & App Creation: Coding user-friendly mobile and web experiences that run smoothly on smartphones</option>
+                  </optgroup>
+                  <optgroup label="🎨 Design & Creative Arts">
+                    <option value="design">UI/UX Product Design: Designing user screens, mobile app wireframes, and interactive prototypes in Figma</option>
+                    <option value="branding">Branding & Visual Identity: Crafting brand identities, custom logos, visual guideline decks, and aesthetics</option>
+                  </optgroup>
+                  <optgroup label="📊 Data, Quality & Security">
+                    <option value="data">Data Analytics & Insights: Querying databases, finding sales trends, and building visual dashboards in Excel/SQL</option>
+                    <option value="testing_security">QA Testing & Cyber Defense: Hunting software bugs, automated testing, securing systems, and protecting accounts</option>
+                  </optgroup>
+                  <optgroup label="🚀 Growth, Content & Operations">
+                    <option value="digital_marketing">Digital Marketing & Growth: Running paid ad campaigns, driving customer traffic, and optimizing funnels</option>
+                    <option value="writing">Technical Writing: Writing step-by-step guides, documentation, tutorials, and tech explainers</option>
+                    <option value="education">Education & Teaching: Designing online lessons, creating tutorials, and training learners</option>
+                    <option value="operations">Virtual Operations & Tech Support: Organizing calendars, managing client tasks, and coordinating projects</option>
+                  </optgroup>
                 </select>
                 <p className="text-[11px] text-stone-400">
                   Directly weights your daily preference into the diagnostic matching matrix.
@@ -776,6 +823,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               onRetake={handleRetake}
               onExploreOther={handleExploreOther}
               onReturnHome={onBackToHome}
+              onOpenChatbot={onOpenChatbot}
             />
           </div>
         )}

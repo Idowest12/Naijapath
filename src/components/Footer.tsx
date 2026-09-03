@@ -1,8 +1,13 @@
 import React, { useState } from 'react';
-import { Compass, ExternalLink, Globe, ArrowUpRight, ShieldCheck, Zap, Database, Download, X, Sparkles } from 'lucide-react';
+import { Compass, ExternalLink, Globe, ArrowUpRight, ShieldCheck, Zap, Database, Download, X, Sparkles, ArrowUp, Lock } from 'lucide-react';
 import { getAllAssessmentRecords, exportRecordsAsJSON, exportRecordsAsCSV } from '../utils/submissionStorage';
+import { trackClick } from '../utils/analytics';
 
-export const Footer: React.FC = () => {
+interface FooterProps {
+  onOpenAdmin?: () => void;
+}
+
+export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
   const [showDataModal, setShowDataModal] = useState(false);
   const records = getAllAssessmentRecords();
 
@@ -137,15 +142,48 @@ export const Footer: React.FC = () => {
             <span>Dedicated to empowering young Nigerian talent.</span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              id="footer-back-to-top-btn"
+              type="button"
+              onClick={() => {
+                trackClick('footer_back_to_top_btn', 'Footer Back to Top', 'Navigation');
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+              }}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white border border-stone-700 transition-colors font-medium text-xs"
+              title="Scroll back to top of page"
+            >
+              <ArrowUp className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Back to Top</span>
+            </button>
+
             <button
               type="button"
-              onClick={() => setShowDataModal(true)}
+              onClick={() => {
+                trackClick('footer_data_hub_btn', 'Open AI Training Data Hub', 'Data');
+                setShowDataModal(true);
+              }}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-emerald-400 border border-stone-700 hover:border-emerald-500/50 transition-colors font-medium text-xs"
             >
               <Database className="w-3.5 h-3.5" />
               <span>AI Training Data Hub ({records.length})</span>
             </button>
+
+            {onOpenAdmin && (
+              <button
+                id="footer-admin-link-btn"
+                type="button"
+                onClick={() => {
+                  trackClick('footer_admin_link_btn', 'Navigate to Admin Portal', 'Admin');
+                  onOpenAdmin();
+                }}
+                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-stone-900/90 hover:bg-stone-800 text-stone-400 hover:text-emerald-400 border border-stone-800 transition-colors font-mono text-[11px]"
+                title="Executive Admin & Telemetry Portal (/admin)"
+              >
+                <Lock className="w-3 h-3 text-stone-500 group-hover:text-emerald-400" />
+                <span>🔒 Admin</span>
+              </button>
+            )}
 
             <span className="text-stone-400 hidden sm:inline">
               Built for the Nigerian Tech Community

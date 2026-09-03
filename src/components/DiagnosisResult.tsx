@@ -29,7 +29,10 @@ import {
   AlertTriangle,
   HelpCircle,
   Cpu,
-  Layers
+  Layers,
+  Bot,
+  MessageSquare,
+  ArrowUp
 } from 'lucide-react';
 import { RecommendationResult } from '../types';
 import { calculateMatchingProfiles, MatchingProfile } from '../utils/profileMatcher';
@@ -39,13 +42,15 @@ interface DiagnosisResultProps {
   onRetake: () => void;
   onExploreOther: (nicheId: string) => void;
   onReturnHome?: () => void;
+  onOpenChatbot?: (prompt?: string, context?: any) => void;
 }
 
 export const DiagnosisResult: React.FC<DiagnosisResultProps> = ({
   result,
   onRetake,
   onExploreOther,
-  onReturnHome
+  onReturnHome,
+  onOpenChatbot
 }) => {
   const { primaryNiche, secondaryNiche, matchScore, secondaryMatchScore, rationale, constraintFeasibilityNotes, submission, scoreBreakdown, priorityComparison } = result;
   
@@ -419,6 +424,74 @@ Take the 3-minute honest assessment: ${window.location.origin}`;
         </div>
       </div>
 
+      {/* Interactive Naija AI Mentor Consultation Banner */}
+      {onOpenChatbot && (
+        <div id="ai-mentor-consultation-banner" className="bg-gradient-to-br from-stone-900 via-emerald-950 to-stone-950 text-white rounded-3xl p-6 sm:p-8 border border-emerald-800/80 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+          <div className="space-y-3 max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/90 text-emerald-200 text-xs font-bold uppercase tracking-wider border border-emerald-700/80">
+              <Bot className="w-3.5 h-3.5 text-emerald-300" />
+              <span>Naija Tech Chatbot Advisor (Tizzi)</span>
+            </div>
+            <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
+              Have questions about {activeNiche.title}? Ask Tizzi!
+            </h3>
+            <p className="text-stone-300 text-xs sm:text-sm leading-relaxed">
+              Wondering how to manage NEPA power cuts, study on 4GB RAM, or land foreign freelance clients from Nigeria in {activeNiche.title}? Ask our culturally grounded AI career mentor right now.
+            </p>
+            <div className="flex flex-wrap gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => onOpenChatbot(`How do I start learning ${activeNiche.title} in Nigeria with my ${submission.constraints.device === 'phone_only' ? 'smartphone' : 'laptop'} and limited mobile data?`, {
+                  matchedNiche: activeNiche.title,
+                  device: submission.constraints.device,
+                  weeklyHours: submission.constraints.timeWeekly,
+                  location: submission.biodata.location || 'Nigeria'
+                })}
+                className="text-[11px] px-3 py-1.5 rounded-full bg-emerald-900/90 hover:bg-emerald-800 text-emerald-100 border border-emerald-700/80 font-medium transition-all"
+              >
+                "How do I start with my setup?"
+              </button>
+              <button
+                type="button"
+                onClick={() => onOpenChatbot(`What are the highest-rated free YouTube channels and zero-cost sites to learn ${activeNiche.title}?`, {
+                  matchedNiche: activeNiche.title,
+                  device: submission.constraints.device,
+                  weeklyHours: submission.constraints.timeWeekly
+                })}
+                className="text-[11px] px-3 py-1.5 rounded-full bg-emerald-900/90 hover:bg-emerald-800 text-emerald-100 border border-emerald-700/80 font-medium transition-all"
+              >
+                "Best free YouTube channels?"
+              </button>
+              <button
+                type="button"
+                onClick={() => onOpenChatbot(`What are realistic freelance or junior salaries in Naira & USD for a ${activeNiche.title} in Nigeria?`, {
+                  matchedNiche: activeNiche.title
+                })}
+                className="text-[11px] px-3 py-1.5 rounded-full bg-emerald-900/90 hover:bg-emerald-800 text-emerald-100 border border-emerald-700/80 font-medium transition-all"
+              >
+                "Realistic income in ₦ & $?"
+              </button>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => onOpenChatbot(`I was diagnosed with ${activeNiche.title} (${activeScore}% match). Can you give me a personalized breakdown of what my first 30 days should look like?`, {
+              matchedNiche: activeNiche.title,
+              device: submission.constraints.device,
+              weeklyHours: submission.constraints.timeWeekly,
+              location: submission.biodata.location || 'Nigeria',
+              proudAchievement: submission.qualitative.proudAchievement
+            })}
+            className="inline-flex items-center gap-2.5 px-5 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-bold text-sm shadow-md transition-all shrink-0 active:scale-98"
+          >
+            <Bot className="w-5 h-5 text-stone-950" />
+            <span>Chat with Tizzi AI</span>
+            <ArrowRight className="w-4 h-4 text-stone-950" />
+          </button>
+        </div>
+      )}
+
       {/* Profiles Matching What You Inputted (Cohort Intelligence) */}
       <div id="cohort-matching-card" className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
@@ -788,7 +861,18 @@ Take the 3-minute honest assessment: ${window.location.origin}`;
           </button>
         </div>
 
-        <div className="flex items-center gap-3">
+        <div className="flex flex-wrap items-center gap-3">
+          <button
+            id="result-back-to-top-btn"
+            type="button"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-300 bg-white text-stone-700 text-xs font-bold hover:bg-stone-50 hover:text-emerald-700 transition-colors shadow-2xs"
+            title="Scroll back to top of assessment results"
+          >
+            <ArrowUp className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Back to Top</span>
+          </button>
+
           {onReturnHome && (
             <button
               id="result-return-home-btn"

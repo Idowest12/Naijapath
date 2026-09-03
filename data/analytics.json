@@ -1,0 +1,23 @@
+{
+  "version": 2,
+  "adminPasskeyHash": "naija-admin-2026",
+  "failedLoginAttempts": {
+    "count": 0,
+    "lockedUntil": 0
+  },
+  "totals": {
+    "pageviews": 0,
+    "uniqueVisitors": 0,
+    "assessmentStarts": 0,
+    "assessmentCompletions": 0,
+    "chatQueries": 0
+  },
+  "pageviewsByPath": {},
+  "clicksByButton": {},
+  "deviceBreakdown": {},
+  "hoursBreakdown": {},
+  "recommendations": {},
+  "recentSubmissions": [],
+  "visitorSet": [],
+  "ingestedRecordIds": []
+}

@@ -22,12 +22,14 @@ import {
 } from 'lucide-react';
 import { PathwayNiche } from '../types';
 import { ALL_NICHES } from '../data/nichesData';
+import { trackClick } from '../utils/analytics';
 
 interface MainContentProps {
   onStartAssessment?: () => void;
+  onOpenChatbot?: (prompt?: string) => void;
 }
 
-export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment }) => {
+export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment, onOpenChatbot }) => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'phone_friendly' | 'non_technical' | 'technical'>('all');
   const [isMounted, setIsMounted] = useState(false);
 
@@ -77,7 +79,10 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment }) =
               <button
                 id="hero-assessment-primary-btn"
                 type="button"
-                onClick={onStartAssessment}
+                onClick={() => {
+                  trackClick('hero_assessment_primary_btn', 'Start 3-Minute Assessment', 'CTA');
+                  onStartAssessment?.();
+                }}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-emerald-700 text-white font-semibold text-base shadow-sm hover:bg-emerald-800 active:scale-[0.99] transition-all"
               >
                 <Sparkles className="w-5 h-5 text-emerald-200" />
@@ -85,9 +90,27 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment }) =
                 <ArrowRight className="w-5 h-5 text-emerald-200" />
               </button>
 
+              {onOpenChatbot && (
+                <button
+                  id="hero-ask-mentor-btn"
+                  type="button"
+                  onClick={() => {
+                    trackClick('hero_ask_mentor_btn', 'Ask Naija AI Mentor', 'AI Mentor');
+                    onOpenChatbot();
+                  }}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-stone-900 text-white font-semibold text-base hover:bg-stone-800 active:scale-[0.99] transition-all shadow-sm"
+                >
+                  <Bot className="w-5 h-5 text-emerald-300" />
+                  <span>Ask Naija AI Mentor</span>
+                </button>
+              )}
+
               <a
                 id="hero-browse-pathways-btn"
                 href="#pathways"
+                onClick={() => {
+                  trackClick('hero_browse_pathways_btn', 'Browse All Pathways', 'Navigation');
+                }}
                 className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white text-stone-800 font-semibold text-base border border-stone-300 hover:bg-stone-50 hover:border-stone-400 active:bg-stone-100 transition-colors"
               >
                 <BookOpen className="w-4 h-4 text-stone-600" />
@@ -333,7 +356,10 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment }) =
               <button
                 id="filter-all-btn"
                 type="button"
-                onClick={() => setActiveFilter('all')}
+                onClick={() => {
+                  trackClick('filter_all_btn', 'All Niches Filter', 'Filter');
+                  setActiveFilter('all');
+                }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   activeFilter === 'all'
                     ? 'bg-white text-stone-900 shadow-xs'
@@ -345,7 +371,10 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment }) =
               <button
                 id="filter-phone-btn"
                 type="button"
-                onClick={() => setActiveFilter('phone_friendly')}
+                onClick={() => {
+                  trackClick('filter_phone_btn', 'Phone Possible Filter', 'Filter');
+                  setActiveFilter('phone_friendly');
+                }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 ${
                   activeFilter === 'phone_friendly'
                     ? 'bg-emerald-700 text-white shadow-xs'
@@ -358,7 +387,10 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment }) =
               <button
                 id="filter-nontech-btn"
                 type="button"
-                onClick={() => setActiveFilter('non_technical')}
+                onClick={() => {
+                  trackClick('filter_nontech_btn', 'Non-Coding Filter', 'Filter');
+                  setActiveFilter('non_technical');
+                }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   activeFilter === 'non_technical'
                     ? 'bg-white text-stone-900 shadow-xs'
@@ -370,7 +402,10 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment }) =
               <button
                 id="filter-tech-btn"
                 type="button"
-                onClick={() => setActiveFilter('technical')}
+                onClick={() => {
+                  trackClick('filter_tech_btn', 'Technical Filter', 'Filter');
+                  setActiveFilter('technical');
+                }}
                 className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
                   activeFilter === 'technical'
                     ? 'bg-white text-stone-900 shadow-xs'
