@@ -11,7 +11,7 @@ import { AssessmentPage } from './components/AssessmentPage';
 import { NaijaChatbot } from './components/NaijaChatbot';
 import { AdminPortal } from './components/AdminPortal';
 import { Bot, Sparkles, MessageSquare, ArrowUp } from 'lucide-react';
-import { trackPageView, trackClick, syncLocalRecordsToServer } from './utils/analytics';
+import { trackPageView, trackClick, syncLocalRecordsToServer, initGlobalClickListener } from './utils/analytics';
 
 function getInitialView(): 'home' | 'assessment' | 'admin' {
   if (typeof window === 'undefined') return 'home';
@@ -45,10 +45,14 @@ export default function App() {
     return () => window.removeEventListener('popstate', handlePopState);
   }, []);
 
-  // Track initial page view & sync any local assessment records
+  // Track initial page view & sync any local assessment records + listen for all user clicks
   useEffect(() => {
     trackPageView(window.location.pathname || '/');
     syncLocalRecordsToServer();
+    const cleanupClickListener = initGlobalClickListener();
+    return () => {
+      cleanupClickListener();
+    };
   }, []);
 
   useEffect(() => {

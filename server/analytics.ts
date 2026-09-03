@@ -56,6 +56,7 @@ export interface StoredAnalytics {
     uniqueVisitors: number;
     assessmentStarts: number;
     assessmentCompletions: number;
+    totalClicks: number;
     chatQueries: number;
   };
   pageviewsByPath: Record<string, number>;
@@ -90,6 +91,7 @@ function getDefaultData(): StoredAnalytics {
       uniqueVisitors: 0,
       assessmentStarts: 0,
       assessmentCompletions: 0,
+      totalClicks: 0,
       chatQueries: 0,
     },
     pageviewsByPath: {},
@@ -235,6 +237,7 @@ class AnalyticsManager {
       const p = pagePath || '/';
       this.data.pageviewsByPath[p] = (this.data.pageviewsByPath[p] || 0) + 1;
     } else if (type === 'click' && buttonId) {
+      this.data.totals.totalClicks = (this.data.totals.totalClicks || 0) + 1;
       if (!this.data.clicksByButton[buttonId]) {
         this.data.clicksByButton[buttonId] = {
           count: 0,
@@ -243,6 +246,12 @@ class AnalyticsManager {
         };
       }
       this.data.clicksByButton[buttonId].count += 1;
+      if (label && this.data.clicksByButton[buttonId].label !== label) {
+        this.data.clicksByButton[buttonId].label = label;
+      }
+      if (category && (!this.data.clicksByButton[buttonId].category || this.data.clicksByButton[buttonId].category === 'Action')) {
+        this.data.clicksByButton[buttonId].category = category;
+      }
     } else if (type === 'assessment_start') {
       this.data.totals.assessmentStarts = (this.data.totals.assessmentStarts || 0) + 1;
     } else if (type === 'assessment_complete' && metadata) {
@@ -387,12 +396,18 @@ class AnalyticsManager {
       count: item.count,
     })).sort((a, b) => b.count - a.count);
 
+    const totalClicks = Math.max(
+      this.data.totals.totalClicks || 0,
+      clicksList.reduce((acc, curr) => acc + curr.count, 0)
+    );
+
     return {
       totals: {
         pageviews: this.data.totals.pageviews,
         uniqueVisitors: this.data.totals.uniqueVisitors,
         assessmentStarts: this.data.totals.assessmentStarts,
         assessmentCompletions: this.data.totals.assessmentCompletions,
+        totalClicks,
         completionRate,
         chatQueries: this.data.totals.chatQueries,
       },

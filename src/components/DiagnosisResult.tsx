@@ -453,14 +453,14 @@ Take the 3-minute honest assessment: ${window.location.origin}`;
               </button>
               <button
                 type="button"
-                onClick={() => onOpenChatbot(`What are the highest-rated free YouTube channels and zero-cost sites to learn ${activeNiche.title}?`, {
+                onClick={() => onOpenChatbot(`What are the highest-rated free YouTube channels and free learning resources for ${activeNiche.title}?`, {
                   matchedNiche: activeNiche.title,
                   device: submission.constraints.device,
                   weeklyHours: submission.constraints.timeWeekly
                 })}
                 className="text-[11px] px-3 py-1.5 rounded-full bg-emerald-900/90 hover:bg-emerald-800 text-emerald-100 border border-emerald-700/80 font-medium transition-all"
               >
-                "Best free YouTube channels?"
+                "Best free learning resources?"
               </button>
               <button
                 type="button"
@@ -732,34 +732,68 @@ Take the 3-minute honest assessment: ${window.location.origin}`;
         </div>
       </div>
 
-      {/* Free Zero-Cost Resources & Nigerian Communities */}
+      {/* Free Resources & Nigerian Communities */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         
         {/* Curated Resources */}
         <div className="lg:col-span-2 bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm">
           <div className="mb-5">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">Zero-Cost Learning Kit</span>
-            <h3 className="text-lg font-bold text-stone-900 mt-0.5">
-              Curated Free Resources for {activeNiche.title}
+            <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 inline-block mb-1.5">
+              Free Resources (No Dime Needed)
+            </span>
+            <h3 className="text-lg sm:text-xl font-bold text-stone-900 mt-1">
+              Free Resources & Direct Links for {activeNiche.title}
             </h3>
-            <p className="text-xs text-stone-500 mt-1">
-              Hand-picked for low bandwidth consumption and high practical yield.
+            <p className="text-xs text-stone-600 mt-1 leading-relaxed">
+              All materials here are 100% free — no payment, no subscription, and tested to consume minimal internet data. Click any card to open the resource directly.
             </p>
           </div>
 
           <div className="space-y-3">
             {activeNiche.resources.map((res, i) => (
-              <div key={i} className="p-4 rounded-xl bg-stone-50 border border-stone-200 hover:border-stone-300 transition-colors">
-                <div className="flex items-center justify-between gap-2 mb-1">
-                  <h4 className="text-sm font-bold text-stone-900">{res.name}</h4>
-                  {res.lowDataFriendly && (
-                    <span className="text-[10px] uppercase font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded">
-                      Low-Data Friendly
-                    </span>
-                  )}
+              <a
+                key={i}
+                href={res.url || '#'}
+                target={res.url ? '_blank' : undefined}
+                rel={res.url ? 'noopener noreferrer' : undefined}
+                data-track-category="Free Resource Link"
+                data-track-label={`Resource: ${res.name}`}
+                className="group block p-4 rounded-2xl bg-stone-50 border border-stone-200 hover:border-emerald-500 hover:bg-emerald-50/50 hover:shadow-sm transition-all text-left"
+              >
+                <div className="flex items-start justify-between gap-3 mb-1.5">
+                  <div className="flex items-center gap-2.5">
+                    <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                      <BookOpen className="w-4 h-4" />
+                    </div>
+                    <h4 className="text-sm font-bold text-stone-900 group-hover:text-emerald-950 transition-colors flex items-center gap-1.5">
+                      {res.name}
+                      {res.url && (
+                        <ExternalLink className="w-3.5 h-3.5 text-stone-400 group-hover:text-emerald-700 transition-colors shrink-0" />
+                      )}
+                    </h4>
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0">
+                    {res.lowDataFriendly && (
+                      <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100/90 border border-emerald-200 px-2 py-0.5 rounded-full">
+                        Low Data Friendly
+                      </span>
+                    )}
+                    {res.url && (
+                      <span className="hidden sm:inline-flex items-center text-[11px] font-bold text-emerald-700 group-hover:text-emerald-900 group-hover:underline">
+                        Go straight to resource ↗
+                      </span>
+                    )}
+                  </div>
                 </div>
-                <p className="text-xs text-stone-600 leading-relaxed">{res.description}</p>
-              </div>
+                <p className="text-xs text-stone-600 leading-relaxed pl-10.5 group-hover:text-stone-800">
+                  {res.description}
+                </p>
+                {res.url && (
+                  <div className="sm:hidden mt-2.5 pl-10.5 flex items-center text-[11px] font-bold text-emerald-700">
+                    <span>Go straight to resource ↗</span>
+                  </div>
+                )}
+              </a>
             ))}
           </div>
         </div>

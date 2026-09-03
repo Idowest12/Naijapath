@@ -55,20 +55,23 @@ export const ALL_NICHES: PathwayNiche[] = [
     resources: [
       {
         name: 'The Tech VA Starter Roadmap (YouTube)',
+        url: 'https://www.youtube.com/results?search_query=virtual+assistant+training+for+beginners',
         type: 'youtube',
-        description: 'Free comprehensive breakdown of essential digital tools for Nigerian remote assistants.',
+        description: 'Straightforward video guide explaining essential digital tools for remote assistants in Nigeria without any complicated jargon.',
         lowDataFriendly: true
       },
       {
-        name: 'ALX Virtual Assistant Program Materials',
+        name: 'ALX Virtual Assistant Pathway',
+        url: 'https://www.alxafrica.com/',
         type: 'free_course',
-        description: 'World-class curriculum covering soft skills, calendar mastery, and executive support.',
+        description: 'Top-tier free training covering professional communication, managing calendars, and supporting executives remotely.',
         lowDataFriendly: true
       },
       {
         name: 'Notion for Beginners (Free Guide)',
+        url: 'https://www.notion.so/help/guides/notion-for-beginners',
         type: 'doc',
-        description: 'Step-by-step documentation for building client databases and team dashboards.',
+        description: 'Step-by-step reading guide to help you organize documents, client tasks, and team notes like a seasoned pro.',
         lowDataFriendly: true
       }
     ],
@@ -127,16 +130,25 @@ export const ALL_NICHES: PathwayNiche[] = [
     ],
     resources: [
       {
-        name: 'HubSpot Academy: Social Media Certification',
+        name: 'HubSpot Academy: Social Media Marketing Certification',
+        url: 'https://academy.hubspot.com/courses/social-media',
         type: 'free_course',
-        description: 'Globally recognized 100% free certification on organic social growth and strategy.',
+        description: 'Globally recognized 100% free certificate course. Teaches you how to grow audience engagement, manage campaigns, and pitch paying brands.',
         lowDataFriendly: true
       },
       {
         name: 'Canva Design School for Beginners',
+        url: 'https://www.canva.com/designschool/tutorials/',
         type: 'youtube',
-        description: 'Visual balance, color theory, and mobile graphic design fundamentals.',
-        lowDataFriendly: false
+        description: 'Learn quick visual design hacks directly on your phone or laptop. Great for creating eye-catching social banners and Instagram carousels.',
+        lowDataFriendly: true
+      },
+      {
+        name: 'Meta Business Suite Quick Guide',
+        url: 'https://www.facebook.com/business/learn',
+        type: 'doc',
+        description: 'Free official guide on scheduling posts, checking analytics, and setting up automated replies for Facebook & Instagram pages.',
+        lowDataFriendly: true
       }
     ],
     relevantCommunities: ['Naija Marketers & Creators Network', 'Product Dive', 'Tech Creatives NG']
@@ -195,14 +207,23 @@ export const ALL_NICHES: PathwayNiche[] = [
     resources: [
       {
         name: 'Google Technical Writing Course I & II',
+        url: 'https://developers.google.com/tech-writing/overview',
         type: 'free_course',
-        description: 'Google’s legendary free course on punctuation, active voice, and clear tech communication.',
+        description: 'Google’s legendary free tutorial on how to explain technical things in simple, active English without unnecessary grammar or confusion.',
         lowDataFriendly: true
       },
       {
-        name: 'Write the Docs Community Handbook',
+        name: 'Write the Docs Community Guide',
+        url: 'https://www.writethedocs.org/guide/',
         type: 'doc',
-        description: 'Comprehensive global repository of technical documentation guidelines.',
+        description: 'Global handbook sharing step-by-step practices for writing developer guides, API docs, and user support manuals.',
+        lowDataFriendly: true
+      },
+      {
+        name: 'Markdown Crash Guide (Fast Syntax)',
+        url: 'https://www.markdownguide.org/basic-syntax/',
+        type: 'doc',
+        description: 'The standard formatting language used across GitHub and technical blogs. You can learn the whole thing in 15 minutes.',
         lowDataFriendly: true
       }
     ],
@@ -261,21 +282,24 @@ export const ALL_NICHES: PathwayNiche[] = [
     ],
     resources: [
       {
-        name: 'Figma for Beginners (Official YouTube)',
+        name: 'Figma for Beginners (Official YouTube Series)',
+        url: 'https://www.youtube.com/c/Figmadesign',
         type: 'youtube',
-        description: 'Complete official playlist covering auto-layout, components, and design systems.',
+        description: 'The official step-by-step video lessons by Figma. Covers auto-layout, mobile screen sizing, components, and how to make clickable prototypes.',
         lowDataFriendly: false
       },
       {
-        name: 'Refactoring UI (Visual Guidelines)',
+        name: 'Refactoring UI (Practical Visual Rules)',
+        url: 'https://www.refactoringui.com/',
         type: 'doc',
-        description: 'Practical visual design rules for clean borders, shadows, and contrast.',
+        description: 'No-nonsense visual design handbook. Gives you practical rules for spacing, colors, font hierarchy, and card layouts without guesswork.',
         lowDataFriendly: true
       },
       {
         name: 'Interaction Design Foundation Open Guides',
+        url: 'https://www.interaction-design.org/literature/topics/ux-design',
         type: 'doc',
-        description: 'Human psychology and user experience fundamentals.',
+        description: 'Free articles on UX fundamentals, user research methods, and understanding how real people interact with digital products.',
         lowDataFriendly: true
       }
     ],
@@ -334,21 +358,31 @@ export const ALL_NICHES: PathwayNiche[] = [
     ],
     resources: [
       {
-        name: 'SQLBolt (Interactive Free Tutorial)',
+        name: 'W3Schools: SQL Tutorial for Beginners',
+        url: 'https://www.w3schools.com/sql/',
         type: 'free_course',
-        description: 'Best zero-data browser-based practice tool for learning SQL queries.',
+        description: 'The cleanest, easiest way to practice database queries right in your browser. No heavy setup needed, works with very little data, and explains everything in simple terms.',
         lowDataFriendly: true
       },
       {
-        name: 'Alex The Analyst YouTube Bootcamp',
+        name: 'SQLBolt (Interactive Free In-Browser Practice)',
+        url: 'https://sqlbolt.com/',
+        type: 'free_course',
+        description: 'Zero-stress interactive tutorial. You read a 1-minute lesson and immediately type SQL commands to solve real data problems.',
+        lowDataFriendly: true
+      },
+      {
+        name: 'Alex The Analyst YouTube Data Bootcamp',
+        url: 'https://www.youtube.com/c/AlexTheAnalyst',
         type: 'youtube',
-        description: 'Complete end-to-end data analytics roadmap from Excel to Portfolio projects.',
+        description: 'Complete video blueprint covering Excel, SQL, Tableau, Power BI, and how to build portfolio projects that impress Nigerian and foreign recruiters.',
         lowDataFriendly: false
       },
       {
-        name: 'Kaggle Learn Micro-Courses',
+        name: 'Kaggle Learn Micro-Courses & Certificates',
+        url: 'https://www.kaggle.com/learn',
         type: 'free_course',
-        description: 'Free certificates in Pandas, Data Cleaning, and Visualizations.',
+        description: 'Bite-sized free certified tracks on Data Cleaning, Pandas, and Data Visualization that you can finish in a weekend.',
         lowDataFriendly: true
       }
     ],
@@ -407,21 +441,31 @@ export const ALL_NICHES: PathwayNiche[] = [
     ],
     resources: [
       {
+        name: 'W3Schools: Web Development for Beginners',
+        url: 'https://www.w3schools.com/',
+        type: 'free_course',
+        description: 'The easiest, #1 beginner-friendly place to start coding. Practice HTML, CSS & JavaScript directly inside your browser without downloading any heavy software. Works smoothly with very low data.',
+        lowDataFriendly: true
+      },
+      {
         name: 'freeCodeCamp Responsive Web Design Certification',
+        url: 'https://www.freecodecamp.org/learn/2022/responsive-web-design/',
         type: 'free_course',
-        description: 'Interactive, self-paced, zero-cost curriculum with project-based certificates.',
+        description: '100% free hands-on coding curriculum. Build 5 real web projects and earn a globally recognized certificate without paying a kobo.',
         lowDataFriendly: true
       },
       {
-        name: 'The Odin Project: Foundations',
+        name: 'The Odin Project: Web Foundations',
+        url: 'https://www.theodinproject.com/paths/foundations/courses/foundations',
         type: 'free_course',
-        description: 'Rigorous open-source curriculum focusing on real command line tools and Git.',
+        description: '100% free open-source guide that teaches you how real software developers think, work with Git, and deploy live websites.',
         lowDataFriendly: true
       },
       {
-        name: 'MDN Web Docs (Mozilla)',
+        name: 'MDN Web Docs (Mozilla Learn)',
+        url: 'https://developer.mozilla.org/en-US/docs/Learn',
         type: 'doc',
-        description: 'The definitive web reference guide for HTML, CSS, and JavaScript.',
+        description: 'The official reference dictionary for the internet. Clear definitions, simple examples, and explanations that make sense for beginners.',
         lowDataFriendly: true
       }
     ],
@@ -480,21 +524,31 @@ export const ALL_NICHES: PathwayNiche[] = [
     ],
     resources: [
       {
-        name: 'freeCodeCamp: Back End Development and APIs Certification',
+        name: 'W3Schools: Node.js & Server Tutorials',
+        url: 'https://www.w3schools.com/nodejs/',
         type: 'free_course',
-        description: 'Comprehensive hands-on training with Node.js, Express, MongoDB, and microservices.',
+        description: 'Easy-to-follow backend beginner lessons. Learn how servers listen for requests, handle web files, and return data with zero hassle.',
         lowDataFriendly: true
       },
       {
-        name: 'Roadmap.sh: Backend Developer Roadmap',
+        name: 'freeCodeCamp: Backend Development and APIs',
+        url: 'https://www.freecodecamp.org/learn/back-end-development-and-apis/',
+        type: 'free_course',
+        description: 'Comprehensive hands-on training with Node.js, Express, MongoDB, and microservices. Build real projects and earn a certificate for free.',
+        lowDataFriendly: true
+      },
+      {
+        name: 'Roadmap.sh: Backend Developer Visual Guide',
+        url: 'https://roadmap.sh/backend',
         type: 'doc',
-        description: 'Visual step-by-step roadmap to becoming a modern backend engineer.',
+        description: 'Clear visual checklist of what to learn next — from server basics and relational databases to deploying on the cloud.',
         lowDataFriendly: true
       },
       {
-        name: 'The Odin Project: NodeJS Course',
+        name: 'The Odin Project: NodeJS Track',
+        url: 'https://www.theodinproject.com/paths/full-stack-javascript/courses/nodejs',
         type: 'free_course',
-        description: 'In-depth guide covering Express, PostgreSQL, Prisma, authentication, and deployment.',
+        description: 'In-depth free guide covering Express, PostgreSQL, Prisma, user authentication, and deployment without cutting corners.',
         lowDataFriendly: true
       }
     ],
@@ -553,21 +607,31 @@ export const ALL_NICHES: PathwayNiche[] = [
     ],
     resources: [
       {
-        name: 'The Odin Project: Full Stack JavaScript',
+        name: 'W3Schools: Full-Stack Web Development Basics',
+        url: 'https://www.w3schools.com/whatis/',
         type: 'free_course',
-        description: 'World-class free open-source curriculum taking you from zero to full-stack mastery.',
+        description: 'Understand how frontend (HTML/CSS/JS) talks to backend servers and databases. Try code examples directly in your browser with very low data and plain English.',
+        lowDataFriendly: true
+      },
+      {
+        name: 'The Odin Project: Full Stack JavaScript Track',
+        url: 'https://www.theodinproject.com/paths/full-stack-javascript',
+        type: 'free_course',
+        description: 'World-renowned 100% free open-source curriculum taking you from zero to full-stack mastery with Node.js and React.',
         lowDataFriendly: true
       },
       {
         name: 'Full Stack Open (University of Helsinki)',
+        url: 'https://fullstackopen.com/en/',
         type: 'free_course',
-        description: 'Deep, production-grade deep dive into React, Redux, Node.js, MongoDB, GraphQL, and TypeScript.',
+        description: 'Deep, production-grade deep dive into React, Redux, Node.js, MongoDB, GraphQL, and TypeScript. Completely free and highly respected by employers.',
         lowDataFriendly: true
       },
       {
         name: 'Next.js Official Interactive Tutorial',
+        url: 'https://nextjs.org/learn',
         type: 'doc',
-        description: 'Learn modern full-stack React and server-side rendering step-by-step.',
+        description: 'Learn modern full-stack React and server-side rendering step-by-step directly from the creators of Next.js.',
         lowDataFriendly: true
       }
     ],
@@ -626,15 +690,24 @@ export const ALL_NICHES: PathwayNiche[] = [
     ],
     resources: [
       {
-        name: 'uTest Academy (Free Hands-on Testing Training)',
+        name: 'uTest Academy (Free Practical Testing Training)',
+        url: 'https://www.utest.com/academy',
         type: 'free_course',
-        description: 'World largest community of testers with practical hands-on courses and paid cycles.',
+        description: 'World’s largest software tester network. Learn how to test real mobile and web apps, report bugs clearly, and earn real money participating in live paid test cycles.',
         lowDataFriendly: true
       },
       {
         name: 'Guru99 Software Testing Tutorial',
+        url: 'https://www.guru99.com/software-testing.html',
         type: 'doc',
-        description: 'Clear, text-first definitions of manual, regression, and functional testing.',
+        description: 'Clear, text-first definitions of manual testing, regression checks, and writing test cases without confusing words.',
+        lowDataFriendly: true
+      },
+      {
+        name: 'Postman Student API Testing Guide',
+        url: 'https://academy.postman.com/',
+        type: 'free_course',
+        description: 'Learn how to test backend APIs, check server status codes, and automate test runs with free badges for your CV.',
         lowDataFriendly: true
       }
     ],
@@ -694,15 +767,24 @@ export const ALL_NICHES: PathwayNiche[] = [
     resources: [
       {
         name: 'TryHackMe: Pre-Security Path',
+        url: 'https://tryhackme.com/path/outline/presecurity',
         type: 'free_course',
-        description: 'Gamified, interactive virtual labs teaching computer basics and networking safely.',
+        description: 'Fun, game-like browser rooms that teach you how the internet works, computer networking, and basic security concepts safely without risking your laptop.',
         lowDataFriendly: true
       },
       {
         name: 'Professor Messer Security+ Training',
+        url: 'https://www.professormesser.com/security-plus/sy0-701/sy0-701-video/sy0-701-training-course/',
         type: 'youtube',
-        description: 'Complete high-quality free video course covering security concepts and operations.',
+        description: 'World-renowned free video lessons for CompTIA Security+. High clarity, covers real attack types and defensive operations.',
         lowDataFriendly: false
+      },
+      {
+        name: 'Cisco Skills For All (Cybersecurity Intro)',
+        url: 'https://skillsforall.com/',
+        type: 'free_course',
+        description: 'Free beginner-friendly security modules from Cisco with self-paced digital badges.',
+        lowDataFriendly: true
       }
     ],
     relevantCommunities: ['Cybersecurity Experts Association of Nigeria (CSEAN)', 'Naija Sec Force', 'SheSecures']
@@ -760,15 +842,24 @@ export const ALL_NICHES: PathwayNiche[] = [
     ],
     resources: [
       {
-        name: 'Product School Free Micro-Courses & Templates',
+        name: 'Product School Free Templates & Micro-Courses',
+        url: 'https://productschool.com/free-product-management-resources',
         type: 'doc',
-        description: 'Industry standard PRD templates, roadmap guides, and video talks.',
+        description: 'Free sample Product Requirements Documents (PRDs), roadmap templates, and video masterclasses used by top tech companies.',
         lowDataFriendly: true
       },
       {
         name: 'Lenny’s Newsletter (Free Archive)',
+        url: 'https://www.lennysnewsletter.com/',
         type: 'doc',
-        description: 'World-class product strategy, execution, and growth breakdowns.',
+        description: 'Goldmine of practical product breakdowns, startup growth playbooks, and career advice for modern product managers.',
+        lowDataFriendly: true
+      },
+      {
+        name: 'Atlassian Agile & Scrum Coach Guide',
+        url: 'https://www.atlassian.com/agile',
+        type: 'doc',
+        description: 'Clear, text-first guide explaining sprint planning, backlog grooming, and managing team deliverables with zero confusion.',
         lowDataFriendly: true
       }
     ],
@@ -828,20 +919,23 @@ export const ALL_NICHES: PathwayNiche[] = [
     resources: [
       {
         name: 'Google Digital Garage: Fundamentals of Digital Marketing',
+        url: 'https://learndigital.withgoogle.com/digitalgarage',
         type: 'free_course',
-        description: 'Free Google-accredited certification on SEO, SEM, and web marketing.',
+        description: 'Google-accredited 100% free certification. Covers SEO, search ads, local Nigerian business listings, and social marketing from scratch.',
         lowDataFriendly: true
       },
       {
-        name: 'Meta Blueprint Free Certification Training',
+        name: 'Meta Blueprint: Facebook & Instagram Ads Academy',
+        url: 'https://www.facebook.com/business/learn',
         type: 'free_course',
-        description: 'Official Meta courses on Instagram, Facebook, and WhatsApp Ads management.',
+        description: 'Official free lessons from Meta on targeting audiences, budgeting ads, and driving direct WhatsApp sales.',
         lowDataFriendly: true
       },
       {
         name: 'HubSpot Inbound Marketing Certification',
+        url: 'https://academy.hubspot.com/courses/inbound-marketing',
         type: 'free_course',
-        description: 'Learn customer funnels, content marketing, and email automation.',
+        description: 'Learn how to create content that attracts organic buyers, set up email newsletters, and close freelance clients without begging.',
         lowDataFriendly: true
       }
     ],
@@ -901,20 +995,23 @@ export const ALL_NICHES: PathwayNiche[] = [
     resources: [
       {
         name: 'The Futur: Building a Brand Identity (YouTube)',
+        url: 'https://www.youtube.com/c/thefuturishere',
         type: 'youtube',
-        description: 'World-renowned design business lessons on client discovery, logo design, and brand kits.',
+        description: 'World-renowned design masterclasses on client discovery, logo design, color selection, and delivering complete brand books.',
         lowDataFriendly: false
       },
       {
         name: 'Canva Design School: Graphic Design Basics',
+        url: 'https://www.canva.com/designschool/',
         type: 'free_course',
-        description: 'Master composition, layout, typography, and contrast.',
+        description: 'Understand composition, layout, typography pairing, and contrast right on your phone or laptop.',
         lowDataFriendly: true
       },
       {
-        name: 'Brand New (UnderConsideration)',
+        name: 'Brand New (UnderConsideration Archive)',
+        url: 'https://www.underconsideration.com/brandnew/',
         type: 'doc',
-        description: 'World top archive reviewing modern corporate and startup rebrands.',
+        description: 'Top global archive reviewing real corporate and startup rebrands, explaining what worked and what flopped.',
         lowDataFriendly: true
       }
     ],
@@ -974,20 +1071,23 @@ export const ALL_NICHES: PathwayNiche[] = [
     resources: [
       {
         name: 'Instructional Design for Beginners (YouTube)',
+        url: 'https://www.youtube.com/results?search_query=instructional+design+for+beginners',
         type: 'youtube',
-        description: 'Comprehensive guide to building online courses and student-centered learning paths.',
+        description: 'Comprehensive guide to building online courses and student-centered learning paths without confusing academic jargon.',
         lowDataFriendly: true
       },
       {
-        name: 'Coursera: Learning How to Learn',
+        name: 'Coursera: Learning How to Learn (Free Audit)',
+        url: 'https://www.coursera.org/learn/learning-how-to-learn',
         type: 'free_course',
-        description: 'World-famous course on cognitive science and effective teaching methodologies.',
+        description: 'World-famous course on cognitive science and effective teaching methodologies. Audit completely for free.',
         lowDataFriendly: true
       },
       {
         name: 'OpenLearn: Introduction to Instructional Design',
+        url: 'https://www.open.edu/openlearn/education-development/introduction-instructional-design/content-section-0',
         type: 'doc',
-        description: 'Free curriculum from Open University on designing digital educational content.',
+        description: 'Free curriculum from Open University on designing digital educational content with clear learner milestones.',
         lowDataFriendly: true
       }
     ],

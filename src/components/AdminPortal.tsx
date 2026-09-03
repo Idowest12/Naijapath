@@ -68,6 +68,7 @@ interface AdminStats {
     uniqueVisitors: number;
     assessmentStarts: number;
     assessmentCompletions: number;
+    totalClicks: number;
     completionRate: number;
     chatQueries: number;
   };
@@ -165,12 +166,12 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
     }
   }, [token]);
 
-  // Auto-refresh timer
+  // Auto-refresh timer (5s for real-time live telemetry)
   useEffect(() => {
     if (!token || !autoRefresh) return;
     const interval = setInterval(() => {
       fetchAdminStats(token, true);
-    }, 30000);
+    }, 5000);
     return () => clearInterval(interval);
   }, [token, autoRefresh]);
 
@@ -636,9 +637,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
         </div>
 
         {/* ------------------------------------------------------------- */}
-        {/* 4 CORE KPI METRIC CARDS */}
+        {/* 5 CORE KPI METRIC CARDS (INCLUDING LIVE CLICKS) */}
         {/* ------------------------------------------------------------- */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Card 1: Pageviews */}
           <div className="bg-stone-900 border border-stone-800 rounded-2xl p-5 relative overflow-hidden">
             <div className="flex items-center justify-between text-stone-400 text-xs font-semibold mb-2">
@@ -652,7 +653,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
             </div>
             <div className="mt-3 pt-3 border-t border-stone-800/80 flex items-center justify-between text-[11px] text-stone-400">
               <span>Home: {stats?.pageviewsByPath['/'] || 0}</span>
-              <span>Test: {stats?.pageviewsByPath['/assessment'] || 0}</span>
               <span>Result: {stats?.pageviewsByPath['/result'] || 0}</span>
             </div>
           </div>
@@ -660,7 +660,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
           {/* Card 2: Unique Visitors */}
           <div className="bg-stone-900 border border-stone-800 rounded-2xl p-5 relative overflow-hidden">
             <div className="flex items-center justify-between text-stone-400 text-xs font-semibold mb-2">
-              <span>Unique Visitors (Sessions)</span>
+              <span>Unique Visitors</span>
               <div className="w-8 h-8 rounded-lg bg-blue-950 border border-blue-800/60 flex items-center justify-center text-blue-400">
                 <Users className="w-4 h-4" />
               </div>
@@ -669,15 +669,39 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
               {stats ? stats.totals.uniqueVisitors.toLocaleString() : '---'}
             </div>
             <div className="mt-3 pt-3 border-t border-stone-800/80 flex items-center justify-between text-[11px] text-stone-400">
-              <span className="text-blue-400 font-medium">Distinct IPs & Devices</span>
+              <span className="text-blue-400 font-medium">Distinct Sessions</span>
               <span>Organic Traffic</span>
             </div>
           </div>
 
-          {/* Card 3: Completion Funnel */}
+          {/* Card 3: Live User Clicks & Interactions */}
+          <div 
+            onClick={() => setActiveTab('clicks')}
+            className="bg-stone-900 border border-emerald-900/60 hover:border-emerald-500/80 cursor-pointer rounded-2xl p-5 relative overflow-hidden transition-all group"
+            title="Click to view full button and action breakdown"
+          >
+            <div className="flex items-center justify-between text-stone-400 text-xs font-semibold mb-2">
+              <span className="flex items-center gap-1.5 text-emerald-400">
+                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                <span>Live Clicks</span>
+              </span>
+              <div className="w-8 h-8 rounded-lg bg-emerald-950 border border-emerald-700/80 flex items-center justify-center text-emerald-300 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                <MousePointerClick className="w-4 h-4" />
+              </div>
+            </div>
+            <div className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">
+              {stats ? (stats.totals.totalClicks || 0).toLocaleString() : '---'}
+            </div>
+            <div className="mt-3 pt-3 border-t border-stone-800/80 flex items-center justify-between text-[11px] text-stone-400">
+              <span className="text-emerald-300 font-medium group-hover:underline">All CTAs & Links</span>
+              <span className="text-stone-500 font-mono">5s auto-sync</span>
+            </div>
+          </div>
+
+          {/* Card 4: Completion Funnel */}
           <div className="bg-stone-900 border border-stone-800 rounded-2xl p-5 relative overflow-hidden">
             <div className="flex items-center justify-between text-stone-400 text-xs font-semibold mb-2">
-              <span>Diagnostic Completions</span>
+              <span>Diagnostic Tests</span>
               <div className="w-8 h-8 rounded-lg bg-amber-950 border border-amber-800/60 flex items-center justify-center text-amber-400">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
@@ -688,15 +712,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
             <div className="mt-3 pt-3 border-t border-stone-800/80 flex items-center justify-between text-[11px] text-stone-400">
               <span>Starts: {stats?.totals.assessmentStarts || 0}</span>
               <span className="text-amber-400 font-bold">
-                {stats?.totals.completionRate || 0}% Completion
+                {stats?.totals.completionRate || 0}% Done
               </span>
             </div>
           </div>
 
-          {/* Card 4: AI Mentor Interactions */}
+          {/* Card 5: AI Mentor Interactions */}
           <div className="bg-stone-900 border border-stone-800 rounded-2xl p-5 relative overflow-hidden">
             <div className="flex items-center justify-between text-stone-400 text-xs font-semibold mb-2">
-              <span>AI Mentor (Tizzi) Queries</span>
+              <span>Tizzi AI Queries</span>
               <div className="w-8 h-8 rounded-lg bg-purple-950 border border-purple-800/60 flex items-center justify-center text-purple-400">
                 <Bot className="w-4 h-4" />
               </div>

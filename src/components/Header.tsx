@@ -59,7 +59,7 @@ export const Header: React.FC<HeaderProps> = ({
           </div>
           <div className="hidden sm:flex items-center gap-3 text-emerald-200/90 text-[11px]">
             <span className="flex items-center gap-1">
-              <Laptop className="w-3.5 h-3.5" /> Zero-cost starting resources
+              <Laptop className="w-3.5 h-3.5" /> 100% Free learning resources
             </span>
           </div>
         </div>
