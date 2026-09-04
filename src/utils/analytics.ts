@@ -4,6 +4,7 @@
  */
 
 import { getAllAssessmentRecords } from './submissionStorage';
+import { track } from '@vercel/analytics';
 
 const VISITOR_ID_KEY = 'naija_tech_visitor_id_v1';
 const LOCAL_COUNTERS_KEY = 'naija_tech_analytics_counters_v1';
@@ -131,6 +132,16 @@ export async function sendAnalyticsEvent(event: {
 
     // Always update local persistent storage so analytics work even on static hosts (Vercel)
     recordLocalEvent(payload);
+
+    // Forward to Vercel Analytics Custom Events
+    try {
+      track(event.type, {
+        label: event.label || '',
+        category: event.category || 'General',
+        buttonId: event.buttonId || '',
+        ...(event.path ? { path: event.path } : {}),
+      });
+    } catch {}
 
     // Sync to backend API if available
     fetch('/api/analytics/event', {

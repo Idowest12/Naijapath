@@ -11,6 +11,7 @@ import { AssessmentPage } from './components/AssessmentPage';
 import { NaijaChatbot } from './components/NaijaChatbot';
 import { AdminPortal } from './components/AdminPortal';
 import { Bot, Sparkles, MessageSquare, ArrowUp } from 'lucide-react';
+import { Analytics } from '@vercel/analytics/react';
 import { trackPageView, trackClick, syncLocalRecordsToServer, initGlobalClickListener } from './utils/analytics';
 
 function getInitialView(): 'home' | 'assessment' | 'admin' {
@@ -192,6 +193,9 @@ export default function App() {
         diagnosticContext={chatbotContext}
         initialPrompt={initialChatbotPrompt}
       />
+
+      {/* Vercel Live Analytics */}
+      <Analytics />
     </div>
   );
 }
