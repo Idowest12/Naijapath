@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import Markdown from 'react-markdown';
 import { trackChatQuery } from '../utils/analytics';
+import { generateSmartMentorResponse } from '../utils/mentorEngine';
 
 export interface ChatMessage {
   id: string;
@@ -73,6 +74,7 @@ export const NaijaChatbot: React.FC<NaijaChatbotProps> = ({
   
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+  const handledInitialPromptRef = useRef<string | null>(null);
 
   // Auto-scroll to bottom of conversation
   useEffect(() => {
@@ -87,12 +89,15 @@ export const NaijaChatbot: React.FC<NaijaChatbotProps> = ({
       setTimeout(() => {
         inputRef.current?.focus();
       }, 150);
+    } else {
+      handledInitialPromptRef.current = null;
     }
   }, [isOpen]);
 
   // Handle initial prompt if passed
   useEffect(() => {
-    if (initialPrompt && isOpen) {
+    if (initialPrompt && isOpen && handledInitialPromptRef.current !== initialPrompt) {
+      handledInitialPromptRef.current = initialPrompt;
       handleSendMessage(initialPrompt);
     }
   }, [initialPrompt, isOpen]);
@@ -114,11 +119,17 @@ export const NaijaChatbot: React.FC<NaijaChatbotProps> = ({
     trackChatQuery();
 
     try {
-      // Format messages history for the API
-      const historyPayload = [...messages, userMessage].map((m) => ({
-        role: m.role,
-        content: m.content,
-      }));
+      // Format messages history cleanly for the API
+      const historyPayload = [...messages, userMessage]
+        .filter((m) => m && m.content && !m.content.includes('blip detected'))
+        .map((m) => ({
+          role: m.role,
+          content: m.content,
+        }));
+
+      // Set a client timeout so requests never hang on spotty connections
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 8000);
 
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -129,31 +140,43 @@ export const NaijaChatbot: React.FC<NaijaChatbotProps> = ({
           messages: historyPayload,
           context: diagnosticContext,
         }),
-      });
+        signal: controller.signal,
+      }).catch(() => null);
 
-      const data = await res.json().catch(() => null);
+      clearTimeout(timeoutId);
 
-      if (!res.ok) {
-        throw new Error(data?.error || `Server returned ${res.status}`);
+      let replyText = "";
+      if (res && res.ok) {
+        const data = await res.json().catch(() => null);
+        if (data && data.reply) {
+          replyText = data.reply;
+        }
+      }
+
+      // If server response was not available, immediately fall back to the smart mentor engine
+      if (!replyText) {
+        replyText = generateSmartMentorResponse(messageContent, diagnosticContext);
       }
 
       const botMessage: ChatMessage = {
         id: `bot-${Date.now()}`,
         role: 'assistant',
-        content: data?.reply || "I am right here with you. Could you please rephrase or ask your question again?",
+        content: replyText,
         timestamp: new Date(),
       };
 
       setMessages((prev) => [...prev, botMessage]);
     } catch (err: any) {
-      console.error('Chat error:', err);
-      const errorMessage: ChatMessage = {
-        id: `error-${Date.now()}`,
+      console.warn('Network issue caught, delivering local mentor guidance:', err);
+      // Guarantee the user always gets their comprehensive answer
+      const offlineAnswer = generateSmartMentorResponse(messageContent, diagnosticContext);
+      const botMessage: ChatMessage = {
+        id: `bot-${Date.now()}`,
         role: 'assistant',
-        content: `**Small network blip detected.** 🔌\n\nPlease check your internet data connection and tap send again. If the issue persists, your question will be answered as soon as your connection stabilizes.`,
+        content: offlineAnswer,
         timestamp: new Date(),
       };
-      setMessages((prev) => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, botMessage]);
     } finally {
       setIsLoading(false);
     }
