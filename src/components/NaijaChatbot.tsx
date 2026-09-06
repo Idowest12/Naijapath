@@ -131,15 +131,16 @@ export const NaijaChatbot: React.FC<NaijaChatbotProps> = ({
         }),
       });
 
+      const data = await res.json().catch(() => null);
+
       if (!res.ok) {
-        throw new Error(`Server returned ${res.status}`);
+        throw new Error(data?.error || `Server returned ${res.status}`);
       }
 
-      const data = await res.json();
       const botMessage: ChatMessage = {
         id: `bot-${Date.now()}`,
         role: 'assistant',
-        content: data.reply || "I didn't catch that. Could you please rephrase?",
+        content: data?.reply || "I am right here with you. Could you please rephrase or ask your question again?",
         timestamp: new Date(),
       };
 
@@ -149,7 +150,7 @@ export const NaijaChatbot: React.FC<NaijaChatbotProps> = ({
       const errorMessage: ChatMessage = {
         id: `error-${Date.now()}`,
         role: 'assistant',
-        content: `**Omo, small network wahala occurred.** 🔌\n\nPlease check your internet connection and try sending your question again. If you are developing locally, ensure your backend server is running and your \`GEMINI_API_KEY\` is active in **Settings > Secrets**.`,
+        content: `**Small network blip detected.** 🔌\n\nPlease check your internet data connection and tap send again. If the issue persists, your question will be answered as soon as your connection stabilizes.`,
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
