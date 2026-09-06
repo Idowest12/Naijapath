@@ -174,18 +174,18 @@ export default function App() {
       {/* Persistent Floating Controls (Back to Top & Draggable Chatbot Launcher) - Hidden on Admin View */}
       {currentView !== 'admin' && (
         <>
-          {showBackToTop && (
-            <div className="fixed bottom-24 right-5 z-40 pointer-events-none">
+          {currentView === 'home' && showBackToTop && (
+            <div className="fixed bottom-22 right-4 sm:right-6 z-30 pointer-events-none">
               <button
                 id="floating-back-to-top-btn"
                 type="button"
                 onClick={handleScrollToTop}
-                className="pointer-events-auto group flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white/95 hover:bg-white text-stone-700 hover:text-emerald-700 shadow-md hover:shadow-lg border border-stone-200/90 backdrop-blur-xs transition-all duration-200 active:scale-95 animate-in fade-in slide-in-from-bottom-2 cursor-pointer"
+                className="pointer-events-auto group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 hover:bg-white text-stone-600 hover:text-stone-950 shadow-sm hover:shadow-md border border-stone-200/90 backdrop-blur-md transition-all duration-200 active:scale-95 animate-in fade-in cursor-pointer"
                 aria-label="Scroll back to top"
                 title="Scroll back to top"
               >
-                <ArrowUp className="w-4 h-4 text-emerald-600 group-hover:-translate-y-0.5 transition-transform duration-200" />
-                <span className="text-xs font-bold tracking-tight text-stone-700 group-hover:text-emerald-700">Top</span>
+                <ArrowUp className="w-3.5 h-3.5 text-stone-500 group-hover:-translate-y-0.5 transition-transform duration-200" />
+                <span className="text-xs font-medium tracking-tight text-stone-600 group-hover:text-stone-900">Top</span>
               </button>
             </div>
           )}

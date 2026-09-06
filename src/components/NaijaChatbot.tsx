@@ -60,7 +60,7 @@ export const NaijaChatbot: React.FC<NaijaChatbotProps> = ({
       {
         id: 'msg-welcome',
         role: 'assistant',
-        content: `**Kedu & Welcome! I am Tizzi, your Naija Tech Career Guide & Mentor.** 🇳🇬\n\nAsk me anything about starting tech in Nigeria — whether you're navigating **NEPA power cuts**, managing **limited data subscriptions**, choosing between **Frontend, Backend, UI/UX, or Data**, or looking for **free scholarships like 3MTT and DevCareer**.\n\nWhat would you like to explore today?`,
+        content: `**Kedu & Welcome! I am Tizzi, your Naija Tech Career Guide & Mentor.** 🇳🇬\n\nAsk me anything about starting tech in Nigeria, whether you are navigating **NEPA power cuts**, managing **limited data subscriptions**, choosing between **Frontend, Backend, UI/UX, or Data**, or looking for **free scholarships like 3MTT and DevCareer**.\n\nWhat would you like to explore today?`,
         timestamp: new Date(),
       }
     ];

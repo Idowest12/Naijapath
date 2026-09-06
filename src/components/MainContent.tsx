@@ -58,24 +58,24 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment, onO
             isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
           }`}>
             {/* Eyebrow badge */}
-            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 border border-emerald-200/80 text-emerald-800 text-xs sm:text-sm font-medium mb-6 shadow-xs">
-              <span className="w-2 h-2 rounded-full bg-emerald-600 animate-pulse"></span>
-              <span>Tired of people telling you to "Just learn to code"?</span>
+            <div className="inline-flex items-center gap-2 text-emerald-800 text-xs sm:text-sm font-mono tracking-wider uppercase mb-6">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-700"></span>
+              <span>Beyond "Just learn to code" · A realistic African tech guide</span>
             </div>
 
             {/* Main Title */}
-            <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold text-stone-900 tracking-tight leading-[1.15] mb-6">
-              Find your rightful niche in tech. <br className="hidden sm:inline" />
-              <span className="text-emerald-700">Matched to your actual reality.</span>
+            <h1 className="font-serif-display text-4xl sm:text-6xl lg:text-7xl text-stone-900 font-normal tracking-tight leading-[1.12] mb-6">
+              Find your rightful place in tech. <br className="hidden sm:inline" />
+              <span className="italic text-emerald-800">Grounded in your actual reality.</span>
             </h1>
 
             {/* Subtitle */}
-            <p className="max-w-2xl mx-auto text-base sm:text-lg text-stone-600 leading-relaxed mb-8 sm:mb-10">
-              Over 50% of high-paying tech roles do not require writing code. Naija Tech Guide assesses your real constraints like your <strong>device (phone vs. laptop)</strong>, <strong>weekly hours</strong>, and <strong>aptitude</strong>, then gives you a concrete <strong>Day-One action</strong> you can do today.
+            <p className="max-w-2xl mx-auto text-base sm:text-lg text-stone-600 leading-relaxed mb-8 sm:mb-10 font-sans">
+              Over 50% of high-paying tech roles do not require writing code. We evaluate your actual situation, including your device (phone vs. laptop), power setup, and problem-solving style, and then provide a concrete <strong>Day-One proof task</strong> you can complete today.
             </p>
 
             {/* Action CTAs */}
-            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-10">
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-3 max-w-md sm:max-w-none mx-auto mb-10">
               <button
                 id="hero-assessment-primary-btn"
                 type="button"
@@ -83,11 +83,10 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment, onO
                   trackClick('hero_assessment_primary_btn', 'Start 3-Minute Assessment', 'CTA');
                   onStartAssessment?.();
                 }}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-emerald-700 text-white font-semibold text-base shadow-sm hover:bg-emerald-800 active:scale-[0.99] transition-all"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-xl bg-emerald-800 hover:bg-emerald-900 text-white font-medium text-sm sm:text-base shadow-sm active:scale-[0.99] transition-all cursor-pointer"
               >
-                <Sparkles className="w-5 h-5 text-emerald-200" />
-                <span>Start 3-Minute Assessment</span>
-                <ArrowRight className="w-5 h-5 text-emerald-200" />
+                <span>Take the 3-Minute Assessment</span>
+                <ArrowRight className="w-4 h-4 text-emerald-200" />
               </button>
 
               {onOpenChatbot && (
@@ -98,10 +97,10 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment, onO
                     trackClick('hero_ask_mentor_btn', 'Ask Naija AI Mentor', 'AI Mentor');
                     onOpenChatbot();
                   }}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-stone-900 text-white font-semibold text-base hover:bg-stone-800 active:scale-[0.99] transition-all shadow-sm"
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3.5 rounded-xl bg-white hover:bg-stone-50 text-stone-800 font-medium text-sm sm:text-base border border-stone-300/90 active:scale-[0.99] transition-all shadow-2xs cursor-pointer"
                 >
-                  <Bot className="w-5 h-5 text-emerald-300" />
-                  <span>Ask Naija AI Mentor</span>
+                  <Bot className="w-4 h-4 text-emerald-700" />
+                  <span>Ask Naija Mentor</span>
                 </button>
               )}
 
@@ -111,95 +110,119 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment, onO
                 onClick={() => {
                   trackClick('hero_browse_pathways_btn', 'Browse All Pathways', 'Navigation');
                 }}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white text-stone-800 font-semibold text-base border border-stone-300 hover:bg-stone-50 hover:border-stone-400 active:bg-stone-100 transition-colors"
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-3 text-stone-600 hover:text-stone-900 font-medium text-sm transition-colors cursor-pointer hover:underline underline-offset-4"
               >
-                <BookOpen className="w-4 h-4 text-stone-600" />
-                <span>Browse All Pathways</span>
+                <BookOpen className="w-4 h-4 text-stone-400" />
+                <span>Explore all 12 pathways</span>
               </a>
             </div>
 
             {/* Quick Realities Badges */}
             <div className="pt-6 border-t border-stone-200/80 flex flex-wrap items-center justify-center gap-y-3 gap-x-6 text-xs sm:text-sm text-stone-500">
               <span className="flex items-center gap-1.5 font-medium text-stone-700">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Phone-friendly paths included
+                <CheckCircle2 className="w-4 h-4 text-emerald-700" /> Phone-friendly paths included
               </span>
               <span className="flex items-center gap-1.5 font-medium text-stone-700">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" /> 100% Free learning materials
+                <CheckCircle2 className="w-4 h-4 text-emerald-700" /> 100% Free learning materials
               </span>
               <span className="flex items-center gap-1.5 font-medium text-stone-700">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" /> Concrete Day-One proof task
+                <CheckCircle2 className="w-4 h-4 text-emerald-700" /> Concrete Day-One proof task
               </span>
             </div>
           </div>
 
           {/* Dynamic Visual Showcase: Real African Tech Talents at Work */}
-          <div className={`mt-14 grid grid-cols-1 md:grid-cols-3 gap-5 transition-all duration-1000 delay-200 ease-out transform ${
+          <div className={`mt-14 grid grid-cols-1 md:grid-cols-3 gap-6 transition-all duration-1000 delay-200 ease-out transform ${
             isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}>
             
             {/* Visual 1: Software Developer / Coding */}
-            <div className="group relative rounded-2xl overflow-hidden border border-stone-200 bg-white shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-              <div className="h-56 overflow-hidden relative">
-                <img
-                  src="https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=800&q=80"
-                  alt="Young African software engineer working on code with multi-screen monitors"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-stone-950/20 to-transparent"></div>
-                <div className="absolute top-3 left-3">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-emerald-600 text-white text-[11px] font-bold shadow-xs">
-                    <Code2 className="w-3.5 h-3.5" /> Technical Path
-                  </span>
+            <div className="group rounded-2xl border border-stone-200/90 bg-white p-3.5 shadow-2xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 flex flex-col justify-between">
+              <div>
+                <div className="h-48 rounded-xl overflow-hidden bg-stone-100 relative">
+                  <img
+                    src="https://images.unsplash.com/photo-1573164713988-8665fc963095?auto=format&fit=crop&w=800&q=80"
+                    alt="African software engineer working on code"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
+                  />
                 </div>
-                <div className="absolute bottom-3 left-3 right-3 text-white">
-                  <h3 className="text-sm font-bold tracking-tight">Software & Web Development</h3>
-                  <p className="text-[11px] text-stone-300 mt-0.5 line-clamp-1">Writing clean code, responsive apps & web APIs</p>
+                <div className="pt-4 px-1">
+                  <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-emerald-800">
+                    <span>Engineering</span>
+                    <span className="text-stone-400 font-sans font-normal lowercase">laptop needed</span>
+                  </div>
+                  <h3 className="font-serif-display text-xl font-normal text-stone-900 mt-1 tracking-tight">
+                    Software & Web Engineering
+                  </h3>
+                  <p className="text-xs text-stone-600 mt-1.5 leading-relaxed">
+                    Building resilient backend APIs, web apps, and databases. High upside, requires steady power and a computer.
+                  </p>
                 </div>
+              </div>
+              <div className="pt-3 px-1 mt-3 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
+                <span>Code-heavy</span>
+                <span className="font-mono text-[11px] text-stone-600">8 to 15 hrs/week</span>
               </div>
             </div>
 
             {/* Visual 2: Social Media & Digital Operations */}
-            <div className="group relative rounded-2xl overflow-hidden border border-stone-200 bg-white shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-              <div className="h-56 overflow-hidden relative">
-                <img
-                  src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=800&q=80"
-                  alt="Young Nigerian digital specialist and social media manager managing mobile campaigns and analytics"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-stone-950/20 to-transparent"></div>
-                <div className="absolute top-3 left-3">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-amber-600 text-white text-[11px] font-bold shadow-xs">
-                    <Share2 className="w-3.5 h-3.5" /> Phone Friendly
-                  </span>
+            <div className="group rounded-2xl border border-stone-200/90 bg-white p-3.5 shadow-2xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 flex flex-col justify-between">
+              <div>
+                <div className="h-48 rounded-xl overflow-hidden bg-stone-100 relative">
+                  <img
+                    src="https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=800&q=80"
+                    alt="Nigerian digital specialist managing campaigns"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
+                  />
                 </div>
-                <div className="absolute bottom-3 left-3 right-3 text-white">
-                  <h3 className="text-sm font-bold tracking-tight">Social Media & Community</h3>
-                  <p className="text-[11px] text-stone-300 mt-0.5 line-clamp-1">Content creation, brand growth & smartphone tools</p>
+                <div className="pt-4 px-1">
+                  <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-emerald-800">
+                    <span>Growth & Media</span>
+                    <span className="text-emerald-700 font-medium font-sans lowercase">100% phone viable</span>
+                  </div>
+                  <h3 className="font-serif-display text-xl font-normal text-stone-900 mt-1 tracking-tight">
+                    Social Media & Community Ops
+                  </h3>
+                  <p className="text-xs text-stone-600 mt-1.5 leading-relaxed">
+                    Distributing campaigns, brand communication, and community management. Start right from your smartphone.
+                  </p>
                 </div>
+              </div>
+              <div className="pt-3 px-1 mt-3 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
+                <span>No coding required</span>
+                <span className="font-mono text-[11px] text-stone-600">5 to 8 hrs/week</span>
               </div>
             </div>
 
             {/* Visual 3: UI/UX & Product Design / VAs */}
-            <div className="group relative rounded-2xl overflow-hidden border border-stone-200 bg-white shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-              <div className="h-56 overflow-hidden relative">
-                <img
-                  src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80"
-                  alt="Young African professional working on product design and digital workspace operations"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-stone-950/80 via-stone-950/20 to-transparent"></div>
-                <div className="absolute top-3 left-3">
-                  <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-teal-600 text-white text-[11px] font-bold shadow-xs">
-                    <Palette className="w-3.5 h-3.5" /> Visual & Ops
-                  </span>
+            <div className="group rounded-2xl border border-stone-200/90 bg-white p-3.5 shadow-2xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5 flex flex-col justify-between">
+              <div>
+                <div className="h-48 rounded-xl overflow-hidden bg-stone-100 relative">
+                  <img
+                    src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=800&q=80"
+                    alt="African professional working on product design"
+                    referrerPolicy="no-referrer"
+                    className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-500"
+                  />
                 </div>
-                <div className="absolute bottom-3 left-3 right-3 text-white">
-                  <h3 className="text-sm font-bold tracking-tight">Product Design & Tech Operations</h3>
-                  <p className="text-[11px] text-stone-300 mt-0.5 line-clamp-1">Wireframing, client calendars & remote team systems</p>
+                <div className="pt-4 px-1">
+                  <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-emerald-800">
+                    <span>Design & Ops</span>
+                    <span className="text-stone-400 font-sans font-normal lowercase">laptop preferred</span>
+                  </div>
+                  <h3 className="font-serif-display text-xl font-normal text-stone-900 mt-1 tracking-tight">
+                    Product Design & Virtual Ops
+                  </h3>
+                  <p className="text-xs text-stone-600 mt-1.5 leading-relaxed">
+                    Figma wireframing, client communication systems, and remote executive support. Focuses on clarity and empathy.
+                  </p>
                 </div>
+              </div>
+              <div className="pt-3 px-1 mt-3 border-t border-stone-100 flex items-center justify-between text-xs text-stone-500">
+                <span>Visual & logical</span>
+                <span className="font-mono text-[11px] text-stone-600">6 to 10 hrs/week</span>
               </div>
             </div>
 
@@ -208,127 +231,101 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment, onO
       </section>
 
       {/* The 4-Layer Assessment Framework */}
-      <section id="framework" className="py-16 sm:py-20 bg-stone-100/70 border-b border-stone-200">
+      <section id="framework" className="py-16 sm:py-24 bg-stone-100/60 border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className={`text-center max-w-3xl mx-auto mb-12 transition-all duration-700 ease-out transform ${
+          <div className={`text-center max-w-3xl mx-auto mb-16 transition-all duration-700 ease-out transform ${
             isMounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
           }`}>
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">Why Most Tech Quizzes Fail You</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 mt-2 tracking-tight">
-              A label is not a plan. You need real context first.
+            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-emerald-800">Diagnostic Protocol</span>
+            <h2 className="font-serif-display text-3xl sm:text-5xl text-stone-900 mt-3 tracking-tight font-normal">
+              A career title is not a plan. <br className="hidden sm:inline" />
+              <span className="italic text-emerald-800">You need real context first.</span>
             </h2>
-            <p className="text-stone-600 text-sm sm:text-base mt-3 leading-relaxed">
-              Standard career tests ask generic questions like "Do you like computers?". But if you are balancing university tests, only have a phone, or need income in 60 days, generic advice sets you up to quit. Here is our 4-layer diagnostic architecture:
+            <p className="text-stone-600 text-sm sm:text-base mt-4 leading-relaxed font-sans max-w-2xl mx-auto">
+              Most tests give generic advice like "Try coding!" without checking whether you own a laptop, have stable electricity, or need to earn in 60 days. Our assessment filters through four grounded stages:
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {/* Editorial 4-Phase Diagnostic Timeline */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             
-            {/* Layer 0: Biodata */}
-            <div id="framework-card-biodata" className="bg-white rounded-2xl p-6 border border-stone-200 shadow-sm flex flex-col justify-between hover:border-emerald-300 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+            {/* Phase 1: Biodata & Stage */}
+            <div id="framework-card-biodata" className="bg-white rounded-2xl p-6 border border-stone-200/90 shadow-2xs flex flex-col justify-between hover:shadow-sm transition-all duration-200">
               <div>
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-base mb-4">
-                  0
+                <div className="flex items-center justify-between border-b border-stone-100 pb-3 mb-4">
+                  <span className="font-mono text-xs font-semibold text-emerald-800 tracking-wider">PHASE 01</span>
+                  <span className="text-[11px] text-stone-400 font-mono">CONTEXT</span>
                 </div>
-                <h3 className="text-base font-bold text-stone-900 mb-2">Layer 0: Biodata & Stage</h3>
-                <p className="text-xs text-stone-600 leading-relaxed mb-3">
-                  Tailors advice to your actual life stage:
+                <h3 className="font-serif-display text-xl text-stone-900 font-normal mb-2">
+                  Life Stage & Origin
+                </h3>
+                <p className="text-xs text-stone-600 leading-relaxed font-sans">
+                  Undergraduates, NYSC corps members, and career switchers face completely different clocks. We calibrate for local developer grants and female-in-tech opportunities.
                 </p>
-                <ul className="space-y-2 text-xs text-stone-600">
-                  <li className="flex items-center gap-2">
-                    <UserCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span><strong>Age Bracket:</strong> Undergrad, youth, or mid-career</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span><strong>Targeting:</strong> Female-in-tech grants, NYSC tracks</span>
-                  </li>
-                </ul>
               </div>
-              <div className="mt-4 pt-3 border-t border-stone-100 text-[11px] text-stone-500">
-                Filters irrelevant options immediately
+              <div className="mt-6 pt-3 border-t border-stone-100 text-[11px] text-stone-500 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-700"></span>
+                <span>Filters out irrelevant options early</span>
               </div>
             </div>
 
-            {/* Layer 1: Hardware & Power Reality */}
-            <div id="framework-card-constraints" className="bg-white rounded-2xl p-6 border border-stone-200 shadow-sm flex flex-col justify-between hover:border-emerald-300 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+            {/* Phase 2: Hardware & Constraints */}
+            <div id="framework-card-constraints" className="bg-white rounded-2xl p-6 border border-stone-200/90 shadow-2xs flex flex-col justify-between hover:shadow-sm transition-all duration-200">
               <div>
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-base mb-4">
-                  1
+                <div className="flex items-center justify-between border-b border-stone-100 pb-3 mb-4">
+                  <span className="font-mono text-xs font-semibold text-emerald-800 tracking-wider">PHASE 02</span>
+                  <span className="text-[11px] text-stone-400 font-mono">REALITY</span>
                 </div>
-                <h3 className="text-base font-bold text-stone-900 mb-2">Layer 1: Real Constraints</h3>
-                <p className="text-xs text-stone-600 leading-relaxed mb-3">
-                  Honest hardware and bandwidth assessment:
+                <h3 className="font-serif-display text-xl text-stone-900 font-normal mb-2">
+                  Hardware & Energy
+                </h3>
+                <p className="text-xs text-stone-600 leading-relaxed font-sans">
+                  We audit your actual device (smartphone vs. shared PC vs. laptop), weekly study hours, and access to steady electricity or night-owl powerbanks.
                 </p>
-                <ul className="space-y-2 text-xs text-stone-600">
-                  <li className="flex items-center gap-2">
-                    <Smartphone className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span><strong>Device:</strong> Phone-only, Family PC, or Laptop</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Clock className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span><strong>Hours:</strong> 3-5 hrs vs. full-time immersion</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Zap className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span><strong>Power & Data:</strong> Powerbank dependent & internet access</span>
-                  </li>
-                </ul>
               </div>
-              <div className="mt-4 pt-3 border-t border-stone-100 text-[11px] text-stone-500">
-                Guarantees you don't pick an impossible path
+              <div className="mt-6 pt-3 border-t border-stone-100 text-[11px] text-stone-500 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-700"></span>
+                <span>Never recommends impossible prerequisites</span>
               </div>
             </div>
 
-            {/* Layer 2: Aptitude & Scenarios */}
-            <div id="framework-card-aptitude" className="bg-white rounded-2xl p-6 border border-stone-200 shadow-sm flex flex-col justify-between hover:border-emerald-300 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+            {/* Phase 3: Cognitive Scenarios */}
+            <div id="framework-card-aptitude" className="bg-white rounded-2xl p-6 border border-stone-200/90 shadow-2xs flex flex-col justify-between hover:shadow-sm transition-all duration-200">
               <div>
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-base mb-4">
-                  2
+                <div className="flex items-center justify-between border-b border-stone-100 pb-3 mb-4">
+                  <span className="font-mono text-xs font-semibold text-emerald-800 tracking-wider">PHASE 03</span>
+                  <span className="text-[11px] text-stone-400 font-mono">INSTINCTS</span>
                 </div>
-                <h3 className="text-base font-bold text-stone-900 mb-2">Layer 2: Real Scenarios</h3>
-                <p className="text-xs text-stone-600 leading-relaxed mb-3">
-                  Reveals how your brain naturally solves problems:
+                <h3 className="font-serif-display text-xl text-stone-900 font-normal mb-2">
+                  Problem-Solving Style
+                </h3>
+                <p className="text-xs text-stone-600 leading-relaxed font-sans">
+                  Five real-life scenarios test whether you get irritated by messy visuals, broken logic, disorganized schedules, or slow communication.
                 </p>
-                <ul className="space-y-2 text-xs text-stone-600">
-                  <li className="flex items-center gap-2">
-                    <Flame className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span><strong>Frustration style:</strong> Clutter vs. broken logic</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <Target className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span><strong>Ideal output:</strong> Design, spreadsheet, or running app</span>
-                  </li>
-                </ul>
               </div>
-              <div className="mt-4 pt-3 border-t border-stone-100 text-[11px] text-stone-500">
-                Measures natural instincts, not exam memory
+              <div className="mt-6 pt-3 border-t border-stone-100 text-[11px] text-stone-500 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-700"></span>
+                <span>Measures natural curiosity over textbook tests</span>
               </div>
             </div>
 
-            {/* Layer 3: Day-One Action */}
-            <div id="framework-card-dayone" className="bg-white rounded-2xl p-6 border border-stone-200 shadow-sm flex flex-col justify-between hover:border-emerald-300 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
+            {/* Phase 4: Day-One Proof Project */}
+            <div id="framework-card-dayone" className="bg-white rounded-2xl p-6 border border-stone-200/90 shadow-2xs flex flex-col justify-between hover:shadow-sm transition-all duration-200">
               <div>
-                <div className="w-10 h-10 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center font-bold text-base mb-4">
-                  3
+                <div className="flex items-center justify-between border-b border-stone-100 pb-3 mb-4">
+                  <span className="font-mono text-xs font-semibold text-emerald-800 tracking-wider">PHASE 04</span>
+                  <span className="text-[11px] text-stone-400 font-mono">ACTION</span>
                 </div>
-                <h3 className="text-base font-bold text-stone-900 mb-2">Layer 3: Day-One Task</h3>
-                <p className="text-xs text-stone-600 leading-relaxed mb-3">
-                  Never leave with just a career title:
+                <h3 className="font-serif-display text-xl text-stone-900 font-normal mb-2">
+                  The Day-One Proof
+                </h3>
+                <p className="text-xs text-stone-600 leading-relaxed font-sans">
+                  You walk away with an exact 20-minute exercise using free tools (like Canva, Notion, or browser dev tools) to test your genuine enjoyment immediately.
                 </p>
-                <ul className="space-y-2 text-xs text-stone-600">
-                  <li className="flex items-center gap-2">
-                    <Sparkles className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span><strong>Actionable:</strong> 20-30 min proof exercise today</span>
-                  </li>
-                  <li className="flex items-center gap-2">
-                    <BookOpen className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                    <span><strong>Free tools:</strong> No paid courses required</span>
-                  </li>
-                </ul>
               </div>
-              <div className="mt-4 pt-3 border-t border-stone-100 text-[11px] text-stone-500">
-                Test your own interest in 30 minutes
+              <div className="mt-6 pt-3 border-t border-stone-100 text-[11px] text-stone-500 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-700"></span>
+                <span>Validates interest before spending a single naira</span>
               </div>
             </div>
 
@@ -342,11 +339,11 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment, onO
           
           <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">Curated Tech Pathways</span>
-              <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 mt-1 tracking-tight">
-                Explore tech roles with honesty
+              <span className="text-xs font-mono font-semibold uppercase tracking-wider text-emerald-800">Curated Tech Pathways</span>
+              <h2 className="font-serif-display text-3xl sm:text-4xl text-stone-900 mt-1 tracking-tight font-normal">
+                Explore tech roles with complete honesty
               </h2>
-              <p className="text-stone-600 text-sm sm:text-base mt-2">
+              <p className="text-stone-600 text-sm sm:text-base mt-2 font-sans">
                 Every niche has realistic device requirements and an actionable starter proof task.
               </p>
             </div>
@@ -417,91 +414,95 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment, onO
             </div>
           </div>
 
-          {/* Cards Grid with Dynamic Images & Animations */}
-          <div id="pathway-cards-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Cards Grid with Refined Editorial Presentation */}
+          <div id="pathway-cards-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
             {filteredNiches.map((niche) => (
-              <div
+              <article
                 key={niche.id}
                 id={`niche-card-${niche.id}`}
-                className="bg-white rounded-2xl border border-stone-200 hover:border-emerald-300 hover:shadow-lg hover:-translate-y-1 transition-all duration-300 flex flex-col justify-between overflow-hidden group"
+                className="bg-white rounded-2xl border border-stone-200/90 hover:border-emerald-700/40 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300 flex flex-col justify-between overflow-hidden group"
               >
-                {/* Image Header */}
-                {niche.imageUrl && (
-                  <div className="relative h-44 w-full overflow-hidden bg-stone-100">
-                    <img 
-                      src={niche.imageUrl} 
-                      alt={niche.title}
-                      referrerPolicy="no-referrer"
-                      loading="lazy"
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/15 to-transparent"></div>
-                    
-                    {/* Device Badge Floating Top Right */}
-                    <div className="absolute top-3 right-3">
-                      {niche.deviceRequirement === 'phone_only_possible' ? (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-emerald-900 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-full shadow-xs border border-emerald-200">
-                          <Smartphone className="w-3 h-3 text-emerald-700" /> Phone Friendly
-                        </span>
-                      ) : (
-                        <span className="inline-flex items-center gap-1 text-[11px] font-bold text-stone-800 bg-white/95 backdrop-blur-xs px-2.5 py-1 rounded-full shadow-xs border border-stone-200">
-                          <Laptop className="w-3 h-3 text-stone-600" /> Laptop Needed
-                        </span>
-                      )}
+                <div>
+                  {/* Clean Photography Header */}
+                  {niche.imageUrl && (
+                    <div className="relative h-48 w-full overflow-hidden bg-stone-100 border-b border-stone-100">
+                      <img 
+                        src={niche.imageUrl} 
+                        alt={niche.title}
+                        referrerPolicy="no-referrer"
+                        loading="lazy"
+                        className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-700 ease-out"
+                      />
+                      
+                      {/* Discrete subtle device pill pinned neatly in top right with soft backdrop */}
+                      <div className="absolute top-3 right-3">
+                        {niche.deviceRequirement === 'phone_only_possible' ? (
+                          <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-900 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-xs border border-emerald-200/80">
+                            <Smartphone className="w-3 h-3 text-emerald-700" /> Phone-friendly
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-stone-700 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-xs border border-stone-200/80">
+                            <Laptop className="w-3 h-3 text-stone-500" /> Laptop needed
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="p-6 sm:p-7 space-y-4">
+                    {/* Typographic Metadata Header */}
+                    <div className="flex items-center justify-between text-xs text-stone-500 font-mono">
+                      <span className="uppercase tracking-wider font-semibold text-emerald-800">
+                        {niche.category === 'creative' ? 'Design & Creative' : niche.category === 'non-technical' ? 'Operations & Growth' : 'Engineering & Data'}
+                      </span>
+                      <span className="flex items-center gap-1 text-stone-500">
+                        <Clock className="w-3 h-3 text-stone-400" /> {niche.timeCommitment}
+                      </span>
                     </div>
 
-                    {/* Category & Time Tag Floating Bottom */}
-                    <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-white text-[11px]">
-                      <span className="font-semibold uppercase tracking-wider bg-black/40 backdrop-blur-xs px-2 py-0.5 rounded">
-                        {niche.category === 'creative' ? 'Visual / Design' : niche.category === 'non-technical' ? 'Operational / Growth' : 'Engineering / Code'}
-                      </span>
-                      <span className="flex items-center gap-1 bg-black/40 backdrop-blur-xs px-2 py-0.5 rounded font-medium">
-                        <Clock className="w-3 h-3 text-emerald-300" /> {niche.timeCommitment}
-                      </span>
-                    </div>
-                  </div>
-                )}
-
-                <div className="p-6 flex-1 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-lg font-bold text-stone-900 group-hover:text-emerald-800 transition-colors">
+                    {/* Headline */}
+                    <h3 className="font-serif-display text-2xl font-normal text-stone-900 leading-snug group-hover:text-emerald-900 transition-colors">
                       {niche.title}
                     </h3>
 
-                    <p className="text-sm text-stone-600 mt-2 leading-relaxed">
+                    {/* Human Description */}
+                    <p className="text-sm text-stone-600 leading-relaxed font-sans">
                       {niche.description}
                     </p>
 
-                    {/* Day One Mission Highlight */}
-                    <div className="mt-4 p-3.5 rounded-xl bg-stone-50 border border-stone-200">
-                      <div className="flex items-center gap-1.5 text-xs font-bold text-emerald-800 uppercase tracking-wider mb-1">
-                        <Flame className="w-3.5 h-3.5 text-emerald-600" /> Day-One Action:
+                    {/* Day-One Proof Task Memo */}
+                    <div className="p-4 rounded-xl bg-stone-50 border border-stone-200/80 space-y-1.5">
+                      <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-stone-500">
+                        <span className="font-semibold text-emerald-800">Day-One Proof Task</span>
+                        <span>~{niche.dayOneEstimatedMins || 20} mins</span>
                       </div>
-                      <p className="text-xs text-stone-700 leading-snug">
+                      <p className="text-xs text-stone-700 leading-relaxed font-sans italic">
                         "{niche.dayOneAction}"
                       </p>
                     </div>
                   </div>
-
-                  <div className="mt-5 pt-4 border-t border-stone-100 flex items-center justify-between">
-                    <div className="flex flex-wrap gap-1">
-                      {niche.typicalTools.slice(0, 3).map((tool, i) => (
-                        <span key={i} className="text-[11px] px-2 py-0.5 rounded bg-stone-100 text-stone-600 font-medium">
-                          {tool}
-                        </span>
-                      ))}
-                    </div>
-
-                    <button
-                      type="button"
-                      onClick={onStartAssessment}
-                      className="text-xs font-bold text-emerald-700 hover:text-emerald-900 flex items-center gap-1 group-hover:translate-x-0.5 transition-transform"
-                    >
-                      Assess Fit <ChevronRight className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
                 </div>
-              </div>
+
+                {/* Card Footer: Tools & CTA */}
+                <div className="px-6 sm:px-7 pb-6 pt-2 border-t border-stone-100 flex items-center justify-between mt-auto">
+                  <div className="flex flex-wrap gap-1.5">
+                    {niche.typicalTools.slice(0, 3).map((tool, i) => (
+                      <span key={i} className="text-[11px] font-mono px-2 py-0.5 rounded bg-stone-100 text-stone-600">
+                        {tool}
+                      </span>
+                    ))}
+                  </div>
+
+                  <button
+                    type="button"
+                    onClick={onStartAssessment}
+                    className="text-xs font-semibold text-emerald-800 hover:text-emerald-950 inline-flex items-center gap-1 group-hover:translate-x-0.5 transition-all cursor-pointer"
+                  >
+                    <span>Assess fit</span>
+                    <ArrowRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </article>
             ))}
           </div>
 
@@ -509,19 +510,19 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment, onO
       </section>
 
       {/* Day-One Mission Showcase Section */}
-      <section id="day-one" className="py-16 sm:py-20 bg-emerald-900 text-white relative overflow-hidden">
+      <section id="day-one" className="py-16 sm:py-20 bg-emerald-950 text-white relative overflow-hidden">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
             
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-300">The Core Philosophy</span>
-              <h2 className="text-2xl sm:text-4xl font-extrabold tracking-tight mt-2 leading-tight">
-                Don't wait 6 months to know if tech is for you.
+              <span className="text-xs font-mono font-semibold uppercase tracking-wider text-emerald-300">The Core Philosophy</span>
+              <h2 className="font-serif-display text-3xl sm:text-4xl lg:text-5xl font-normal tracking-tight mt-2 leading-tight">
+                Don't spend six months wondering if tech is for you.
               </h2>
-              <p className="text-emerald-100/90 text-sm sm:text-base mt-4 leading-relaxed">
-                Most people start with huge tutorial playlists, burn their data, and get stuck in tutorial hell without ever building anything. 
+              <p className="text-emerald-100/90 text-sm sm:text-base mt-4 leading-relaxed font-sans">
+                Most beginners start with huge tutorial playlists, burn their data, and get stuck in tutorial hell without ever building anything. 
               </p>
-              <p className="text-emerald-200/80 text-sm sm:text-base mt-3 leading-relaxed">
+              <p className="text-emerald-200/80 text-sm sm:text-base mt-3 leading-relaxed font-sans">
                 Naija Tech Guide forces a tangible output on <strong>Day 1</strong>. If you do the 30-minute task and enjoy the problem-solving feeling, you have proven your interest to yourself.
               </p>
 
@@ -530,10 +531,10 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment, onO
                   id="dayone-start-assessment-btn"
                   type="button"
                   onClick={onStartAssessment}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white text-emerald-950 font-bold text-sm hover:bg-emerald-50 active:scale-[0.99] transition-all shadow-sm"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white text-emerald-950 font-semibold text-sm hover:bg-stone-100 active:scale-[0.99] transition-all shadow-sm cursor-pointer"
                 >
-                  <Sparkles className="w-4 h-4 text-emerald-700" />
                   <span>Get Your Day-One Mission</span>
+                  <ArrowRight className="w-4 h-4 text-emerald-950" />
                 </button>
               </div>
 

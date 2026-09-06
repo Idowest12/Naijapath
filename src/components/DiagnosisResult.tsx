@@ -745,7 +745,7 @@ Take the 3-minute honest assessment: ${window.location.origin}`;
               Free Resources & Direct Links for {activeNiche.title}
             </h3>
             <p className="text-xs text-stone-600 mt-1 leading-relaxed">
-              All materials here are 100% free — no payment, no subscription, and tested to consume minimal internet data. Click any card to open the resource directly.
+              All materials here are completely free with no payment or subscription needed, and tested to consume minimal internet data. Click any card to open the resource directly.
             </p>
           </div>
 

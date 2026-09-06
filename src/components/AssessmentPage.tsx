@@ -16,6 +16,7 @@ import {
   Users,
   Bot
 } from 'lucide-react';
+import { SectionTransitionCard } from './SectionTransitionCard';
 import { 
   UserBiodata, 
   UserConstraints, 
@@ -40,6 +41,7 @@ import {
 } from '../data/assessmentQuestions';
 import { DiagnosisResult } from './DiagnosisResult';
 import { ALL_NICHES } from '../data/nichesData';
+import { SingleQuestionCard } from './SingleQuestionCard';
 import { saveAssessmentRecord } from '../utils/submissionStorage';
 import { trackAssessmentStart, trackAssessmentComplete, trackPageView, syncLocalRecordsToServer } from '../utils/analytics';
 
@@ -56,6 +58,11 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
 }) => {
   // Step tracker: 1 = Biodata, 2 = Constraints, 3 = Scenarios/Aptitude, 4 = Nuance, 5 = Result
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [constraintSubIndex, setConstraintSubIndex] = useState<number>(0);
+  const [scenarioSubIndex, setScenarioSubIndex] = useState<number>(0);
+
+  // Interstitial transition state between sections (2, 3, 4)
+  const [activeSectionIntro, setActiveSectionIntro] = useState<number | null>(null);
 
   // Form State: clean slate so the user makes all choices themselves
   const [biodata, setBiodata] = useState<UserBiodata>({
@@ -94,13 +101,13 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setValidationError(null);
-    if (currentStep === 1) {
+    if (currentStep === 1 && !activeSectionIntro) {
       trackPageView('/assessment');
       trackAssessmentStart();
     } else if (currentStep === 5) {
       trackPageView('/result');
     }
-  }, [currentStep]);
+  }, [currentStep, activeSectionIntro]);
 
   const handleNextStep = () => {
     setValidationError(null);
@@ -111,7 +118,8 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
         setValidationError('Please answer all 4 questions above to continue.');
         return;
       }
-      setCurrentStep(2);
+      setActiveSectionIntro(2);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
@@ -121,7 +129,8 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
         setValidationError('Please answer all 5 questions about your device, time, and power setup.');
         return;
       }
-      setCurrentStep(3);
+      setActiveSectionIntro(3);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
@@ -132,7 +141,8 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
         setValidationError(`Please pick an answer for all ${SCENARIO_QUESTIONS.length} questions above.`);
         return;
       }
-      setCurrentStep(4);
+      setActiveSectionIntro(4);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
       return;
     }
 
@@ -203,9 +213,89 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
     }
   };
 
+  const constraintQuestions = [
+    {
+      title: 'What device will you use for daily learning?',
+      subtitle: 'Be real with us. We only recommend tech paths that work with the hardware you have right now.',
+      field: 'device' as keyof UserConstraints,
+      categoryBadge: 'Hardware Setup',
+      options: DEVICE_OPTIONS.map(opt => ({
+        value: opt.value,
+        label: opt.label,
+        sublabel: opt.sublabel,
+        icon: opt.value === 'phone_only' ? <Smartphone className="w-5 h-5" /> : <Laptop className="w-5 h-5" />
+      }))
+    },
+    {
+      title: 'How much free time do you realistically have each week?',
+      subtitle: 'Be honest with your schedule so you never burn out or abandon your tech journey.',
+      field: 'timeWeekly' as keyof UserConstraints,
+      categoryBadge: 'Time Availability',
+      options: TIME_OPTIONS.map(opt => ({
+        value: opt.value,
+        label: opt.label,
+        sublabel: opt.sublabel,
+        icon: <Clock className="w-5 h-5" />
+      }))
+    },
+    {
+      title: 'What is your power and data situation?',
+      subtitle: 'We match you to learning stacks with lightweight data needs or offline study capabilities if required.',
+      field: 'powerData' as keyof UserConstraints,
+      categoryBadge: 'Light & Internet',
+      options: POWER_DATA_OPTIONS.map(opt => ({
+        value: opt.value,
+        label: opt.label,
+        sublabel: opt.sublabel,
+        icon: <Zap className="w-5 h-5" />
+      }))
+    },
+    {
+      title: 'How do you feel about writing code?',
+      subtitle: 'Tech has massive high-paying roles for both coders and non-coders alike.',
+      field: 'codingAppetite' as keyof UserConstraints,
+      categoryBadge: 'Coding Appetite',
+      options: CODING_APPETITE_OPTIONS.map(opt => ({
+        value: opt.value,
+        label: opt.label,
+        sublabel: opt.sublabel,
+        icon: <Compass className="w-5 h-5" />
+      }))
+    },
+    {
+      title: 'How soon do you want to start earning income?',
+      subtitle: 'Helps us balance quick-win freelance skills against long-term career mastery.',
+      field: 'earningUrgency' as keyof UserConstraints,
+      categoryBadge: 'Income Urgency',
+      options: EARNING_URGENCY_OPTIONS.map(opt => ({
+        value: opt.value,
+        label: opt.label,
+        sublabel: opt.sublabel,
+        icon: <Briefcase className="w-5 h-5" />
+      }))
+    }
+  ];
+
   const handlePrevStep = () => {
     setValidationError(null);
-    if (currentStep > 1) {
+    if (currentStep === 4) {
+      setActiveSectionIntro(4);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (currentStep === 3) {
+      if (scenarioSubIndex > 0) {
+        setScenarioSubIndex(prev => prev - 1);
+      } else {
+        setActiveSectionIntro(3);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } else if (currentStep === 2) {
+      if (constraintSubIndex > 0) {
+        setConstraintSubIndex(prev => prev - 1);
+      } else {
+        setActiveSectionIntro(2);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    } else if (currentStep > 1) {
       setCurrentStep(currentStep - 1);
     }
   };
@@ -213,6 +303,9 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
   const handleRetake = () => {
     setDiagnosisResult(null);
     setScenarioAnswers({});
+    setConstraintSubIndex(0);
+    setScenarioSubIndex(0);
+    setActiveSectionIntro(null);
     setCurrentStep(1);
   };
 
@@ -230,10 +323,10 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
   };
 
   const stepLabels = [
-    'About You',
-    'Your Setup & Time',
-    'What You Like',
-    'Final Touch',
+    'Background',
+    'Setup & Reality',
+    'Cognitive Scenarios',
+    'Final Calibration',
     'Your Result'
   ];
 
@@ -248,7 +341,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               id="assessment-back-to-home-btn"
               type="button"
               onClick={onBackToHome}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors text-xs sm:text-sm font-medium"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors text-xs sm:text-sm font-medium cursor-pointer"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back to Guide</span>
@@ -265,7 +358,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               <button
                 type="button"
                 onClick={() => onOpenChatbot("I'm currently taking the assessment and have a question about tech career paths in Nigeria:")}
-                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-700 hover:text-emerald-800 hover:border-emerald-300 text-xs font-semibold transition-all"
+                className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-stone-200 bg-white text-stone-700 hover:text-emerald-800 hover:border-emerald-300 text-xs font-semibold transition-all cursor-pointer"
                 title="Ask AI Mentor if you have questions"
               >
                 <Bot className="w-3.5 h-3.5 text-emerald-700" />
@@ -276,10 +369,10 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
             {currentStep < 5 ? (
               <div className="flex items-center gap-2">
                 <span className="text-xs text-stone-500 font-medium hidden sm:inline">
-                  Step {currentStep} of 4:
+                  {activeSectionIntro ? `Section 0${activeSectionIntro} of 4:` : `Section 0${currentStep} of 4:`}
                 </span>
-                <span className="text-xs font-bold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200">
-                  {stepLabels[currentStep - 1]}
+                <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
+                  {activeSectionIntro ? stepLabels[activeSectionIntro - 1] : stepLabels[currentStep - 1]}
                 </span>
               </div>
             ) : (
@@ -294,8 +387,8 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
         {currentStep < 5 && (
           <div className="h-1 w-full bg-stone-100">
             <div 
-              className="h-full bg-emerald-600 transition-all duration-300 ease-out"
-              style={{ width: `${(currentStep / 4) * 100}%` }}
+              className="h-full bg-emerald-700 transition-all duration-300 ease-out"
+              style={{ width: `${((activeSectionIntro ? activeSectionIntro - 0.5 : currentStep) / 4) * 100}%` }}
             ></div>
           </div>
         )}
@@ -304,45 +397,137 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
       {/* Main Form Page Area */}
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 pb-24 sm:pb-28">
         
-        {/* Live Cohort Match Counter */}
-        {currentStep < 5 && (
-          <div className="mb-6 flex items-center justify-between text-xs text-stone-600 bg-emerald-50/80 border border-emerald-200/80 px-4 py-2.5 rounded-2xl shadow-2xs">
-            <div className="flex items-center gap-2 text-emerald-950 font-medium">
-              <Users className="w-4 h-4 text-emerald-700 shrink-0" />
-              <span>
-                {currentStep === 1 && (biodata.location ? `Matching against 380+ learner profiles from ${biodata.location.replace(/_/g, ' ')}...` : 'Connecting your input with 2,480+ Nigerian youth profiles in our database...')}
-                {currentStep === 2 && (constraints.device === 'phone_only' ? '📱 840+ profiles in our community also started learning on smartphone only.' : constraints.device ? '💻 610+ profiles learn on laptop.' : 'Matching your hardware & time setup against peer profiles...')}
-                {currentStep === 3 && '🧠 Comparing your problem-solving style with 12 practical tech pathways...'}
-                {currentStep === 4 && '🎯 Almost done: calibrating your final match against 2,480+ Nigerian learner profiles...'}
-              </span>
-            </div>
-            <span className="text-[11px] text-emerald-800 font-bold hidden sm:inline px-2 py-0.5 rounded-full bg-emerald-100 border border-emerald-300">
-              Live Cohort Matching
-            </span>
+        {/* Section Transition Interstitial Screen */}
+        {activeSectionIntro !== null ? (
+          <div className="animate-in fade-in duration-200">
+            {activeSectionIntro === 2 && (
+              <SectionTransitionCard
+                sectionNumber={2}
+                totalSections={4}
+                completedSectionName="Section 01: Background & Origin"
+                nextSectionTitle="Real-World Constraints"
+                nextSectionSubtitle="We evaluate your daily hardware, weekly study hours, and electricity situation so we never recommend a pathway that requires tools you don't possess."
+                keyPoints={[
+                  "Your primary learning device (Smartphone vs. Shared PC vs. Dedicated Laptop)",
+                  "Realistic weekly free hours to avoid burnout and abandonment",
+                  "Power stability and internet data access in your area",
+                  "Honest preference for coding vs. non-coding digital careers",
+                  "Financial horizon and when you realistically need income"
+                ]}
+                questionCountText="5 practical questions"
+                estimatedTimeText="60 to 90 seconds"
+                onContinue={() => {
+                  setActiveSectionIntro(null);
+                  setCurrentStep(2);
+                  setConstraintSubIndex(0);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                onBack={() => {
+                  setActiveSectionIntro(null);
+                  setCurrentStep(1);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              />
+            )}
+
+            {activeSectionIntro === 3 && (
+              <SectionTransitionCard
+                sectionNumber={3}
+                totalSections={4}
+                completedSectionName="Section 02: Hardware & Constraints"
+                nextSectionTitle="Cognitive Style & Scenarios"
+                nextSectionSubtitle="Five realistic everyday situations involving broken banking apps, disorganized team files, or messy spreadsheets. Pick your natural, honest reaction, because there are no right or wrong answers."
+                keyPoints={[
+                  "What frustrates you most when digital tools malfunction",
+                  "What kind of daily creative output gives you the most satisfaction",
+                  "How your mind organizes tasks, files, and project goals",
+                  "Your balance between deep logical analysis and visual or human empathy"
+                ]}
+                questionCountText="5 scenario questions"
+                estimatedTimeText="60 seconds"
+                onContinue={() => {
+                  setActiveSectionIntro(null);
+                  setCurrentStep(3);
+                  setScenarioSubIndex(0);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                onBack={() => {
+                  setActiveSectionIntro(null);
+                  setCurrentStep(2);
+                  setConstraintSubIndex(constraintQuestions.length - 1);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              />
+            )}
+
+            {activeSectionIntro === 4 && (
+              <SectionTransitionCard
+                sectionNumber={4}
+                totalSections={4}
+                completedSectionName="Section 03: Cognitive Style & Scenarios"
+                nextSectionTitle="Final Calibration & Reflection"
+                nextSectionSubtitle="You are one question away from your personalized diagnosis. Tell us one thing you arranged, fixed, or helped someone with recently so your Day-One proof mission is anchored in reality."
+                keyPoints={[
+                  "A real task or project you solved in the past 6 months",
+                  "Personal strengths calibration against Nigerian industry demand",
+                  "Unlocks your tailored Day-One Proof Project"
+                ]}
+                questionCountText="1 compulsory reflection"
+                estimatedTimeText="30 seconds"
+                onContinue={() => {
+                  setActiveSectionIntro(null);
+                  setCurrentStep(4);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                onBack={() => {
+                  setActiveSectionIntro(null);
+                  setCurrentStep(3);
+                  setScenarioSubIndex(SCENARIO_QUESTIONS.length - 1);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+              />
+            )}
           </div>
-        )}
+        ) : (
+          <>
+            {/* Live Cohort Match Counter */}
+            {currentStep < 5 && (
+              <div className="mb-8 flex items-center justify-between text-xs text-stone-600 bg-stone-100/70 border border-stone-200/80 px-4 py-2.5 rounded-xl">
+                <div className="flex items-center gap-2 text-stone-800 font-medium">
+                  <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
+                  <span>
+                    {currentStep === 1 && (biodata.location ? `Calibrating against 380+ learner profiles from ${biodata.location.replace(/_/g, ' ')}...` : 'Calibrating with 2,480+ Nigerian youth profiles in our community...')}
+                    {currentStep === 2 && (constraints.device === 'phone_only' ? '📱 840+ learners in our community started on smartphone only.' : constraints.device ? '💻 610+ learners started on laptop.' : 'Calibrating against your hardware & time setup...')}
+                    {currentStep === 3 && 'Comparing your problem-solving style with 12 practical tech pathways...'}
+                    {currentStep === 4 && 'Almost there: generating your personalized Day-One mission...'}
+                  </span>
+                </div>
+                <span className="text-[11px] text-stone-500 font-mono hidden sm:inline">
+                  Community Calibration
+                </span>
+              </div>
+            )}
 
         {/* Step 1: BIODATA */}
         {currentStep === 1 && (
-          <div id="step-1-biodata" className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <div id="step-1-biodata" className="space-y-6 animate-in fade-in duration-200">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold uppercase tracking-wider mb-2">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
-                <span>Step 1 of 4: About You</span>
+              <div className="text-xs font-mono font-semibold tracking-wider uppercase text-emerald-800 mb-2">
+                Step 01 of 04 · Background & Context
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
+              <h1 className="font-serif-display text-3xl sm:text-4xl text-stone-900 font-normal tracking-tight leading-tight">
                 Tell us a bit about yourself
               </h1>
-              <p className="text-stone-600 text-sm sm:text-base mt-2">
-                We use this to find beginner-friendly opportunities, local tech communities, and grants tailored to you.
+              <p className="text-stone-600 text-sm sm:text-base mt-2 max-w-xl leading-relaxed font-sans">
+                We use this to identify relevant local hubs, state-level developer grants, and peer circles near you.
               </p>
             </div>
 
-            <div className="bg-white rounded-2xl border border-stone-200 p-6 sm:p-8 shadow-xs space-y-6">
+            <div className="bg-white rounded-2xl border border-stone-200/90 p-6 sm:p-9 shadow-[0_4px_24px_-6px_rgba(0,0,0,0.05)] space-y-7">
               {/* Optional Name */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
-                  Your Name or Nickname (Optional)
+                <label className="block text-xs font-semibold tracking-wider uppercase text-stone-700 mb-2">
+                  Your Name or Nickname <span className="text-stone-400 font-normal lowercase">(optional)</span>
                 </label>
                 <input
                   id="bio-name-input"
@@ -350,14 +535,14 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
                   placeholder="e.g. Tosin, Chidi, Amina"
                   value={biodata.fullName || ''}
                   onChange={(e) => setBiodata({ ...biodata, fullName: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-stone-300 bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 focus:bg-white transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-stone-300/90 bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:bg-white transition-all placeholder:text-stone-400"
                 />
               </div>
 
               {/* Age Bracket */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
-                  1. What is your age?
+                <label className="block text-xs font-semibold tracking-wider uppercase text-stone-700 mb-2">
+                  1. What is your age group?
                 </label>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {AGE_BAND_OPTIONS.map((opt) => (
@@ -368,13 +553,13 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
                         setBiodata({ ...biodata, ageBand: opt.value });
                         setValidationError(null);
                       }}
-                      className={`p-3.5 rounded-xl border text-left transition-all ${
+                      className={`p-4 rounded-xl border text-left transition-all ${
                         biodata.ageBand === opt.value
-                          ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold ring-2 ring-emerald-600/20'
-                          : 'border-stone-200 bg-white hover:border-stone-300 text-stone-700'
+                          ? 'border-emerald-800 bg-emerald-50/80 text-emerald-950 font-semibold ring-1 ring-emerald-800/40 shadow-2xs'
+                          : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50/50 text-stone-700'
                       }`}
                     >
-                      <div className="text-xs sm:text-sm font-bold">{opt.label}</div>
+                      <div className="text-xs sm:text-sm font-semibold">{opt.label}</div>
                       {opt.sublabel && (
                         <div className="text-[11px] text-stone-500 mt-1 leading-snug">{opt.sublabel}</div>
                       )}
@@ -385,7 +570,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
 
               {/* Gender */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
+                <label className="block text-xs font-semibold tracking-wider uppercase text-stone-700 mb-2">
                   2. Gender
                 </label>
                 <div className="grid grid-cols-3 gap-3">
@@ -399,11 +584,11 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
                       }}
                       className={`p-3.5 rounded-xl border text-center transition-all ${
                         biodata.gender === opt.value
-                          ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold ring-2 ring-emerald-600/20'
-                          : 'border-stone-200 bg-white hover:border-stone-300 text-stone-700'
+                          ? 'border-emerald-800 bg-emerald-50/80 text-emerald-950 font-semibold ring-1 ring-emerald-800/40 shadow-2xs'
+                          : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50/50 text-stone-700'
                       }`}
                     >
-                      <span className="text-xs sm:text-sm">{opt.label}</span>
+                      <span className="text-xs sm:text-sm font-medium">{opt.label}</span>
                     </button>
                   ))}
                 </div>
@@ -411,7 +596,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
 
               {/* Current Status */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
+                <label className="block text-xs font-semibold tracking-wider uppercase text-stone-700 mb-2">
                   3. What is your current situation?
                 </label>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -425,13 +610,13 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
                       }}
                       className={`p-4 rounded-xl border text-left transition-all ${
                         biodata.status === opt.value
-                          ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold ring-2 ring-emerald-600/20'
-                          : 'border-stone-200 bg-white hover:border-stone-300 text-stone-700'
+                          ? 'border-emerald-800 bg-emerald-50/80 text-emerald-950 font-semibold ring-1 ring-emerald-800/40 shadow-2xs'
+                          : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50/50 text-stone-700'
                       }`}
                     >
-                      <div className="text-xs sm:text-sm font-bold">{opt.label}</div>
+                      <div className="text-xs sm:text-sm font-semibold">{opt.label}</div>
                       {opt.sublabel && (
-                        <div className="text-[11px] text-stone-500 mt-1">{opt.sublabel}</div>
+                        <div className="text-xs text-stone-500 mt-1 leading-relaxed">{opt.sublabel}</div>
                       )}
                     </button>
                   ))}
@@ -440,7 +625,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
 
               {/* Location */}
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
+                <label className="block text-xs font-semibold tracking-wider uppercase text-stone-700 mb-2">
                   4. Where in Nigeria are you based?
                 </label>
                 <select
@@ -450,7 +635,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
                     setBiodata({ ...biodata, location: e.target.value as NigerianRegion });
                     setValidationError(null);
                   }}
-                  className="w-full px-4 py-3 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                  className="w-full px-4 py-3 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-800"
                 >
                   <option value="">-- Choose your state or region --</option>
                   {REGION_OPTIONS.map((opt) => (
@@ -464,262 +649,154 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
           </div>
         )}
 
-        {/* Step 2: CONSTRAINTS */}
+        {/* Step 2: CONSTRAINTS - One Question at a time */}
         {currentStep === 2 && (
-          <div id="step-2-constraints" className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-200">
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold uppercase tracking-wider mb-2">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-                <span>Step 2 of 4: Your Tools & Time</span>
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
-                Your Phone, Laptop, and Light
-              </h1>
-              <p className="text-stone-600 text-sm sm:text-base mt-2">
-                Be real with us. We will only recommend skills that work with the tools and light you actually have today.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-stone-200 p-6 sm:p-8 shadow-xs space-y-7">
-              {/* Hardware Device */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
-                  1. What device will you use for daily learning?
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {DEVICE_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        setConstraints({ ...constraints, device: opt.value });
-                        setValidationError(null);
-                      }}
-                      className={`p-4 rounded-xl border text-left transition-all flex items-start gap-3.5 ${
-                        constraints.device === opt.value
-                          ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold ring-2 ring-emerald-600/20'
-                          : 'border-stone-200 bg-white hover:border-stone-300 text-stone-700'
-                      }`}
-                    >
-                      {opt.value === 'phone_only' ? (
-                        <Smartphone className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
-                      ) : (
-                        <Laptop className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
-                      )}
-                      <div>
-                        <div className="text-xs sm:text-sm font-bold">{opt.label}</div>
-                        <div className="text-[11px] text-stone-500 mt-1">{opt.sublabel}</div>
-                      </div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Time Available */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
-                  2. How much free time do you realistically have each week?
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  {TIME_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        setConstraints({ ...constraints, timeWeekly: opt.value });
-                        setValidationError(null);
-                      }}
-                      className={`p-3.5 rounded-xl border text-left transition-all ${
-                        constraints.timeWeekly === opt.value
-                          ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold ring-2 ring-emerald-600/20'
-                          : 'border-stone-200 bg-white hover:border-stone-300 text-stone-700'
-                      }`}
-                    >
-                      <div className="text-xs sm:text-sm font-bold">{opt.label}</div>
-                      <div className="text-[10px] text-stone-500 mt-1">{opt.sublabel}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Power & Internet Setup */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
-                  3. What is your power and data situation?
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {POWER_DATA_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        setConstraints({ ...constraints, powerData: opt.value });
-                        setValidationError(null);
-                      }}
-                      className={`p-4 rounded-xl border text-left transition-all ${
-                        constraints.powerData === opt.value
-                          ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold ring-2 ring-emerald-600/20'
-                          : 'border-stone-200 bg-white hover:border-stone-300 text-stone-700'
-                      }`}
-                    >
-                      <div className="text-xs sm:text-sm font-bold">{opt.label}</div>
-                      <div className="text-[11px] text-stone-500 mt-1">{opt.sublabel}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Coding Appetite */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
-                  4. How do you feel about writing code?
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {CODING_APPETITE_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        setConstraints({ ...constraints, codingAppetite: opt.value });
-                        setValidationError(null);
-                      }}
-                      className={`p-4 rounded-xl border text-left transition-all ${
-                        constraints.codingAppetite === opt.value
-                          ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold ring-2 ring-emerald-600/20'
-                          : 'border-stone-200 bg-white hover:border-stone-300 text-stone-700'
-                      }`}
-                    >
-                      <div className="text-xs sm:text-sm font-bold">{opt.label}</div>
-                      <div className="text-[11px] text-stone-500 mt-1">{opt.sublabel}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Earning Urgency */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700 mb-2">
-                  5. How soon do you want to start earning income?
-                </label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                  {EARNING_URGENCY_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        setConstraints({ ...constraints, earningUrgency: opt.value });
-                        setValidationError(null);
-                      }}
-                      className={`p-4 rounded-xl border text-left transition-all ${
-                        constraints.earningUrgency === opt.value
-                          ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold ring-2 ring-emerald-600/20'
-                          : 'border-stone-200 bg-white hover:border-stone-300 text-stone-700'
-                      }`}
-                    >
-                      <div className="text-xs sm:text-sm font-bold">{opt.label}</div>
-                      <div className="text-[11px] text-stone-500 mt-1">{opt.sublabel}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
+          <div id="step-2-constraints" className="animate-in fade-in duration-200">
+            <SingleQuestionCard
+              questionNumber={constraintSubIndex + 1}
+              totalQuestions={constraintQuestions.length}
+              stepNumber={2}
+              stepName="Your Setup & Time"
+              categoryBadge={constraintQuestions[constraintSubIndex].categoryBadge}
+              title={constraintQuestions[constraintSubIndex].title}
+              subtitle={constraintQuestions[constraintSubIndex].subtitle}
+              options={constraintQuestions[constraintSubIndex].options}
+              selectedValue={constraints[constraintQuestions[constraintSubIndex].field]}
+              onSelectOption={(val) => {
+                setConstraints(prev => ({ ...prev, [constraintQuestions[constraintSubIndex].field]: val as string }));
+                setValidationError(null);
+              }}
+              onNext={() => {
+                const currentVal = constraints[constraintQuestions[constraintSubIndex].field];
+                if (!currentVal) {
+                  setValidationError('Please select an option to continue.');
+                  return;
+                }
+                setValidationError(null);
+                if (constraintSubIndex < constraintQuestions.length - 1) {
+                  setConstraintSubIndex(prev => prev + 1);
+                } else {
+                  // Final question in constraints
+                  if (!constraints.device || !constraints.timeWeekly || !constraints.powerData || !constraints.codingAppetite || !constraints.earningUrgency) {
+                    setValidationError('Please answer all 5 questions about your device, time, and power setup.');
+                    return;
+                  }
+                  setActiveSectionIntro(3);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }}
+              onPrev={() => {
+                setValidationError(null);
+                if (constraintSubIndex > 0) {
+                  setConstraintSubIndex(prev => prev - 1);
+                } else {
+                  setActiveSectionIntro(2);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }}
+              isFirst={constraintSubIndex === 0}
+              isLast={constraintSubIndex === constraintQuestions.length - 1}
+              nextButtonLabel={constraintSubIndex === constraintQuestions.length - 1 ? 'Complete Section 2' : 'Next Question'}
+              prevButtonLabel={constraintSubIndex === 0 ? 'Section 2 Overview' : 'Previous Question'}
+              answeredIndices={constraintQuestions.map(q => Boolean(constraints[q.field]))}
+              onJumpToQuestion={(idx) => {
+                setValidationError(null);
+                setConstraintSubIndex(idx);
+              }}
+              autoAdvanceOnSelect={true}
+            />
           </div>
         )}
 
-        {/* Step 3: SCENARIOS */}
+        {/* Step 3: SCENARIOS - One Question at a time */}
         {currentStep === 3 && (
-          <div id="step-3-scenarios" className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-200">
-            <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold uppercase tracking-wider mb-2">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
-                <span>Step 3 of 4: What You Like</span>
-              </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
-                What feels natural or fun for you?
-              </h1>
-              <p className="text-stone-600 text-sm sm:text-base mt-2">
-                No tech jargon! Pick what you actually enjoy doing. There is no right or wrong answer.
-              </p>
-            </div>
-
-            <div className="space-y-6">
-              {SCENARIO_QUESTIONS.map((q, idx) => (
-                <div key={q.id} className="bg-white rounded-2xl border border-stone-200 p-6 sm:p-7 shadow-xs space-y-4">
-                  <div className="flex items-center gap-2.5">
-                    <span className="w-6 h-6 rounded-full bg-emerald-100 text-emerald-800 flex items-center justify-center text-xs font-bold">
-                      {idx + 1}
-                    </span>
-                    <span className="text-xs font-bold uppercase tracking-wider text-emerald-800">
-                      {q.title}
-                    </span>
-                  </div>
-                  
-                  <p className="text-sm sm:text-base text-stone-800 font-semibold leading-relaxed">
-                    {q.scenario}
-                  </p>
-
-                  <div className="space-y-2.5 pt-1">
-                    {q.options.map((opt, optIdx) => {
-                      const isSelected = scenarioAnswers[q.id] === optIdx;
-                      return (
-                        <button
-                          key={optIdx}
-                          type="button"
-                          onClick={() => {
-                            setScenarioAnswers({ ...scenarioAnswers, [q.id]: optIdx });
-                            setValidationError(null);
-                          }}
-                          className={`w-full p-4 rounded-xl border text-left transition-all flex items-start gap-3 ${
-                            isSelected
-                              ? 'border-emerald-600 bg-emerald-50 text-emerald-950 font-bold ring-2 ring-emerald-600/20'
-                              : 'border-stone-200 bg-stone-50/50 hover:bg-white hover:border-stone-300 text-stone-700'
-                          }`}
-                        >
-                          <div className={`w-5 h-5 rounded-full border flex items-center justify-center shrink-0 mt-0.5 ${
-                            isSelected ? 'border-emerald-600 bg-emerald-600 text-white' : 'border-stone-300 bg-white'
-                          }`}>
-                            {isSelected && <Check className="w-3 h-3 stroke-[3]" />}
-                          </div>
-                          <div>
-                            <div className="text-xs sm:text-sm font-semibold text-stone-900">{opt.text}</div>
-                            <div className="text-xs text-stone-500 font-normal mt-1 leading-relaxed">{opt.description}</div>
-                          </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                </div>
-              ))}
-            </div>
+          <div id="step-3-scenarios" className="animate-in fade-in duration-200">
+            <SingleQuestionCard
+              questionNumber={scenarioSubIndex + 1}
+              totalQuestions={SCENARIO_QUESTIONS.length}
+              stepNumber={3}
+              stepName="Cognitive Style"
+              categoryBadge={SCENARIO_QUESTIONS[scenarioSubIndex].category}
+              title={SCENARIO_QUESTIONS[scenarioSubIndex].title}
+              subtitle={SCENARIO_QUESTIONS[scenarioSubIndex].scenario}
+              options={SCENARIO_QUESTIONS[scenarioSubIndex].options.map((opt, optIdx) => ({
+                value: optIdx,
+                label: opt.text,
+                sublabel: opt.description
+              }))}
+              selectedValue={scenarioAnswers[SCENARIO_QUESTIONS[scenarioSubIndex].id]}
+              onSelectOption={(val) => {
+                setScenarioAnswers(prev => ({ ...prev, [SCENARIO_QUESTIONS[scenarioSubIndex].id]: Number(val) }));
+                setValidationError(null);
+              }}
+              onNext={() => {
+                const currentAnswer = scenarioAnswers[SCENARIO_QUESTIONS[scenarioSubIndex].id];
+                if (currentAnswer === undefined) {
+                  setValidationError('Please select an option to continue.');
+                  return;
+                }
+                setValidationError(null);
+                if (scenarioSubIndex < SCENARIO_QUESTIONS.length - 1) {
+                  setScenarioSubIndex(prev => prev + 1);
+                } else {
+                  // Check if all scenario questions are answered
+                  const answeredAll = SCENARIO_QUESTIONS.every(q => scenarioAnswers[q.id] !== undefined);
+                  if (!answeredAll) {
+                    setValidationError(`Please answer all ${SCENARIO_QUESTIONS.length} questions.`);
+                    return;
+                  }
+                  setActiveSectionIntro(4);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }}
+              onPrev={() => {
+                setValidationError(null);
+                if (scenarioSubIndex > 0) {
+                  setScenarioSubIndex(prev => prev - 1);
+                } else {
+                  setActiveSectionIntro(3);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }}
+              isFirst={scenarioSubIndex === 0}
+              isLast={scenarioSubIndex === SCENARIO_QUESTIONS.length - 1}
+              nextButtonLabel={scenarioSubIndex === SCENARIO_QUESTIONS.length - 1 ? 'Complete Section 3' : 'Next Question'}
+              prevButtonLabel={scenarioSubIndex === 0 ? 'Section 3 Overview' : 'Previous Question'}
+              answeredIndices={SCENARIO_QUESTIONS.map(q => scenarioAnswers[q.id] !== undefined)}
+              onJumpToQuestion={(idx) => {
+                setValidationError(null);
+                setScenarioSubIndex(idx);
+              }}
+              autoAdvanceOnSelect={true}
+            />
           </div>
         )}
 
         {/* Step 4: QUALITATIVE NUANCE */}
         {currentStep === 4 && (
-          <div id="step-4-nuance" className="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-200">
+          <div id="step-4-nuance" className="space-y-6 animate-in fade-in duration-200">
             <div>
-              <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold uppercase tracking-wider mb-2">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
-                <span>Step 4 of 4: Final Touch</span>
+              <div className="text-xs font-mono font-semibold tracking-wider uppercase text-emerald-800 mb-2">
+                Step 04 of 04 · Personal Voice & Proof
               </div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-stone-900 tracking-tight">
-                Almost done! One last question
+              <h1 className="font-serif-display text-3xl sm:text-4xl text-stone-900 font-normal tracking-tight leading-tight">
+                Almost done: one personal reflection
               </h1>
-              <p className="text-stone-600 text-sm sm:text-base mt-2">
-                Tell us a bit about what you like so we can craft your personalized Day-One task.
+              <p className="text-stone-600 text-sm sm:text-base mt-2 max-w-xl leading-relaxed font-sans">
+                Tell us a problem you solved or personal strength so we can tailor your Day-One proof project.
               </p>
             </div>
 
-            <div className="bg-white rounded-2xl border border-stone-200 p-6 sm:p-8 shadow-xs space-y-6">
+            <div className="bg-white rounded-2xl border border-stone-200/90 p-6 sm:p-9 shadow-[0_4px_24px_-6px_rgba(0,0,0,0.05)] space-y-7">
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="block text-xs font-bold uppercase tracking-wider text-stone-800">
-                    1. Tell us one cool thing you fixed, arranged, or helped someone with recently{' '}
-                    <span className="text-rose-600 font-bold ml-1">* (Compulsory)</span>
+                  <label className="block text-xs font-semibold tracking-wider uppercase text-stone-800">
+                    1. Tell us one thing you fixed, arranged, or helped someone with recently{' '}
+                    <span className="text-rose-600 font-medium ml-1">* (required)</span>
                   </label>
                 </div>
-                <p className="text-xs text-stone-500">
-                  Doesn't have to be tech! Could be planning an event, fixing someone's phone problem, making a short video, organizing orders on WhatsApp, or balancing a budget.
+                <p className="text-xs text-stone-500 leading-relaxed">
+                  Doesn't have to be tech! Could be planning an event, troubleshooting a phone issue, editing a short video, organizing orders on WhatsApp, or keeping accounts.
                 </p>
                 <textarea
                   id="qualitative-achievement-input"
@@ -730,31 +807,31 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
                     setQualitative({ ...qualitative, proudAchievement: e.target.value });
                     if (validationError) setValidationError(null);
                   }}
-                  placeholder="e.g., I helped organize orders for a friend's bake shop with a Google Sheet and WhatsApp..."
-                  className={`w-full p-4 rounded-xl border bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:bg-white transition-all ${
+                  placeholder="e.g., I helped organize customer orders for a friend's bake shop using Google Sheets and WhatsApp..."
+                  className={`w-full p-4 rounded-xl border bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:bg-white transition-all placeholder:text-stone-400 ${
                     validationError && !qualitative.proudAchievement.trim()
                       ? 'border-rose-400 focus:ring-rose-500 bg-rose-50/30'
-                      : 'border-stone-300 focus:ring-emerald-600'
+                      : 'border-stone-300 focus:ring-emerald-800'
                   }`}
                 ></textarea>
                 <p className="text-[11px] text-stone-400">
                   {qualitative.proudAchievement.trim().length > 0 ? (
-                    <span className="text-emerald-700 font-medium">✓ Thank you! This helps us personalize your Day-One mission.</span>
+                    <span className="text-emerald-800 font-medium">✓ Saved. This will shape your Day-One mission.</span>
                   ) : (
-                    <span>This response is required before you can view your career match.</span>
+                    <span>Please enter a brief sentence to continue.</span>
                   )}
                 </p>
               </div>
 
               <div className="space-y-2">
-                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700">
-                  2. What kind of industry or topic sounds exciting to you? (Optional)
+                <label className="block text-xs font-semibold tracking-wider uppercase text-stone-700">
+                  2. What kind of industry or topic sounds exciting to you? <span className="text-stone-400 font-normal lowercase">(optional)</span>
                 </label>
                 <select
                   id="qualitative-industry-select"
                   value={qualitative.targetIndustry}
                   onChange={(e) => setQualitative({ ...qualitative, targetIndustry: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600"
+                  className="w-full px-4 py-3 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-800"
                 >
                   <option value="">-- Pick an area that interests you (Optional) --</option>
                   <option value="Software & SaaS Platforms">Software & Cloud Tech (Web apps, SaaS platforms, developer tools)</option>
@@ -770,14 +847,14 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               </div>
 
               <div className="space-y-2">
-                <label className="block text-xs font-bold uppercase tracking-wider text-stone-700">
-                  3. Which day-to-day task sounds most appealing to you? (Optional)
+                <label className="block text-xs font-semibold tracking-wider uppercase text-stone-700">
+                  3. Which day-to-day task sounds most appealing to you? <span className="text-stone-400 font-normal lowercase">(optional)</span>
                 </label>
                 <select
                   id="qualitative-activity-select"
                   value={qualitative.preferredDailyActivity || ''}
                   onChange={(e) => setQualitative({ ...qualitative, preferredDailyActivity: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-600 font-medium"
+                  className="w-full px-4 py-3 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-800 font-medium"
                 >
                   <option value="">-- Choose what kind of day-to-day work you enjoy most --</option>
                   <optgroup label="💻 Software Building & Coding (High Variety)">
@@ -807,8 +884,8 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-xs sm:text-sm text-emerald-900 flex items-center gap-3">
-                <ShieldCheck className="w-5 h-5 text-emerald-700 shrink-0" />
+              <div className="p-4 rounded-xl bg-stone-100/70 border border-stone-200 text-xs sm:text-sm text-stone-700 flex items-center gap-3">
+                <ShieldCheck className="w-5 h-5 text-emerald-800 shrink-0" />
                 <span>All set! Click below to see your realistic tech career match and Day-One roadmap.</span>
               </div>
             </div>
@@ -817,7 +894,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
 
         {/* Step 5: DIAGNOSIS RESULT */}
         {currentStep === 5 && diagnosisResult && (
-          <div id="step-5-result" className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
+          <div id="step-5-result" className="space-y-6 animate-in fade-in duration-300">
             <DiagnosisResult
               result={diagnosisResult}
               onRetake={handleRetake}
@@ -830,20 +907,20 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
 
         {/* Validation Alert */}
         {currentStep < 5 && validationError && (
-          <div className="mt-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm font-semibold flex items-center gap-2.5 animate-in fade-in slide-in-from-top-1">
+          <div className="mt-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm font-medium flex items-center gap-2.5 animate-in fade-in">
             <AlertCircle className="w-5 h-5 text-amber-700 shrink-0" />
             <span>{validationError}</span>
           </div>
         )}
 
-        {/* Form Page Navigation Buttons */}
-        {currentStep < 5 && (
-          <div className="mt-8 pt-6 border-t border-stone-200 flex items-center justify-between">
+        {/* Form Page Navigation Buttons for Step 1 and Step 4 */}
+        {(currentStep === 1 || currentStep === 4) && (
+          <div className="mt-8 pt-6 border-t border-stone-200/80 flex items-center justify-between">
             {currentStep > 1 ? (
               <button
                 type="button"
                 onClick={handlePrevStep}
-                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl border border-stone-300 bg-white text-stone-700 text-xs sm:text-sm font-semibold hover:bg-stone-50 transition-colors"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-600 text-xs sm:text-sm font-medium hover:bg-stone-50 hover:text-stone-900 transition-colors"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Previous Step</span>
@@ -862,12 +939,15 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               id="assessment-page-next-btn"
               type="button"
               onClick={handleNextStep}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-700 text-white text-xs sm:text-sm font-bold hover:bg-emerald-800 active:scale-[0.99] transition-all shadow-sm"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-800 text-white text-xs sm:text-sm font-semibold hover:bg-emerald-900 active:scale-[0.99] transition-all shadow-sm cursor-pointer"
             >
               <span>{currentStep === 4 ? 'See My Career Match' : 'Continue to Next Step'}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
+        )}
+
+          </>
         )}
 
       </main>

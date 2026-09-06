@@ -541,7 +541,7 @@ export const ALL_NICHES: PathwayNiche[] = [
         name: 'Roadmap.sh: Backend Developer Visual Guide',
         url: 'https://roadmap.sh/backend',
         type: 'doc',
-        description: 'Clear visual checklist of what to learn next — from server basics and relational databases to deploying on the cloud.',
+        description: 'Clear visual checklist of what to learn next, from server basics and relational databases to deploying on the cloud.',
         lowDataFriendly: true
       },
       {
@@ -561,7 +561,7 @@ export const ALL_NICHES: PathwayNiche[] = [
     deviceRequirement: 'laptop_required',
     supportedOnPhone: false,
     imageUrl: 'https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&w=800&q=80',
-    shortTagline: 'Build complete web platforms end-to-end—from sleek user interfaces to robust database backends',
+    shortTagline: 'Build complete web platforms end-to-end, connecting sleek user interfaces with robust database backends',
     description: 'Full-stack engineers have the versatile superpower to build entire digital products from scratch. They seamlessly connect React / Next.js client frontends with Node/Python backend APIs, database schemas, and cloud deployment.',
     timeCommitment: '15-20 hrs/week',
     earningHorizon: '6-9 months',

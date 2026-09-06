@@ -117,7 +117,7 @@ export const SCENARIO_QUESTIONS: ScenarioQuestion[] = [
       },
       {
         text: 'Server timeouts, failed bank transfers, or slow backend API errors',
-        description: 'The app freezing on "Processing payment...", database connection errors, or backend crashes.',
+        description: 'The app freezing on "Processing payment...", database connection errors, or backend crashes (APIs are the digital messengers that connect apps to bank servers).',
         weights: { logicalStructural: 5, securityCuriosity: 4, analyticalDetail: 3 }
       },
       {
@@ -145,7 +145,7 @@ export const SCENARIO_QUESTIONS: ScenarioQuestion[] = [
       },
       {
         text: 'A working backend REST API, database schema, or secure server script',
-        description: 'Building server endpoints and database tables that process data accurately and handle thousands of requests.',
+        description: 'Building server endpoints and database tables that process transactions accurately (an API works like a digital waiter delivering requests to the kitchen/database).',
         weights: { logicalStructural: 5, analyticalDetail: 5, securityCuriosity: 3 }
       },
       {
@@ -233,39 +233,6 @@ export const SCENARIO_QUESTIONS: ScenarioQuestion[] = [
         text: 'Organize client orders, appointment calendars, and customer service messaging',
         description: 'Manage the day-to-day administrative flow so customer requests never get lost.',
         weights: { organizationOps: 5, peopleCommunication: 4 }
-      }
-    ]
-  },
-  {
-    id: 'scenario-tech-curiosity',
-    category: 'Curiosity Trigger',
-    title: 'What makes you wonder "How does that work?"',
-    scenario: 'When you encounter impressive modern technology, which dimension fascinates you the most?',
-    options: [
-      {
-        text: 'How interactive website screens and animations look so fluid and responsive',
-        description: 'The frontend code, CSS transitions, and component magic that make web layouts feel effortless.',
-        weights: { visualCreative: 5, logicalStructural: 4, peopleCommunication: 2 }
-      },
-      {
-        text: 'How cloud servers and backend APIs process millions of transactions in milliseconds',
-        description: 'The database indexing, server clustering, and API architectures running in the background.',
-        weights: { logicalStructural: 5, analyticalDetail: 5, securityCuriosity: 4 }
-      },
-      {
-        text: 'How a software engineer builds a complete SaaS platform from database to browser',
-        description: 'The full-stack integration connecting Next.js frontends to PostgreSQL cloud databases.',
-        weights: { logicalStructural: 5, organizationOps: 4, visualCreative: 3 }
-      },
-      {
-        text: 'How financial apps prevent fraud, secure passwords, and stop hacker attacks',
-        description: 'The security shields and verification layers protecting user data and bank vaults.',
-        weights: { securityCuriosity: 5, analyticalDetail: 4, logicalStructural: 3 }
-      },
-      {
-        text: 'How algorithms calculate predictions, analyze trends, and visualize insights',
-        description: 'The mathematics and data models turning raw user clicks into valuable business intelligence.',
-        weights: { analyticalDetail: 5, logicalStructural: 4 }
       }
     ]
   },

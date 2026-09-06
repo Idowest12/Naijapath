@@ -47,27 +47,10 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return (
-    <header id="site-header" className="sticky top-0 z-50 bg-stone-50/95 backdrop-blur-md border-b border-stone-200/80">
-      {/* Context Top Banner */}
-      <div id="top-context-banner" className="bg-emerald-900 text-emerald-100 text-xs py-1.5 px-4">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-            <p className="font-medium tracking-tight">
-              <span className="font-bold">Naija Tech Guide:</span> Tailored for young Nigerians & career switchers
-            </p>
-          </div>
-          <div className="hidden sm:flex items-center gap-3 text-emerald-200/90 text-[11px]">
-            <span className="flex items-center gap-1">
-              <Laptop className="w-3.5 h-3.5" /> 100% Free learning resources
-            </span>
-          </div>
-        </div>
-      </div>
-
+    <header id="site-header" className="sticky top-0 z-40 bg-stone-50/95 backdrop-blur-md border-b border-stone-200/90 transition-all">
       {/* Main Navigation Bar */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20">
+        <div className="flex items-center justify-between h-18 sm:h-20">
           
           {/* Logo & Brand Identity */}
           <div className="flex items-center gap-3">
@@ -75,22 +58,24 @@ export const Header: React.FC<HeaderProps> = ({
               id="brand-logo-link" 
               href="#" 
               onClick={handleLogoClick}
-              className="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600 rounded-lg p-1"
+              className="flex items-center gap-3 group focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-800 rounded-lg py-1"
             >
-              <div className="w-10 h-10 rounded-xl bg-emerald-700 text-white flex items-center justify-center shadow-sm group-hover:bg-emerald-800 transition-colors">
-                <Compass className="w-5 h-5 text-emerald-100 transition-transform group-hover:rotate-45" />
+              <div className="w-10 h-10 rounded-xl bg-emerald-900 text-emerald-100 flex items-center justify-center shadow-xs group-hover:bg-emerald-800 transition-colors shrink-0">
+                <Compass className="w-5 h-5 transition-transform duration-300 group-hover:rotate-45" />
               </div>
               <div className="flex flex-col">
-                <span className="text-lg font-bold tracking-tight text-stone-900 leading-tight">
+                <span className="font-serif-display text-xl sm:text-2xl text-stone-900 font-normal tracking-tight leading-tight">
                   Naija Tech Guide
                 </span>
-                <span className="text-xs text-stone-500 font-normal">Real tech niches for real constraints</span>
+                <span className="text-[11px] sm:text-xs text-stone-500 font-sans tracking-wide">
+                  Practical pathways for real constraints
+                </span>
               </div>
             </a>
           </div>
 
           {/* Desktop Nav Links */}
-          <nav id="desktop-navigation" aria-label="Main Navigation" className="hidden md:flex items-center gap-1 lg:gap-2">
+          <nav id="desktop-navigation" aria-label="Main Navigation" className="hidden md:flex items-center gap-1 lg:gap-1.5">
             {NAV_ITEMS.map((item) => (
               <a
                 key={item.id}
@@ -100,7 +85,7 @@ export const Header: React.FC<HeaderProps> = ({
                   e.preventDefault();
                   handleNavClick(item.href);
                 }}
-                className="px-3 py-2 rounded-lg text-sm font-medium text-stone-700 hover:text-emerald-800 hover:bg-stone-100 transition-colors"
+                className="px-3.5 py-2 rounded-lg text-sm font-medium text-stone-600 hover:text-stone-900 hover:bg-stone-100/80 transition-colors"
               >
                 {item.label}
               </a>
@@ -117,14 +102,11 @@ export const Header: React.FC<HeaderProps> = ({
                   trackClick('header_open_chatbot_btn', 'Ask Naija AI', 'AI Mentor');
                   onOpenChatbot();
                 }}
-                className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-stone-300 text-stone-800 text-sm font-semibold hover:border-emerald-600 hover:text-emerald-800 hover:bg-emerald-50/50 active:scale-[0.99] transition-all shadow-2xs"
+                className="inline-flex items-center gap-2 px-3.5 py-2.5 rounded-xl bg-white border border-stone-200 text-stone-700 text-xs sm:text-sm font-medium hover:border-stone-300 hover:text-stone-900 hover:bg-stone-50 active:scale-[0.99] transition-all cursor-pointer"
                 title="Chat with Tizzi, our Naija Tech AI Mentor"
               >
-                <div className="relative flex items-center justify-center">
-                  <Bot className="w-4 h-4 text-emerald-700" />
-                  <span className="absolute -top-0.5 -right-0.5 w-2 h-2 bg-emerald-500 rounded-full animate-ping"></span>
-                </div>
-                <span>Ask Naija AI</span>
+                <Bot className="w-4 h-4 text-emerald-800" />
+                <span>Ask Mentor Tizzi</span>
               </button>
             )}
 
@@ -135,11 +117,10 @@ export const Header: React.FC<HeaderProps> = ({
                 trackClick('header_start_assessment_btn', 'Find Your Niche', 'CTA');
                 onStartAssessment?.();
               }}
-              className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-emerald-700 text-white text-sm font-semibold hover:bg-emerald-800 active:scale-[0.99] transition-all shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-600"
+              className="inline-flex items-center gap-2 px-4.5 py-2.5 rounded-xl bg-emerald-800 text-white text-xs sm:text-sm font-semibold hover:bg-emerald-900 active:scale-[0.99] transition-all shadow-xs focus:outline-none focus-visible:ring-2 focus-visible:ring-emerald-800 cursor-pointer"
             >
-              <Sparkles className="w-4 h-4 text-emerald-200" />
-              <span>Find Your Niche</span>
-              <ArrowRight className="w-4 h-4 text-emerald-200" />
+              <span>Take Assessment</span>
+              <ArrowRight className="w-3.5 h-3.5 text-emerald-200" />
             </button>
           </div>
 
@@ -151,9 +132,9 @@ export const Header: React.FC<HeaderProps> = ({
               aria-label="Toggle Navigation Menu"
               aria-expanded={mobileMenuOpen}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2.5 rounded-lg text-stone-700 hover:text-stone-900 hover:bg-stone-100 active:bg-stone-200 transition-colors"
+              className="p-2.5 rounded-xl text-stone-700 hover:text-stone-900 hover:bg-stone-100 transition-colors cursor-pointer"
             >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+              {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
           </div>
         </div>
@@ -163,7 +144,7 @@ export const Header: React.FC<HeaderProps> = ({
       {mobileMenuOpen && (
         <div 
           id="mobile-navigation-drawer" 
-          className="md:hidden border-t border-stone-200 bg-stone-50 px-4 pt-3 pb-6 space-y-2 animate-in fade-in slide-in-from-top-2 duration-150"
+          className="md:hidden border-t border-stone-200/80 bg-stone-50 px-4 pt-3 pb-6 space-y-2 animate-in fade-in duration-150"
         >
           <div className="space-y-1">
             {NAV_ITEMS.map((item) => (
@@ -175,7 +156,7 @@ export const Header: React.FC<HeaderProps> = ({
                   e.preventDefault();
                   handleNavClick(item.href);
                 }}
-                className="block px-3 py-2.5 rounded-lg text-base font-medium text-stone-800 hover:bg-stone-100 hover:text-emerald-800 transition-colors"
+                className="block px-3 py-2.5 rounded-lg text-sm font-medium text-stone-800 hover:bg-stone-100 transition-colors"
               >
                 {item.label}
               </a>
@@ -190,10 +171,10 @@ export const Header: React.FC<HeaderProps> = ({
                   setMobileMenuOpen(false);
                   onOpenChatbot();
                 }}
-                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-stone-300 text-stone-800 font-semibold shadow-2xs active:bg-stone-50"
+                className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-stone-200 text-stone-800 text-sm font-medium shadow-2xs active:bg-stone-50 cursor-pointer"
               >
-                <Bot className="w-4 h-4 text-emerald-700" />
-                <span>Ask Naija AI Mentor (Tizzi)</span>
+                <Bot className="w-4 h-4 text-emerald-800" />
+                <span>Ask Mentor Tizzi (AI)</span>
               </button>
             )}
             <button
@@ -203,10 +184,9 @@ export const Header: React.FC<HeaderProps> = ({
                 setMobileMenuOpen(false);
                 onStartAssessment?.();
               }}
-              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-700 text-white font-semibold shadow-sm active:bg-emerald-800"
+              className="w-full flex items-center justify-center gap-2 px-4 py-3 rounded-xl bg-emerald-800 text-white text-sm font-semibold shadow-xs active:bg-emerald-900 cursor-pointer"
             >
-              <Sparkles className="w-4 h-4 text-emerald-200" />
-              <span>Find Your Niche (3-Min Quiz)</span>
+              <span>Take 3-Minute Assessment</span>
               <ArrowRight className="w-4 h-4 text-emerald-200" />
             </button>
           </div>

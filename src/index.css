@@ -1,1 +1,8 @@
 @import "tailwindcss";
+
+@layer utilities {
+  .font-serif-display {
+    font-family: 'Fraunces', Georgia, serif;
+    font-optical-sizing: auto;
+  }
+}
