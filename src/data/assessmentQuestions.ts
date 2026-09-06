@@ -40,35 +40,35 @@ export interface ScenarioQuestion {
 }
 
 export const AGE_BAND_OPTIONS: BiodataQuestionOption<AgeBand>[] = [
-  { value: 'under_18', label: 'Under 18', sublabel: 'Secondary school or just starting out' },
-  { value: '18_22', label: '18 - 22', sublabel: 'Uni student or fresh school leaver' },
-  { value: '23_27', label: '23 - 27', sublabel: 'Graduate, job seeker, or starting early career' },
-  { value: '28_34', label: '28 - 34', sublabel: 'Switching from another career into tech' },
-  { value: '35_plus', label: '35+', sublabel: 'Experienced worker learning digital skills' },
+  { value: 'under_18', label: 'Under 18', sublabel: 'Secondary school student or just discovering tech' },
+  { value: '18_22', label: '18 – 22', sublabel: 'In uni, polytechnic, or fresh school leaver' },
+  { value: '23_27', label: '23 – 27', sublabel: 'Recent graduate, serving (NYSC), or early in work' },
+  { value: '28_34', label: '28 – 34', sublabel: 'Switching career or adding high-paying tech skills' },
+  { value: '35_plus', label: '35 and above', sublabel: 'Experienced professional or parent learning digital skills' },
 ];
 
 export const GENDER_OPTIONS: BiodataQuestionOption<Gender>[] = [
-  { value: 'female', label: 'Female', sublabel: 'Unlocks female-in-tech grants & communities' },
+  { value: 'female', label: 'Female', sublabel: 'Unlocks female-in-tech grants & fellowships' },
   { value: 'male', label: 'Male' },
   { value: 'prefer_not_to_say', label: 'Prefer not to say' },
 ];
 
 export const STATUS_OPTIONS: BiodataQuestionOption<CurrentStatus>[] = [
-  { value: 'student_undergrad', label: 'Student in School', sublabel: 'Balancing school lectures, tests & exams' },
-  { value: 'unemployed_grad', label: 'Recent Graduate / Looking for Work', sublabel: 'Free time and ready to learn skills for income' },
-  { value: 'working_non_tech', label: 'Working a 9-to-5 (Non-Tech)', sublabel: 'Working in bank, sales, teaching, admin, etc.' },
-  { value: 'self_employed', label: 'Business Owner / Hustling', sublabel: 'Running my own business or trade' },
-  { value: 'secondary_school', label: 'Finished Secondary School', sublabel: 'Awaiting admission or exploring tech first' },
+  { value: 'student_undergrad', label: 'Student in School', sublabel: 'Juggling lectures, assignments, and campus life' },
+  { value: 'unemployed_grad', label: 'Recent Graduate / Job Hunting', sublabel: 'Done with school or NYSC, ready to build income' },
+  { value: 'working_non_tech', label: 'Working a 9-to-5 (Non-Tech)', sublabel: 'In banking, teaching, sales, or civil service — looking to pivot' },
+  { value: 'self_employed', label: 'Business Owner / Hustling', sublabel: 'Running my own trade or business, wanting tech leverage' },
+  { value: 'secondary_school', label: 'Finished Secondary School', sublabel: 'Waiting for JAMB/admission or exploring tech first' },
 ];
 
 export const REGION_OPTIONS: BiodataQuestionOption<NigerianRegion>[] = [
-  { value: 'lagos', label: 'Lagos State', sublabel: 'Most tech hubs and community events' },
-  { value: 'abuja', label: 'Abuja / FCT', sublabel: 'Growing tech community and hubs' },
-  { value: 'south_west', label: 'South-West (Oyo, Ogun, Osun, Ondo, Ekiti)' },
-  { value: 'south_south', label: 'South-South (Rivers, Edo, Delta, etc.)' },
-  { value: 'south_east', label: 'South-East (Enugu, Anambra, Imo, etc.)' },
-  { value: 'north', label: 'Northern States (Kaduna, Kano, Jos, etc.)' },
-  { value: 'outside_nigeria', label: 'Outside Nigeria / Abroad' },
+  { value: 'lagos', label: 'Lagos State (Yaba, Ikeja, Lekki & major hubs)' },
+  { value: 'abuja', label: 'Abuja / FCT (Central tech ecosystem & hubs)' },
+  { value: 'south_west', label: 'South-West (Oyo / Ibadan, Ogun, Osun, Ondo, Ekiti)' },
+  { value: 'south_south', label: 'South-South (Rivers / Port Harcourt, Edo / Benin, Delta, etc.)' },
+  { value: 'south_east', label: 'South-East (Enugu, Anambra, Imo, Abia, Ebonyi)' },
+  { value: 'north', label: 'Northern States (Kaduna, Kano, Jos / Plateau, etc.)' },
+  { value: 'outside_nigeria', label: 'Living outside Nigeria / Abroad' },
 ];
 
 export const DEVICE_OPTIONS: BiodataQuestionOption<DeviceType>[] = [

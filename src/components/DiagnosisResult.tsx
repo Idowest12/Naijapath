@@ -107,45 +107,45 @@ Take the 3-minute honest assessment: ${window.location.origin}`;
     <div id="diagnosis-result-container" className="space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-200">
       
       {/* 2-Option Pathway Selector & Priority Indicator */}
-      <div className="bg-stone-900 text-white rounded-3xl p-4 sm:p-6 border border-stone-800 shadow-md">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+      <div className="bg-[#18201a] text-stone-100 rounded-3xl p-5 sm:p-7 border border-[#263228] shadow-lg">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
           <div>
-            <span className="text-xs uppercase font-bold tracking-widest text-emerald-400">
-              Dual Matched Pathways
+            <span className="text-xs font-mono font-medium uppercase tracking-wider text-emerald-300/90">
+              Calibrated Recommendations
             </span>
-            <h3 className="text-base sm:text-lg font-bold text-stone-100">
-              Your Top 2 Calibrated Career Options
+            <h3 className="font-serif-display text-xl sm:text-2xl font-normal text-white mt-0.5">
+              Your Top 2 Matched Career Pathways
             </h3>
           </div>
-          <span className="text-xs text-stone-400">
-            Click an option below to view its specific action plan & roadmap
+          <span className="text-xs text-stone-300 font-sans">
+            Click an option below to switch the roadmap and day-one task
           </span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
           {/* Option 1: Priority #1 */}
           <button
             type="button"
             onClick={() => setActiveOption('primary')}
-            className={`p-4 rounded-2xl border text-left transition-all ${
+            className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
               activeOption === 'primary'
-                ? 'bg-emerald-950/80 border-emerald-500 shadow-sm ring-1 ring-emerald-500/50'
-                : 'bg-stone-800/80 border-stone-700 hover:border-stone-600 text-stone-300'
+                ? 'bg-[#222c24] border-emerald-600 shadow-sm ring-1 ring-emerald-600/50'
+                : 'bg-[#1c241e] border-[#29352c] hover:border-stone-600 text-stone-300'
             }`}
           >
-            <div className="flex items-center justify-between gap-2 mb-1.5">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-500 text-emerald-950 text-[11px] font-black uppercase tracking-wider">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-700 text-white text-[11px] font-mono font-medium uppercase tracking-wider">
                 <Sparkles className="w-3 h-3 fill-current" />
                 Priority #1 (Top Match)
               </span>
-              <span className="text-lg font-black text-emerald-400">
+              <span className="text-lg font-bold font-mono text-emerald-300">
                 {matchScore}%
               </span>
             </div>
-            <div className="font-bold text-white text-base">
+            <div className="font-serif-display text-lg text-white font-normal">
               {primaryNiche.title}
             </div>
-            <p className="text-xs text-stone-400 mt-1 line-clamp-1">
+            <p className="text-xs text-stone-300 mt-1 line-clamp-1 font-sans">
               {primaryNiche.shortTagline}
             </p>
           </button>
@@ -154,25 +154,25 @@ Take the 3-minute honest assessment: ${window.location.origin}`;
           <button
             type="button"
             onClick={() => setActiveOption('secondary')}
-            className={`p-4 rounded-2xl border text-left transition-all ${
+            className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
               activeOption === 'secondary'
-                ? 'bg-emerald-950/80 border-emerald-500 shadow-sm ring-1 ring-emerald-500/50'
-                : 'bg-stone-800/80 border-stone-700 hover:border-stone-600 text-stone-300'
+                ? 'bg-[#222c24] border-emerald-600 shadow-sm ring-1 ring-emerald-600/50'
+                : 'bg-[#1c241e] border-[#29352c] hover:border-stone-600 text-stone-300'
             }`}
           >
-            <div className="flex items-center justify-between gap-2 mb-1.5">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-stone-700 text-stone-200 text-[11px] font-bold uppercase tracking-wider">
+            <div className="flex items-center justify-between gap-2 mb-2">
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-stone-800 text-stone-200 text-[11px] font-mono font-medium uppercase tracking-wider border border-stone-700/60">
                 <Target className="w-3 h-3 text-stone-300" />
                 Alternative Pathway
               </span>
-              <span className="text-lg font-black text-emerald-400">
+              <span className="text-lg font-bold font-mono text-emerald-300">
                 {secondaryMatchScore}%
               </span>
             </div>
-            <div className="font-bold text-white text-base">
+            <div className="font-serif-display text-lg text-white font-normal">
               {secondaryNiche.title}
             </div>
-            <p className="text-xs text-stone-400 mt-1 line-clamp-1">
+            <p className="text-xs text-stone-300 mt-1 line-clamp-1 font-sans">
               {secondaryNiche.shortTagline}
             </p>
           </button>
@@ -180,22 +180,22 @@ Take the 3-minute honest assessment: ${window.location.origin}`;
 
         {/* Priority Verdict Box */}
         {priorityComparison && (
-          <div className="mt-4 pt-4 border-t border-stone-800/80 space-y-2.5 text-xs">
-            <div className="flex items-center gap-2 text-emerald-400 font-bold uppercase tracking-wider text-[11px]">
+          <div className="mt-5 pt-4 border-t border-[#263228] space-y-2.5 text-xs">
+            <div className="flex items-center gap-2 text-emerald-300 font-mono font-medium uppercase tracking-wider text-[11px]">
               <ShieldCheck className="w-4 h-4" />
               <span>Priority Verdict: Why {priorityComparison.primaryTitle} is Ranked #1</span>
             </div>
-            <p className="text-stone-300 leading-relaxed">
-              <strong className="text-white">Deciding Factor: </strong>
+            <p className="text-stone-300 leading-relaxed font-sans">
+              <strong className="text-white font-medium">Deciding Factor: </strong>
               {priorityComparison.edgeReason}
             </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-stone-400 text-[11px] pt-1">
-              <div className="p-2.5 rounded-xl bg-stone-800/60 border border-stone-700/60">
-                <span className="text-stone-200 font-semibold block mb-0.5">Workflow Differentiator:</span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-stone-300 text-[11px] pt-1 font-sans">
+              <div className="p-3 rounded-xl bg-[#202821] border border-[#2b372d]">
+                <span className="text-stone-100 font-medium block mb-0.5">Workflow Differentiator:</span>
                 <span>{priorityComparison.practicalDifferentiator}</span>
               </div>
-              <div className="p-2.5 rounded-xl bg-stone-800/60 border border-stone-700/60">
-                <span className="text-stone-200 font-semibold block mb-0.5">Ramp-Up & Velocity:</span>
+              <div className="p-3 rounded-xl bg-[#202821] border border-[#2b372d]">
+                <span className="text-stone-100 font-medium block mb-0.5">Ramp-Up & Velocity:</span>
                 <span>{priorityComparison.learningVelocityNote}</span>
               </div>
             </div>

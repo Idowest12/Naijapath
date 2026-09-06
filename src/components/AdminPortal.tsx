@@ -41,6 +41,10 @@ import {
   exportAnalyticsCSV,
   exportAnalyticsJSON
 } from '../utils/analytics';
+import {
+  getAllAssessmentRecords,
+  exportRecordsAsJSON
+} from '../utils/submissionStorage';
 
 interface RecommendationStat {
   nicheId: string;
@@ -667,11 +671,21 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
               id="admin-export-json-btn"
               type="button"
               onClick={() => downloadExport('json')}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-bold border border-stone-700 transition-all active:scale-95"
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-bold border border-stone-700 transition-all active:scale-95 cursor-pointer"
               title="Download full analytics schema as JSON"
             >
               <FileCode2 className="w-4 h-4 text-emerald-400" />
               <span>Export JSON</span>
+            </button>
+            <button
+              id="admin-export-dataset-btn"
+              type="button"
+              onClick={exportRecordsAsJSON}
+              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 text-xs font-bold border border-emerald-700/70 transition-all active:scale-95 cursor-pointer"
+              title="Download LLM Fine-Tuning Training Dataset JSON"
+            >
+              <Database className="w-4 h-4 text-emerald-400" />
+              <span>AI Dataset ({getAllAssessmentRecords().length})</span>
             </button>
           </div>
 

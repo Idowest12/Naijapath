@@ -50,22 +50,43 @@ const DEFAULT_QUICK_QUESTIONS = [
   "How can I study tech while working a 9-5 job in Lagos traffic?"
 ];
 
+const SESSION_STORAGE_KEY = 'naija_tech_tizzi_chat_session_v1';
+
+const getInitialMessages = (): ChatMessage[] => {
+  try {
+    if (typeof window !== 'undefined' && window.sessionStorage) {
+      const saved = window.sessionStorage.getItem(SESSION_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed.map((m: any) => ({
+            ...m,
+            timestamp: m.timestamp ? new Date(m.timestamp) : new Date(),
+          }));
+        }
+      }
+    }
+  } catch (e) {
+    console.warn('Could not read chat from sessionStorage', e);
+  }
+
+  return [
+    {
+      id: 'msg-welcome',
+      role: 'assistant',
+      content: `**Kedu & Welcome! I am Tizzi, your Naija Tech Career Guide & Mentor.** 🇳🇬\n\nAsk me anything about starting tech in Nigeria, whether you are navigating **NEPA power cuts**, managing **limited data subscriptions**, choosing between **Frontend, Backend, UI/UX, or Data**, or looking for **free scholarships like 3MTT and DevCareer**.\n\nWhat would you like to explore today?`,
+      timestamp: new Date(),
+    }
+  ];
+};
+
 export const NaijaChatbot: React.FC<NaijaChatbotProps> = ({
   isOpen,
   onClose,
   diagnosticContext,
   initialPrompt
 }) => {
-  const [messages, setMessages] = useState<ChatMessage[]>(() => {
-    return [
-      {
-        id: 'msg-welcome',
-        role: 'assistant',
-        content: `**Kedu & Welcome! I am Tizzi, your Naija Tech Career Guide & Mentor.** 🇳🇬\n\nAsk me anything about starting tech in Nigeria, whether you are navigating **NEPA power cuts**, managing **limited data subscriptions**, choosing between **Frontend, Backend, UI/UX, or Data**, or looking for **free scholarships like 3MTT and DevCareer**.\n\nWhat would you like to explore today?`,
-        timestamp: new Date(),
-      }
-    ];
-  });
+  const [messages, setMessages] = useState<ChatMessage[]>(getInitialMessages);
 
   const [inputText, setInputText] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -75,6 +96,17 @@ export const NaijaChatbot: React.FC<NaijaChatbotProps> = ({
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const handledInitialPromptRef = useRef<string | null>(null);
+
+  // Sync with sessionStorage so memory persists during user browsing and clears on tab close
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage && messages.length > 0) {
+        window.sessionStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(messages));
+      }
+    } catch (e) {
+      console.warn('Could not save chat to sessionStorage', e);
+    }
+  }, [messages]);
 
   // Auto-scroll to bottom of conversation
   useEffect(() => {
@@ -119,7 +151,7 @@ export const NaijaChatbot: React.FC<NaijaChatbotProps> = ({
     trackChatQuery();
 
     try {
-      // Format messages history cleanly for the API
+      // Format messages history cleanly for the API to provide multi-turn conversation memory
       const historyPayload = [...messages, userMessage]
         .filter((m) => m && m.content && !m.content.includes('blip detected'))
         .map((m) => ({
@@ -127,9 +159,9 @@ export const NaijaChatbot: React.FC<NaijaChatbotProps> = ({
           content: m.content,
         }));
 
-      // Set a client timeout so requests never hang on spotty connections
+      // 16s client timeout so requests don't hang indefinitely on slow mobile networks
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 8000);
+      const timeoutId = setTimeout(() => controller.abort(), 16000);
 
       const res = await fetch('/api/chat', {
         method: 'POST',
@@ -147,13 +179,17 @@ export const NaijaChatbot: React.FC<NaijaChatbotProps> = ({
 
       let replyText = "";
       if (res && res.ok) {
-        const data = await res.json().catch(() => null);
-        if (data && data.reply) {
-          replyText = data.reply;
+        // Guard against non-JSON responses (e.g. HTML 404/fallback rewrites)
+        const contentType = res.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+          const data = await res.json().catch(() => null);
+          if (data && data.reply) {
+            replyText = data.reply;
+          }
         }
       }
 
-      // If server response was not available, immediately fall back to the smart mentor engine
+      // If server response was not available or not JSON, fall back to the smart mentor engine
       if (!replyText) {
         replyText = generateSmartMentorResponse(messageContent, diagnosticContext);
       }
@@ -189,6 +225,14 @@ export const NaijaChatbot: React.FC<NaijaChatbotProps> = ({
   };
 
   const handleClearHistory = () => {
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        window.sessionStorage.removeItem(SESSION_STORAGE_KEY);
+      }
+    } catch (e) {
+      console.warn('Error clearing sessionStorage', e);
+    }
+
     setMessages([
       {
         id: 'msg-welcome-reset',

@@ -1,25 +1,23 @@
-import React, { useState } from 'react';
-import { Compass, ExternalLink, Globe, ArrowUpRight, ShieldCheck, Zap, Database, Download, X, Sparkles, ArrowUp, Lock } from 'lucide-react';
-import { getAllAssessmentRecords, exportRecordsAsJSON, exportRecordsAsCSV } from '../utils/submissionStorage';
+import React from 'react';
+import { Compass, ShieldCheck, Zap, ArrowUp } from 'lucide-react';
 import { trackClick } from '../utils/analytics';
 
 interface FooterProps {
   onOpenAdmin?: () => void;
+  onSelectNiche?: (nicheId: string) => void;
+  onSelectStrategy?: (strategyKey: string) => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
-  const [showDataModal, setShowDataModal] = useState(false);
-  const records = getAllAssessmentRecords();
-
+export const Footer: React.FC<FooterProps> = ({ onSelectNiche, onSelectStrategy }) => {
   return (
-    <footer id="site-footer" className="bg-stone-900 text-stone-300 border-t border-stone-800">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-16 pb-12">
+    <footer id="site-footer" className="bg-[#181a18] text-stone-300 border-t border-[#272b27]">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 sm:pt-18 pb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           
           {/* Brand Col */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-900 text-emerald-100 flex items-center justify-center">
+              <div className="w-10 h-10 rounded-xl bg-emerald-900/60 border border-emerald-800/70 text-emerald-200 flex items-center justify-center">
                 <Compass className="w-5 h-5" />
               </div>
               <div className="flex flex-col">
@@ -32,110 +30,245 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
               </div>
             </div>
             <p className="text-sm text-stone-400 leading-relaxed max-w-sm font-sans">
-              Debunking the "coding-only" myth for young Africans. We provide realistic, constraint-aware roadmaps tailored to your actual device, weekly hours, and budget.
+              Demystifying tech pathways for young Nigerians. We provide realistic, constraint-aware roadmaps tailored to your actual device, weekly hours, and budget.
             </p>
             <div className="pt-1 flex flex-wrap gap-2 text-xs font-mono">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-stone-800 text-emerald-400 border border-stone-700/80">
-                <Zap className="w-3.5 h-3.5" /> Low-Data Friendly
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-800/80 text-stone-300 border border-stone-700/60">
+                <Zap className="w-3.5 h-3.5 text-emerald-400" /> Low-Data Friendly
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md bg-stone-800 text-stone-300 border border-stone-700/80">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-800/80 text-stone-300 border border-stone-700/60">
                 <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> 100% Free Resources
               </span>
             </div>
           </div>
 
           {/* Column 1: Non-Technical Pathways */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-emerald-400">Non-Coding Niches</h3>
-            <ul className="space-y-2 text-sm">
+          <div className="space-y-3.5">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/80"></span>
+              <h3 className="text-xs font-mono font-medium uppercase tracking-wider text-stone-200">
+                Non-Coding Niches
+              </h3>
+            </div>
+            <ul className="space-y-2 text-sm font-sans">
               <li>
-                <a id="footer-link-uiux" href="#pathways" className="text-stone-400 hover:text-white transition-colors">
-                  UI/UX & Product Design
-                </a>
+                <button
+                  id="footer-link-uiux"
+                  type="button"
+                  onClick={() => {
+                    trackClick('footer_link_uiux', 'UI/UX & Product Design', 'Footer Navigation');
+                    onSelectNiche?.('niche-uiux');
+                  }}
+                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>UI/UX & Product Design</span>
+                </button>
               </li>
               <li>
-                <a id="footer-link-va" href="#pathways" className="text-stone-400 hover:text-white transition-colors">
-                  Virtual Assistance & Tech VA
-                </a>
+                <button
+                  id="footer-link-va"
+                  type="button"
+                  onClick={() => {
+                    trackClick('footer_link_va', 'Virtual Assistance & Tech VA', 'Footer Navigation');
+                    onSelectNiche?.('niche-va');
+                  }}
+                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Virtual Assistance & Tech VA</span>
+                </button>
               </li>
               <li>
-                <a id="footer-link-smm" href="#pathways" className="text-stone-400 hover:text-white transition-colors">
-                  Social Media & Community
-                </a>
+                <button
+                  id="footer-link-smm"
+                  type="button"
+                  onClick={() => {
+                    trackClick('footer_link_smm', 'Social Media & Community', 'Footer Navigation');
+                    onSelectNiche?.('niche-smm');
+                  }}
+                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Social Media & Community</span>
+                </button>
               </li>
               <li>
-                <a id="footer-link-tech-writing" href="#pathways" className="text-stone-400 hover:text-white transition-colors">
-                  Technical Content Writing
-                </a>
+                <button
+                  id="footer-link-tech-writing"
+                  type="button"
+                  onClick={() => {
+                    trackClick('footer_link_tech_writing', 'Technical Content Writing', 'Footer Navigation');
+                    onSelectNiche?.('niche-tech-writing');
+                  }}
+                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Technical Content Writing</span>
+                </button>
               </li>
               <li>
-                <a id="footer-link-pm" href="#pathways" className="text-stone-400 hover:text-white transition-colors">
-                  Product Management
-                </a>
+                <button
+                  id="footer-link-pm"
+                  type="button"
+                  onClick={() => {
+                    trackClick('footer_link_pm', 'Product Management', 'Footer Navigation');
+                    onSelectNiche?.('niche-pm');
+                  }}
+                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Product Management</span>
+                </button>
               </li>
             </ul>
           </div>
 
           {/* Column 2: Technical Pathways */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-emerald-400">Technical Niches</h3>
-            <ul className="space-y-2 text-sm">
+          <div className="space-y-3.5">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/80"></span>
+              <h3 className="text-xs font-mono font-medium uppercase tracking-wider text-stone-200">
+                Technical Niches
+              </h3>
+            </div>
+            <ul className="space-y-2 text-sm font-sans">
               <li>
-                <a id="footer-link-frontend" href="#pathways" className="text-stone-400 hover:text-white transition-colors">
-                  Frontend Web Development
-                </a>
+                <button
+                  id="footer-link-frontend"
+                  type="button"
+                  onClick={() => {
+                    trackClick('footer_link_frontend', 'Frontend Web Development', 'Footer Navigation');
+                    onSelectNiche?.('niche-frontend');
+                  }}
+                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Frontend Web Development</span>
+                </button>
               </li>
               <li>
-                <a id="footer-link-data" href="#pathways" className="text-stone-400 hover:text-white transition-colors">
-                  Data Analysis & BI
-                </a>
+                <button
+                  id="footer-link-data"
+                  type="button"
+                  onClick={() => {
+                    trackClick('footer_link_data', 'Data Analysis & BI', 'Footer Navigation');
+                    onSelectNiche?.('niche-data');
+                  }}
+                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Data Analysis & BI</span>
+                </button>
               </li>
               <li>
-                <a id="footer-link-cyber" href="#pathways" className="text-stone-400 hover:text-white transition-colors">
-                  Cybersecurity Fundamentals
-                </a>
+                <button
+                  id="footer-link-cyber"
+                  type="button"
+                  onClick={() => {
+                    trackClick('footer_link_cyber', 'Cybersecurity Fundamentals', 'Footer Navigation');
+                    onSelectNiche?.('niche-cyber');
+                  }}
+                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Cybersecurity Fundamentals</span>
+                </button>
               </li>
               <li>
-                <a id="footer-link-backend" href="#pathways" className="text-stone-400 hover:text-white transition-colors">
-                  Backend API Engineering
-                </a>
+                <button
+                  id="footer-link-backend"
+                  type="button"
+                  onClick={() => {
+                    trackClick('footer_link_backend', 'Backend API Engineering', 'Footer Navigation');
+                    onSelectNiche?.('niche-backend');
+                  }}
+                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Backend API Engineering</span>
+                </button>
               </li>
               <li>
-                <a id="footer-link-qa" href="#pathways" className="text-stone-400 hover:text-white transition-colors">
-                  Quality Assurance & Testing
-                </a>
+                <button
+                  id="footer-link-qa"
+                  type="button"
+                  onClick={() => {
+                    trackClick('footer_link_qa', 'Quality Assurance & Testing', 'Footer Navigation');
+                    onSelectNiche?.('niche-qa');
+                  }}
+                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Quality Assurance & Testing</span>
+                </button>
               </li>
             </ul>
           </div>
 
           {/* Column 3: Nigerian Realities & Framework */}
-          <div className="space-y-3">
-            <h3 className="text-xs font-semibold uppercase tracking-wider text-emerald-400">Survival & Strategy</h3>
-            <ul className="space-y-2 text-sm">
+          <div className="space-y-3.5">
+            <div className="flex items-center gap-2">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/80"></span>
+              <h3 className="text-xs font-mono font-medium uppercase tracking-wider text-stone-200">
+                Survival & Strategy
+              </h3>
+            </div>
+            <ul className="space-y-2 text-sm font-sans">
               <li>
-                <a id="footer-link-phone-guide" href="#framework" className="text-stone-400 hover:text-white transition-colors flex items-center gap-1">
-                  Phone-Only Tech Strategies
-                </a>
+                <button
+                  id="footer-link-phone-guide"
+                  type="button"
+                  onClick={() => {
+                    trackClick('footer_link_phone_guide', 'Phone-Only Tech Strategies', 'Footer Navigation');
+                    onSelectStrategy?.('phone_friendly');
+                  }}
+                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Phone-Only Tech Strategies</span>
+                </button>
               </li>
               <li>
-                <a id="footer-link-power-data" href="#framework" className="text-stone-400 hover:text-white transition-colors">
-                  Power & Data Hacks
-                </a>
+                <button
+                  id="footer-link-power-data"
+                  type="button"
+                  onClick={() => {
+                    trackClick('footer_link_power_data', 'Power & Data Hacks', 'Footer Navigation');
+                    onSelectStrategy?.('power_data');
+                  }}
+                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Power & Data Hacks</span>
+                </button>
               </li>
               <li>
-                <a id="footer-link-career-switch" href="#framework" className="text-stone-400 hover:text-white transition-colors">
-                  Career Switcher Guide
-                </a>
+                <button
+                  id="footer-link-career-switch"
+                  type="button"
+                  onClick={() => {
+                    trackClick('footer_link_career_switch', 'Career Switcher Guide', 'Footer Navigation');
+                    onSelectStrategy?.('career_switch');
+                  }}
+                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Career Switcher Guide</span>
+                </button>
               </li>
               <li>
-                <a id="footer-link-portfolio" href="#day-one" className="text-stone-400 hover:text-white transition-colors">
-                  First Portfolio Proofs
-                </a>
+                <button
+                  id="footer-link-portfolio"
+                  type="button"
+                  onClick={() => {
+                    trackClick('footer_link_portfolio', 'First Portfolio Proofs', 'Footer Navigation');
+                    onSelectStrategy?.('first_portfolio');
+                  }}
+                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>First Portfolio Proofs</span>
+                </button>
               </li>
               <li>
-                <a id="footer-link-remote" href="#resources" className="text-stone-400 hover:text-white transition-colors">
-                  Receiving Foreign Payments
-                </a>
+                <button
+                  id="footer-link-remote"
+                  type="button"
+                  onClick={() => {
+                    trackClick('footer_link_remote', 'Receiving Foreign Payments', 'Footer Navigation');
+                    onSelectStrategy?.('foreign_payments');
+                  }}
+                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                >
+                  <span>Receiving Foreign Payments</span>
+                </button>
               </li>
             </ul>
           </div>
@@ -143,13 +276,14 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-12 pt-8 border-t border-stone-800 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-400">
-          <div className="flex items-center gap-2">
+        <div className="mt-14 pt-8 border-t border-[#272b27] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-400">
+          <div className="flex flex-wrap items-center gap-2 text-stone-400">
             <span>© {new Date().getFullYear()} TIZZITECH.</span>
+            <span className="hidden sm:inline">·</span>
             <span>Dedicated to empowering young Nigerian talent.</span>
           </div>
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className="flex flex-wrap items-center gap-4">
             <button
               id="footer-back-to-top-btn"
               type="button"
@@ -157,114 +291,19 @@ export const Footer: React.FC<FooterProps> = ({ onOpenAdmin }) => {
                 trackClick('footer_back_to_top_btn', 'Footer Back to Top', 'Navigation');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white border border-stone-700 transition-colors font-medium text-xs"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-stone-800/80 hover:bg-stone-700/80 text-stone-300 hover:text-white border border-stone-700/70 transition-colors font-medium text-xs cursor-pointer"
               title="Scroll back to top of page"
             >
-              <ArrowUp className="w-3.5 h-3.5 text-emerald-400" />
+              <ArrowUp className="w-3.5 h-3.5 text-stone-400" />
               <span>Back to Top</span>
             </button>
 
-            <button
-              type="button"
-              onClick={() => {
-                trackClick('footer_data_hub_btn', 'Open AI Training Data Hub', 'Data');
-                setShowDataModal(true);
-              }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-emerald-400 border border-stone-700 hover:border-emerald-500/50 transition-colors font-medium text-xs"
-            >
-              <Database className="w-3.5 h-3.5" />
-              <span>AI Training Data Hub ({records.length})</span>
-            </button>
-
-            {onOpenAdmin && (
-              <button
-                id="footer-admin-link-btn"
-                type="button"
-                onClick={() => {
-                  trackClick('footer_admin_link_btn', 'Navigate to Admin Portal', 'Admin');
-                  onOpenAdmin();
-                }}
-                className="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-stone-900/90 hover:bg-stone-800 text-stone-400 hover:text-emerald-400 border border-stone-800 transition-colors font-mono text-[11px]"
-                title="Executive Admin & Telemetry Portal (/admin)"
-              >
-                <Lock className="w-3 h-3 text-stone-500 group-hover:text-emerald-400" />
-                <span>🔒 Admin</span>
-              </button>
-            )}
-
-            <span className="text-stone-400 hidden sm:inline">
+            <span className="text-stone-500 hidden sm:inline font-sans">
               Built for the Nigerian Tech Community
             </span>
           </div>
         </div>
       </div>
-
-      {/* AI Training & Dataset Modal */}
-      {showDataModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-stone-900 border border-stone-700 text-stone-100 rounded-3xl max-w-lg w-full p-6 sm:p-8 shadow-2xl space-y-5 animate-in fade-in zoom-in-95 duration-200">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-xl bg-emerald-600/20 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
-                  <Database className="w-4 h-4" />
-                </div>
-                <div>
-                  <h3 className="text-base sm:text-lg font-bold text-white">Learner Assessment Data Hub</h3>
-                  <p className="text-xs text-stone-400">AI Dataset & Pathway Optimization</p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowDataModal(false)}
-                className="w-8 h-8 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-400 hover:text-white flex items-center justify-center transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
-
-            <div className="p-4 rounded-2xl bg-stone-800/80 border border-stone-700 text-xs space-y-2">
-              <div className="flex items-center justify-between text-stone-200 font-semibold">
-                <span>Stored Submissions:</span>
-                <span className="px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 font-bold">
-                  {records.length} {records.length === 1 ? 'Record' : 'Records'}
-                </span>
-              </div>
-              <p className="text-stone-400 leading-relaxed">
-                Whenever anyone completes the assessment, their hardware constraints, time availability, aptitude weights, qualitative answers, and calculated career match are saved securely.
-              </p>
-            </div>
-
-            <div className="space-y-3">
-              <h4 className="text-xs font-bold uppercase tracking-wider text-stone-400">Export Options for Model Training:</h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button
-                  type="button"
-                  onClick={exportRecordsAsJSON}
-                  disabled={records.length === 0}
-                  className="p-3 rounded-xl border border-emerald-600 bg-emerald-600/10 hover:bg-emerald-600/20 disabled:opacity-40 text-emerald-400 text-xs font-bold flex items-center justify-center gap-2 transition-all"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>Download JSON (LLM Fine-Tuning)</span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={exportRecordsAsCSV}
-                  disabled={records.length === 0}
-                  className="p-3 rounded-xl border border-stone-700 bg-stone-800 hover:bg-stone-700 disabled:opacity-40 text-stone-200 text-xs font-bold flex items-center justify-center gap-2 transition-all"
-                >
-                  <Download className="w-4 h-4" />
-                  <span>Download CSV (Spreadsheets)</span>
-                </button>
-              </div>
-            </div>
-
-            <div className="pt-3 border-t border-stone-800 text-[11px] text-stone-400 leading-relaxed">
-              <strong>Future Multi-Device Cloud Storage:</strong> If you want submissions from every visitor on any phone to automatically store centrally in real-time, we can easily connect a Cloud Database (like Firestore or PostgreSQL).
-            </div>
-          </div>
-        </div>
-      )}
     </footer>
   );
 };

@@ -513,22 +513,25 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
           <div id="step-1-biodata" className="space-y-6 animate-in fade-in duration-200">
             <div>
               <div className="text-xs font-mono font-semibold tracking-wider uppercase text-emerald-800 mb-2">
-                Step 01 of 04 · Background & Context
+                Step 01 of 04 · Getting To Know You
               </div>
               <h1 className="font-serif-display text-3xl sm:text-4xl text-stone-900 font-normal tracking-tight leading-tight">
-                Tell us a bit about yourself
+                First, tell us a little about yourself
               </h1>
               <p className="text-stone-600 text-sm sm:text-base mt-2 max-w-xl leading-relaxed font-sans">
-                We use this to identify relevant local hubs, state-level developer grants, and peer circles near you.
+                No long forms or trick questions. We just want to tailor your tech roadmap to your stage in life, what opportunities exist near you, and local tech communities you can join.
               </p>
             </div>
 
             <div className="bg-white rounded-2xl border border-stone-200/90 p-6 sm:p-9 shadow-[0_4px_24px_-6px_rgba(0,0,0,0.05)] space-y-7">
               {/* Optional Name */}
               <div>
-                <label className="block text-xs font-semibold tracking-wider uppercase text-stone-700 mb-2">
-                  Your Name or Nickname <span className="text-stone-400 font-normal lowercase">(optional)</span>
+                <label htmlFor="bio-name-input" className="block text-sm font-semibold text-stone-900 mb-1">
+                  What should we call you? <span className="text-stone-400 font-normal text-xs">(optional)</span>
                 </label>
+                <p className="text-xs text-stone-500 mb-2.5">
+                  Your first name or nickname — so your tailored tech roadmap addresses you personally!
+                </p>
                 <input
                   id="bio-name-input"
                   type="text"
@@ -541,9 +544,12 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
 
               {/* Age Bracket */}
               <div>
-                <label className="block text-xs font-semibold tracking-wider uppercase text-stone-700 mb-2">
-                  1. What is your age group?
+                <label className="block text-sm font-semibold text-stone-900 mb-1">
+                  1. How old are you?
                 </label>
+                <p className="text-xs text-stone-500 mb-3">
+                  Every stage has unique advantages — from student hackathons to fellowships for career-switchers.
+                </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {AGE_BAND_OPTIONS.map((opt) => (
                     <button
@@ -570,9 +576,17 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
 
               {/* Gender */}
               <div>
-                <label className="block text-xs font-semibold tracking-wider uppercase text-stone-700 mb-2">
-                  2. Gender
-                </label>
+                <div className="flex items-baseline justify-between mb-1">
+                  <label className="block text-sm font-semibold text-stone-900">
+                    2. What is your gender?
+                  </label>
+                  <span className="text-[11px] text-emerald-800 font-medium hidden sm:inline">
+                    Unlocks women-in-tech grants
+                  </span>
+                </div>
+                <p className="text-xs text-stone-500 mb-3">
+                  Helps us match female learners with fully-sponsored initiatives (like She Code Africa, Ingressive For Good, and tech laptop grants).
+                </p>
                 <div className="grid grid-cols-3 gap-3">
                   {GENDER_OPTIONS.map((opt) => (
                     <button
@@ -589,6 +603,11 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
                       }`}
                     >
                       <span className="text-xs sm:text-sm font-medium">{opt.label}</span>
+                      {opt.sublabel && (
+                        <span className="block text-[10px] text-emerald-700 mt-0.5 font-normal leading-tight">
+                          {opt.sublabel}
+                        </span>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -596,9 +615,12 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
 
               {/* Current Status */}
               <div>
-                <label className="block text-xs font-semibold tracking-wider uppercase text-stone-700 mb-2">
-                  3. What is your current situation?
+                <label className="block text-sm font-semibold text-stone-900 mb-1">
+                  3. What does your day-to-day look like right now?
                 </label>
+                <p className="text-xs text-stone-500 mb-3">
+                  We want to ensure your learning pace fits comfortably into your real life without burning you out.
+                </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   {STATUS_OPTIONS.map((opt) => (
                     <button
@@ -625,9 +647,12 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
 
               {/* Location */}
               <div>
-                <label className="block text-xs font-semibold tracking-wider uppercase text-stone-700 mb-2">
-                  4. Where in Nigeria are you based?
+                <label htmlFor="bio-location-select" className="block text-sm font-semibold text-stone-900 mb-1">
+                  4. Where in Nigeria are you based right now?
                 </label>
+                <p className="text-xs text-stone-500 mb-3">
+                  Helps us recommend physical tech hubs, state 3MTT learning centers, and developer meetups close to your area.
+                </p>
                 <select
                   id="bio-location-select"
                   value={biodata.location}

@@ -27,15 +27,132 @@ import { trackClick } from '../utils/analytics';
 interface MainContentProps {
   onStartAssessment?: () => void;
   onOpenChatbot?: (prompt?: string) => void;
+  targetNicheId?: string | null;
+  targetStrategyKey?: string | null;
+  onClearTarget?: () => void;
+  onSelectPathway?: (nicheId: string) => void;
 }
 
-export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment, onOpenChatbot }) => {
+export const MainContent: React.FC<MainContentProps> = ({ 
+  onStartAssessment, 
+  onOpenChatbot,
+  targetNicheId,
+  targetStrategyKey,
+  onClearTarget,
+  onSelectPathway
+}) => {
   const [activeFilter, setActiveFilter] = useState<'all' | 'phone_friendly' | 'non_technical' | 'technical'>('all');
   const [isMounted, setIsMounted] = useState(false);
+  const [highlightedNicheId, setHighlightedNicheId] = useState<string | null>(null);
+  const [highlightedCardId, setHighlightedCardId] = useState<string | null>(null);
 
   useEffect(() => {
     // Trigger smooth entry transitions upon mount
     setIsMounted(true);
+  }, []);
+
+  const activateNiche = (nicheId: string, openPage = false) => {
+    const niche = ALL_NICHES.find((n) => n.id === nicheId);
+    if (!niche) return;
+
+    if (openPage && onSelectPathway) {
+      onSelectPathway(nicheId);
+      return;
+    }
+
+    // Ensure active filter doesn't hide the requested niche card
+    if (activeFilter === 'phone_friendly' && !niche.supportedOnPhone && niche.deviceRequirement !== 'phone_only_possible') {
+      setActiveFilter('all');
+    } else if (activeFilter === 'non_technical' && niche.category === 'technical') {
+      setActiveFilter('all');
+    } else if (activeFilter === 'technical' && (niche.category === 'non-technical' || niche.category === 'creative')) {
+      setActiveFilter('all');
+    }
+
+    setHighlightedNicheId(nicheId);
+
+    // Smooth scroll and center the exact matching card on screen
+    setTimeout(() => {
+      const cardEl = document.getElementById(`niche-card-${nicheId}`);
+      if (cardEl) {
+        cardEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        const pathwaysEl = document.getElementById('pathways');
+        pathwaysEl?.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 120);
+
+    // Keep highlight active for 6 seconds
+    setTimeout(() => {
+      setHighlightedNicheId((prev) => (prev === nicheId ? null : prev));
+    }, 6000);
+  };
+
+  // React to targetNicheId prop from Footer or external triggers
+  useEffect(() => {
+    if (targetNicheId) {
+      activateNiche(targetNicheId, true);
+      onClearTarget?.();
+    }
+  }, [targetNicheId]);
+
+  // React to targetStrategyKey prop from Footer
+  useEffect(() => {
+    if (!targetStrategyKey) return;
+    if (targetStrategyKey === 'phone_friendly') {
+      setActiveFilter('phone_friendly');
+      setTimeout(() => {
+        const el = document.getElementById('pathways');
+        el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+    } else if (targetStrategyKey === 'power_data') {
+      setHighlightedCardId('resource-data-card');
+      setTimeout(() => {
+        const el = document.getElementById('resource-data-card');
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+      setTimeout(() => setHighlightedCardId(null), 5000);
+    } else if (targetStrategyKey === 'career_switch') {
+      setHighlightedCardId('framework-card-biodata');
+      setTimeout(() => {
+        const el = document.getElementById('framework');
+        el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+      setTimeout(() => setHighlightedCardId(null), 5000);
+    } else if (targetStrategyKey === 'first_portfolio') {
+      setHighlightedCardId('day-one');
+      setTimeout(() => {
+        const el = document.getElementById('day-one');
+        el?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }, 100);
+      setTimeout(() => setHighlightedCardId(null), 5000);
+    } else if (targetStrategyKey === 'foreign_payments') {
+      setHighlightedCardId('resource-hub-card');
+      setTimeout(() => {
+        const el = document.getElementById('resource-hub-card');
+        el?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 100);
+      setTimeout(() => setHighlightedCardId(null), 5000);
+    }
+    onClearTarget?.();
+  }, [targetStrategyKey]);
+
+  // Listen for hashchange events (e.g. #niche-uiux)
+  useEffect(() => {
+    const handleHash = () => {
+      const hash = window.location.hash;
+      if (hash.startsWith('#niche-')) {
+        const nicheId = hash.replace('#', '');
+        activateNiche(nicheId, true);
+      }
+    };
+
+    window.addEventListener('hashchange', handleHash);
+    // Also check on mount if hash was present
+    if (window.location.hash.startsWith('#niche-')) {
+      handleHash();
+    }
+    return () => window.removeEventListener('hashchange', handleHash);
   }, []);
 
   const filteredNiches = ALL_NICHES.filter((niche) => {
@@ -416,114 +533,151 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment, onO
 
           {/* Cards Grid with Refined Editorial Presentation */}
           <div id="pathway-cards-grid" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
-            {filteredNiches.map((niche) => (
-              <article
-                key={niche.id}
-                id={`niche-card-${niche.id}`}
-                className="bg-white rounded-2xl border border-stone-200/90 hover:border-emerald-700/40 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)] transition-all duration-300 flex flex-col justify-between overflow-hidden group"
-              >
-                <div>
-                  {/* Clean Photography Header */}
-                  {niche.imageUrl && (
-                    <div className="relative h-48 w-full overflow-hidden bg-stone-100 border-b border-stone-100">
-                      <img 
-                        src={niche.imageUrl} 
-                        alt={niche.title}
-                        referrerPolicy="no-referrer"
-                        loading="lazy"
-                        className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-700 ease-out"
-                      />
-                      
-                      {/* Discrete subtle device pill pinned neatly in top right with soft backdrop */}
-                      <div className="absolute top-3 right-3">
-                        {niche.deviceRequirement === 'phone_only_possible' ? (
-                          <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-900 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-xs border border-emerald-200/80">
-                            <Smartphone className="w-3 h-3 text-emerald-700" /> Phone-friendly
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-stone-700 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-xs border border-stone-200/80">
-                            <Laptop className="w-3 h-3 text-stone-500" /> Laptop needed
-                          </span>
-                        )}
+            {filteredNiches.map((niche) => {
+              const isHighlighted = highlightedNicheId === niche.id;
+              return (
+                <article
+                  key={niche.id}
+                  id={`niche-card-${niche.id}`}
+                  className={`bg-white rounded-2xl border transition-all duration-300 flex flex-col justify-between overflow-hidden group ${
+                    isHighlighted
+                      ? 'border-emerald-700 ring-4 ring-emerald-500/40 shadow-[0_16px_40px_rgba(16,185,129,0.22)] scale-[1.02]'
+                      : 'border-stone-200/90 hover:border-emerald-700/40 hover:shadow-[0_8px_30px_rgba(0,0,0,0.06)]'
+                  }`}
+                >
+                  <div>
+                    {/* Active Match Banner */}
+                    {isHighlighted && (
+                      <div className="bg-emerald-800 text-white text-[11px] font-mono px-3 py-1.5 text-center flex items-center justify-center gap-1.5 font-bold animate-pulse">
+                        <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
+                        <span>Selected Role Match</span>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  <div className="p-6 sm:p-7 space-y-4">
-                    {/* Typographic Metadata Header */}
-                    <div className="flex items-center justify-between text-xs text-stone-500 font-mono">
-                      <span className="uppercase tracking-wider font-semibold text-emerald-800">
-                        {niche.category === 'creative' ? 'Design & Creative' : niche.category === 'non-technical' ? 'Operations & Growth' : 'Engineering & Data'}
-                      </span>
-                      <span className="flex items-center gap-1 text-stone-500">
-                        <Clock className="w-3 h-3 text-stone-400" /> {niche.timeCommitment}
-                      </span>
-                    </div>
-
-                    {/* Headline */}
-                    <h3 className="font-serif-display text-2xl font-normal text-stone-900 leading-snug group-hover:text-emerald-900 transition-colors">
-                      {niche.title}
-                    </h3>
-
-                    {/* Human Description */}
-                    <p className="text-sm text-stone-600 leading-relaxed font-sans">
-                      {niche.description}
-                    </p>
-
-                    {/* Day-One Proof Task Memo */}
-                    <div className="p-4 rounded-xl bg-stone-50 border border-stone-200/80 space-y-1.5">
-                      <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-stone-500">
-                        <span className="font-semibold text-emerald-800">Day-One Proof Task</span>
-                        <span>~{niche.dayOneEstimatedMins || 20} mins</span>
+                    {/* Clean Photography Header */}
+                    {niche.imageUrl && (
+                      <div className="relative h-48 w-full overflow-hidden bg-stone-100 border-b border-stone-100">
+                        <img 
+                          src={niche.imageUrl} 
+                          alt={niche.title}
+                          referrerPolicy="no-referrer"
+                          loading="lazy"
+                          className="w-full h-full object-cover group-hover:scale-103 transition-transform duration-700 ease-out"
+                        />
+                        
+                        {/* Discrete subtle device pill pinned neatly in top right with soft backdrop */}
+                        <div className="absolute top-3 right-3">
+                          {niche.deviceRequirement === 'phone_only_possible' ? (
+                            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-emerald-900 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-xs border border-emerald-200/80">
+                              <Smartphone className="w-3 h-3 text-emerald-700" /> Phone-friendly
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-stone-700 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-xs border border-stone-200/80">
+                              <Laptop className="w-3 h-3 text-stone-500" /> Laptop needed
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <p className="text-xs text-stone-700 leading-relaxed font-sans italic">
-                        "{niche.dayOneAction}"
+                    )}
+
+                    <div className="p-6 sm:p-7 space-y-4">
+                      {/* Typographic Metadata Header */}
+                      <div className="flex items-center justify-between text-xs text-stone-500 font-mono">
+                        <span className="uppercase tracking-wider font-semibold text-emerald-800">
+                          {niche.category === 'creative' ? 'Design & Creative' : niche.category === 'non-technical' ? 'Operations & Growth' : 'Engineering & Data'}
+                        </span>
+                        <span className="flex items-center gap-1 text-stone-500">
+                          <Clock className="w-3 h-3 text-stone-400" /> {niche.timeCommitment}
+                        </span>
+                      </div>
+
+                      {/* Headline */}
+                      <h3 
+                        onClick={() => {
+                          trackClick(`view_pathway_title_${niche.id}`, `Click Title for ${niche.title}`, 'Pathways Grid');
+                          onSelectPathway?.(niche.id);
+                        }}
+                        className="font-serif-display text-2xl font-normal text-stone-900 leading-snug group-hover:text-emerald-900 transition-colors cursor-pointer"
+                      >
+                        {niche.title}
+                      </h3>
+
+                      {/* Human Description */}
+                      <p className="text-sm text-stone-600 leading-relaxed font-sans">
+                        {niche.description}
                       </p>
+
+                      {/* Day-One Proof Task Memo */}
+                      <div className="p-4 rounded-xl bg-stone-50 border border-stone-200/80 space-y-1.5">
+                        <div className="flex items-center justify-between text-[11px] font-mono uppercase tracking-wider text-stone-500">
+                          <span className="font-semibold text-emerald-800">Day-One Proof Task</span>
+                          <span>~{niche.dayOneEstimatedMins || 20} mins</span>
+                        </div>
+                        <p className="text-xs text-stone-700 leading-relaxed font-sans italic">
+                          "{niche.dayOneAction}"
+                        </p>
+                      </div>
                     </div>
                   </div>
-                </div>
 
-                {/* Card Footer: Tools & CTA */}
-                <div className="px-6 sm:px-7 pb-6 pt-2 border-t border-stone-100 flex items-center justify-between mt-auto">
-                  <div className="flex flex-wrap gap-1.5">
-                    {niche.typicalTools.slice(0, 3).map((tool, i) => (
-                      <span key={i} className="text-[11px] font-mono px-2 py-0.5 rounded bg-stone-100 text-stone-600">
-                        {tool}
-                      </span>
-                    ))}
+                  {/* Card Footer: Tools & CTA */}
+                  <div className="px-6 sm:px-7 pb-6 pt-2 border-t border-stone-100 flex items-center justify-between mt-auto">
+                    <div className="flex flex-wrap gap-1.5">
+                      {niche.typicalTools.slice(0, 3).map((tool, i) => (
+                        <span key={i} className="text-[11px] font-mono px-2 py-0.5 rounded bg-stone-100 text-stone-600">
+                          {tool}
+                        </span>
+                      ))}
+                    </div>
+
+                    <div className="flex items-center gap-3">
+                      <button
+                        type="button"
+                        onClick={() => {
+                          trackClick(`view_roadmap_${niche.id}`, `View Roadmap for ${niche.title}`, 'Pathways Grid');
+                          onSelectPathway?.(niche.id);
+                        }}
+                        className="text-xs font-semibold text-emerald-800 hover:text-emerald-950 underline underline-offset-2 transition-colors cursor-pointer"
+                      >
+                        Roadmap →
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={onStartAssessment}
+                        className="text-xs font-semibold text-emerald-800 hover:text-emerald-950 inline-flex items-center gap-1 group-hover:translate-x-0.5 transition-all cursor-pointer"
+                      >
+                        <span>Assess fit</span>
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
                   </div>
-
-                  <button
-                    type="button"
-                    onClick={onStartAssessment}
-                    className="text-xs font-semibold text-emerald-800 hover:text-emerald-950 inline-flex items-center gap-1 group-hover:translate-x-0.5 transition-all cursor-pointer"
-                  >
-                    <span>Assess fit</span>
-                    <ArrowRight className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </article>
-            ))}
+                </article>
+              );
+            })}
           </div>
 
         </div>
       </section>
 
       {/* Day-One Mission Showcase Section */}
-      <section id="day-one" className="py-16 sm:py-20 bg-emerald-950 text-white relative overflow-hidden">
+      <section id="day-one" className="py-16 sm:py-24 bg-[#18201a] text-stone-100 relative overflow-hidden border-y border-[#263228]">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14 items-center">
             
             <div>
-              <span className="text-xs font-mono font-semibold uppercase tracking-wider text-emerald-300">The Core Philosophy</span>
-              <h2 className="font-serif-display text-3xl sm:text-4xl lg:text-5xl font-normal tracking-tight mt-2 leading-tight">
-                Don't spend six months wondering if tech is for you.
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/80 border border-emerald-800/80 text-emerald-300 text-xs font-mono font-medium tracking-wide mb-3">
+                <Target className="w-3.5 h-3.5 text-emerald-400" />
+                <span>THE DAY-ONE PHILOSOPHY</span>
+              </div>
+              <h2 className="font-serif-display text-3xl sm:text-4xl lg:text-5xl font-normal tracking-tight text-white mt-1 leading-tight">
+                Don’t spend six months wondering if tech is for you.
               </h2>
-              <p className="text-emerald-100/90 text-sm sm:text-base mt-4 leading-relaxed font-sans">
-                Most beginners start with huge tutorial playlists, burn their data, and get stuck in tutorial hell without ever building anything. 
+              <p className="text-stone-300 text-sm sm:text-base mt-4 leading-relaxed font-sans">
+                Most beginners are told to buy a course or watch a 40-hour playlist. Weeks in, their data is burnt, power is unpredictable, and they still haven't built a single real thing.
               </p>
-              <p className="text-emerald-200/80 text-sm sm:text-base mt-3 leading-relaxed font-sans">
-                Naija Tech Guide forces a tangible output on <strong>Day 1</strong>. If you do the 30-minute task and enjoy the problem-solving feeling, you have proven your interest to yourself.
+              <p className="text-stone-300 text-sm sm:text-base mt-3 leading-relaxed font-sans">
+                Naija Tech Guide flips this completely. On <strong className="text-white font-semibold">Day 1</strong>, you test-drive the actual work for 20 to 30 minutes using free tools. If solving that specific problem excites you, you’ve proven your genuine interest to yourself without spending a single naira.
               </p>
 
               <div className="mt-8 flex flex-col sm:flex-row gap-3">
@@ -531,76 +685,88 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment, onO
                   id="dayone-start-assessment-btn"
                   type="button"
                   onClick={onStartAssessment}
-                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white text-emerald-950 font-semibold text-sm hover:bg-stone-100 active:scale-[0.99] transition-all shadow-sm cursor-pointer"
+                  className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-white text-stone-900 font-semibold text-sm hover:bg-stone-100 active:scale-[0.99] transition-all shadow-sm cursor-pointer"
                 >
-                  <span>Get Your Day-One Mission</span>
-                  <ArrowRight className="w-4 h-4 text-emerald-950" />
+                  <span>Find Your Day-One Mission</span>
+                  <ArrowRight className="w-4 h-4 text-stone-900" />
                 </button>
               </div>
 
               {/* Inspiring Team Photo Banner */}
-              <div className="mt-8 relative rounded-2xl overflow-hidden border border-emerald-800 shadow-md">
+              <div className="mt-8 relative rounded-2xl overflow-hidden border border-[#2b3a2e] shadow-md">
                 <img
                   src="https://images.unsplash.com/photo-1531482615713-2afd69097998?auto=format&fit=crop&w=800&q=80"
                   alt="Young African tech builders collaborating in an innovation hub"
                   referrerPolicy="no-referrer"
                   className="w-full h-44 object-cover"
                 />
-                <div className="absolute inset-0 bg-gradient-to-t from-emerald-950 via-emerald-950/40 to-transparent"></div>
-                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-white">
-                  <span className="font-semibold flex items-center gap-1.5">
+                <div className="absolute inset-0 bg-gradient-to-t from-[#141b16] via-[#141b16]/40 to-transparent"></div>
+                <div className="absolute bottom-3 left-3 right-3 flex items-center justify-between text-xs text-stone-200">
+                  <span className="font-medium flex items-center gap-1.5">
                     <Users className="w-4 h-4 text-emerald-300" /> Community of Nigerian Builders
                   </span>
-                  <span className="text-[11px] bg-emerald-800/80 px-2 py-0.5 rounded text-emerald-100">
+                  <span className="text-[11px] bg-stone-900/80 px-2.5 py-0.5 rounded-full border border-stone-700/70 text-stone-300 font-mono">
                     Real Proof Over Theory
                   </span>
                 </div>
               </div>
             </div>
 
-            {/* Interactive Preview Cards */}
-            <div className="bg-emerald-950/80 p-6 sm:p-8 rounded-2xl border border-emerald-800 space-y-4 shadow-md">
-              <div className="text-xs font-bold text-emerald-300 uppercase tracking-wider flex items-center gap-2">
-                <Target className="w-4 h-4" /> Real Examples of Day-One Tasks
+            {/* Interactive Preview Cards with Warm Human Contrast */}
+            <div className="bg-[#202922] p-6 sm:p-8 rounded-3xl border border-[#2d3a30] space-y-4 shadow-xl">
+              <div className="flex items-center justify-between border-b border-[#2d3a30] pb-3 mb-2">
+                <div className="text-xs font-mono font-semibold uppercase tracking-wider text-stone-200 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-amber-300" /> 
+                  <span>Real Examples of Day-One Tasks</span>
+                </div>
+                <span className="text-[11px] text-stone-400 font-mono">100% Free</span>
               </div>
 
-              <div className="p-4 rounded-xl bg-emerald-900/60 border border-emerald-800 hover:border-emerald-700 transition-colors">
-                <div className="flex items-center justify-between text-xs font-semibold text-emerald-200 mb-1">
-                  <span>UI/UX Product Design</span>
-                  <span className="text-emerald-400">⏱ 30 mins</span>
+              <div className="p-4 rounded-2xl bg-[#28342b] border border-[#344438] hover:border-emerald-600/50 transition-all">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-sm font-medium text-stone-100">UI/UX Product Design</span>
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-stone-900/70 text-amber-200/90 border border-stone-700/60">
+                    ⏱ 30 mins
+                  </span>
                 </div>
-                <p className="text-xs text-emerald-100 leading-relaxed">
-                  Open your bank app (OPay, Kuda, GTBank). Take a screenshot of the transfer screen. Identify 2 confusing buttons. Draw a cleaner version on plain paper with a pen.
+                <p className="text-xs sm:text-[13px] text-stone-300 leading-relaxed font-sans">
+                  Open your mobile bank app (OPay, Kuda, or GTBank). Take a screenshot of the transfer screen, spot two buttons that confuse you, and draw a simpler, cleaner version on plain paper with a pen.
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-emerald-900/60 border border-emerald-800 hover:border-emerald-700 transition-colors">
-                <div className="flex items-center justify-between text-xs font-semibold text-emerald-200 mb-1">
-                  <span>Virtual Assistance</span>
-                  <span className="text-emerald-400">⏱ 20 mins</span>
+              <div className="p-4 rounded-2xl bg-[#28342b] border border-[#344438] hover:border-emerald-600/50 transition-all">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-sm font-medium text-stone-100">Virtual Assistance & Tech VA</span>
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-stone-900/70 text-amber-200/90 border border-stone-700/60">
+                    ⏱ 20 mins
+                  </span>
                 </div>
-                <p className="text-xs text-emerald-100 leading-relaxed">
-                  Download Google Keep or Notion on your phone. Create a 5-item structured weekly agenda with priority color tags and mock executive meeting links.
+                <p className="text-xs sm:text-[13px] text-stone-300 leading-relaxed font-sans">
+                  Download Google Keep or Notion on your phone. Create a 5-item structured weekly executive agenda with priority tags and mock Zoom meeting links.
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-emerald-900/60 border border-emerald-800 hover:border-emerald-700 transition-colors">
-                <div className="flex items-center justify-between text-xs font-semibold text-emerald-200 mb-1">
-                  <span>Data Analytics</span>
-                  <span className="text-emerald-400">⏱ 25 mins</span>
+              <div className="p-4 rounded-2xl bg-[#28342b] border border-[#344438] hover:border-emerald-600/50 transition-all">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-sm font-medium text-stone-100">Data Analytics</span>
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-stone-900/70 text-amber-200/90 border border-stone-700/60">
+                    ⏱ 25 mins
+                  </span>
                 </div>
-                <p className="text-xs text-emerald-100 leading-relaxed">
-                  Open a free Google Sheet. Enter 10 food items with prices from your last market visit. Use `=SUM()` and `=AVERAGE()` to analyze your grocery basket.
+                <p className="text-xs sm:text-[13px] text-stone-300 leading-relaxed font-sans">
+                  Open a free Google Sheet on your browser or phone. Enter 10 grocery items with prices from your last market visit. Use <code className="bg-stone-900/80 px-1 py-0.5 rounded text-amber-200 text-[11px]">=SUM()</code> and <code className="bg-stone-900/80 px-1 py-0.5 rounded text-amber-200 text-[11px]">=AVERAGE()</code> to analyze your total basket spend.
                 </p>
               </div>
 
-              <div className="p-4 rounded-xl bg-emerald-900/60 border border-emerald-800 hover:border-emerald-700 transition-colors">
-                <div className="flex items-center justify-between text-xs font-semibold text-emerald-200 mb-1">
-                  <span>Frontend Web Development</span>
-                  <span className="text-emerald-400">⏱ 25 mins</span>
+              <div className="p-4 rounded-2xl bg-[#28342b] border border-[#344438] hover:border-emerald-600/50 transition-all">
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-sm font-medium text-stone-100">Frontend Web Development</span>
+                  <span className="text-[11px] font-mono px-2 py-0.5 rounded-full bg-stone-900/70 text-amber-200/90 border border-stone-700/60">
+                    ⏱ 25 mins
+                  </span>
                 </div>
-                <p className="text-xs text-emerald-100 leading-relaxed">
-                  Create a single `index.html` file using Notepad or VS Code. Type your name, a quick bio, and 3 favorite links. Double click to watch it open live in your browser!
+                <p className="text-xs sm:text-[13px] text-stone-300 leading-relaxed font-sans">
+                  Create a simple text file called <code className="bg-stone-900/80 px-1 py-0.5 rounded text-amber-200 text-[11px]">index.html</code> using Notepad or Acode on Android. Type your name, a short bio, and three favorite website links. Double-tap to watch it render live in your web browser!
                 </p>
               </div>
 
@@ -611,109 +777,134 @@ export const MainContent: React.FC<MainContentProps> = ({ onStartAssessment, onO
       </section>
 
       {/* Practical Nigerian Realities & Resources Section */}
-      <section id="resources" className="py-16 sm:py-20 bg-stone-50">
+      <section id="resources" className="py-16 sm:py-24 bg-[#faf8f5] border-b border-stone-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">Nigerian Ecosystem Realities</span>
-            <h2 className="text-2xl sm:text-3xl font-bold text-stone-900 mt-2 tracking-tight">
+          <div className="text-center max-w-2xl mx-auto mb-14">
+            <span className="text-xs font-mono font-semibold uppercase tracking-wider text-emerald-800">
+              Ground-Level Realities
+            </span>
+            <h2 className="font-serif-display text-3xl sm:text-4xl text-stone-900 mt-2 tracking-tight font-normal leading-tight">
               Built for how learning actually happens here
             </h2>
-            <p className="text-stone-600 text-sm sm:text-base mt-2">
-              We address power cuts, data conservation, remote dollar payment hurdles, and mobile-first study habits head-on.
+            <p className="text-stone-600 text-sm sm:text-base mt-3 leading-relaxed font-sans">
+              No Silicon Valley assumptions. We address power cuts, data conservation, remote dollar payment hurdles, and mobile-first study habits head-on.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-7">
             
             {/* Resource 1: Data-smart */}
-            <div id="resource-data-card" className="rounded-2xl bg-white border border-stone-200 shadow-xs overflow-hidden hover:border-emerald-300 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
-              <div className="h-40 w-full overflow-hidden relative">
-                <img
-                  src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80"
-                  alt="Students learning on laptops in a study space"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent"></div>
-                <div className="absolute bottom-3 left-3 text-white flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center">
-                    <Zap className="w-4 h-4 text-white" />
+            <article id="resource-data-card" className="rounded-2xl bg-white border border-stone-200/90 shadow-2xs overflow-hidden hover:border-emerald-700/40 hover:shadow-md transition-all duration-300 flex flex-col justify-between">
+              <div>
+                <div className="h-44 w-full overflow-hidden relative bg-stone-100">
+                  <img
+                    src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&w=600&q=80"
+                    alt="Students learning on laptops in a study space"
+                    referrerPolicy="no-referrer"
+                    loading="lazy"
+                    className="w-full h-full object-cover hover:scale-103 transition-transform duration-700 ease-out"
+                  />
+                  <div className="absolute top-3 left-3">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-800 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-xs border border-stone-200/80">
+                      <Zap className="w-3.5 h-3.5 text-emerald-700" /> Data & Power Tactics
+                    </span>
                   </div>
-                  <span className="text-xs font-bold">Data & Power Tips</span>
+                </div>
+                <div className="p-6">
+                  <h3 className="font-serif-display text-xl text-stone-900 font-normal mb-2">
+                    Data-Smart Learning
+                  </h3>
+                  <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-sans">
+                    Prioritize lightweight offline documentation (MDN Web Docs, DevDocs), leverage midnight data bundles for heavy downloads, and lock YouTube video streams to 480p to conserve your gigabytes.
+                  </p>
                 </div>
               </div>
-              <div className="p-6">
-                <h3 className="text-base font-bold text-stone-900 mb-2">Data-Smart Learning</h3>
-                <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-                  Prioritize lightweight documentation (MDN, DevDocs offline), free downloadable PDFs, and setting YouTube video streams to 480p to conserve gigabytes.
-                </p>
+              <div className="px-6 pb-6 pt-2 border-t border-stone-100 text-[11px] text-stone-500 font-sans flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-700"></span>
+                <span>Saves up to 70% of monthly internet spend</span>
               </div>
-            </div>
+            </article>
 
             {/* Resource 2: Free Local Tech Hubs */}
-            <div id="resource-hub-card" className="rounded-2xl bg-white border border-stone-200 shadow-xs overflow-hidden hover:border-emerald-300 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
-              <div className="h-40 w-full overflow-hidden relative">
-                <img
-                  src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80"
-                  alt="Young people collaborating in a modern tech hub"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent"></div>
-                <div className="absolute bottom-3 left-3 text-white flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center">
-                    <Briefcase className="w-4 h-4 text-white" />
+            <article id="resource-hub-card" className="rounded-2xl bg-white border border-stone-200/90 shadow-2xs overflow-hidden hover:border-emerald-700/40 hover:shadow-md transition-all duration-300 flex flex-col justify-between">
+              <div>
+                <div className="h-44 w-full overflow-hidden relative bg-stone-100">
+                  <img
+                    src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?auto=format&fit=crop&w=600&q=80"
+                    alt="Young people collaborating in a modern tech hub"
+                    referrerPolicy="no-referrer"
+                    loading="lazy"
+                    className="w-full h-full object-cover hover:scale-103 transition-transform duration-700 ease-out"
+                  />
+                  <div className="absolute top-3 left-3">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-800 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-xs border border-stone-200/80">
+                      <Briefcase className="w-3.5 h-3.5 text-emerald-700" /> Community Spaces
+                    </span>
                   </div>
-                  <span className="text-xs font-bold">Community Hubs</span>
+                </div>
+                <div className="p-6">
+                  <h3 className="font-serif-display text-xl text-stone-900 font-normal mb-2">
+                    Free Local Tech Hubs
+                  </h3>
+                  <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-sans">
+                    Tap into community spaces (like Co-Creation Hub, ALX hubs, state 3MTT learning centers, and Google Developer Groups) whenever you need steady light and network for major installations.
+                  </p>
                 </div>
               </div>
-              <div className="p-6">
-                <h3 className="text-base font-bold text-stone-900 mb-2">Free Local Tech Hubs</h3>
-                <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-                  Tap into community spaces (like Co-Creation Hub, ALX hubs, GDG groups, and state innovation hubs) when you need steady light and network for major downloads.
-                </p>
+              <div className="px-6 pb-6 pt-2 border-t border-stone-100 text-[11px] text-stone-500 font-sans flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-700"></span>
+                <span>Unlocks free peer study circles & mentors</span>
               </div>
-            </div>
+            </article>
 
             {/* Resource 3: AI Career Advisor */}
-            <div id="resource-ai-card" className="rounded-2xl bg-white border border-stone-200 shadow-xs overflow-hidden hover:border-emerald-300 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
-              <div className="h-40 w-full overflow-hidden relative">
-                <img
-                  src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=600&q=80"
-                  alt="Young professional with digital assistant"
-                  referrerPolicy="no-referrer"
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-stone-900/60 to-transparent"></div>
-                <div className="absolute bottom-3 left-3 text-white flex items-center gap-2">
-                  <div className="w-7 h-7 rounded-lg bg-emerald-600 flex items-center justify-center">
-                    <Bot className="w-4 h-4 text-white" />
+            <article id="resource-ai-card" className="rounded-2xl bg-white border border-stone-200/90 shadow-2xs overflow-hidden hover:border-emerald-700/40 hover:shadow-md transition-all duration-300 flex flex-col justify-between">
+              <div>
+                <div className="h-44 w-full overflow-hidden relative bg-stone-100">
+                  <img
+                    src="https://images.unsplash.com/photo-1600880292203-757bb62b4baf?auto=format&fit=crop&w=600&q=80"
+                    alt="Young professional with digital assistant"
+                    referrerPolicy="no-referrer"
+                    loading="lazy"
+                    className="w-full h-full object-cover hover:scale-103 transition-transform duration-700 ease-out"
+                  />
+                  <div className="absolute top-3 left-3">
+                    <span className="inline-flex items-center gap-1.5 text-xs font-medium text-stone-800 bg-white/95 backdrop-blur-md px-3 py-1 rounded-full shadow-xs border border-stone-200/80">
+                      <Bot className="w-3.5 h-3.5 text-emerald-700" /> 24/7 AI Mentor
+                    </span>
                   </div>
-                  <span className="text-xs font-bold">AI Guidance</span>
+                </div>
+                <div className="p-6">
+                  <h3 className="font-serif-display text-xl text-stone-900 font-normal mb-2">
+                    AI Career Advisor
+                  </h3>
+                  <p className="text-xs sm:text-sm text-stone-600 leading-relaxed font-sans">
+                    Ask anything about starting out: "How do I pitch my first VA gig?", "Can I do UI/UX on an 8GB laptop?", or "What free YouTube playlist is actually current in 2026?".
+                  </p>
                 </div>
               </div>
-              <div className="p-6">
-                <h3 className="text-base font-bold text-stone-900 mb-2">AI Career Advisor (Gemini)</h3>
-                <p className="text-xs sm:text-sm text-stone-600 leading-relaxed">
-                  Ask anything about starting out: "How do I pitch my first VA gig?", "Can I do UI/UX on an 8GB laptop?", or "What free YouTube playlist is actually current in 2026?".
-                </p>
+              <div className="px-6 pb-6 pt-2 border-t border-stone-100 text-[11px] text-stone-500 font-sans flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-700"></span>
+                <span>Grounded specifically in the Nigerian ecosystem</span>
               </div>
-            </div>
+            </article>
 
           </div>
 
           {/* Quick interactive call to action banner */}
-          <div className="mt-12 p-8 rounded-3xl bg-stone-900 text-white text-center max-w-4xl mx-auto border border-stone-800 shadow-sm">
-            <h3 className="text-xl sm:text-2xl font-bold tracking-tight">Ready to find out which door to walk through?</h3>
-            <p className="text-stone-400 text-sm mt-2 max-w-xl mx-auto">
-              Take the 3-minute assessment. No sign-up, no hype, just honest guidance with your day-one task.
+          <div className="mt-14 p-8 sm:p-10 rounded-3xl bg-[#18201a] text-stone-100 text-center max-w-4xl mx-auto border border-[#263228] shadow-lg">
+            <h3 className="font-serif-display text-2xl sm:text-3xl font-normal text-white tracking-tight">
+              Ready to find out which tech door to walk through?
+            </h3>
+            <p className="text-stone-300 text-sm sm:text-base mt-2.5 max-w-xl mx-auto leading-relaxed font-sans">
+              Take our 3-minute assessment. No sign-up, no marketing hype — just honest guidance and your personalized day-one task.
             </p>
-            <div className="mt-6">
+            <div className="mt-7">
               <button
                 id="bottom-banner-assessment-btn"
                 type="button"
                 onClick={onStartAssessment}
-                className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-600 text-white font-semibold text-sm hover:bg-emerald-500 active:scale-[0.99] transition-all shadow-sm"
+                className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl bg-emerald-700 text-white font-semibold text-sm hover:bg-emerald-600 active:scale-[0.99] transition-all shadow-sm cursor-pointer"
               >
                 <Sparkles className="w-4 h-4 text-emerald-200" />
                 <span>Take the Assessment Now</span>
