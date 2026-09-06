@@ -10,7 +10,8 @@ import { Footer } from './components/Footer';
 import { AssessmentPage } from './components/AssessmentPage';
 import { NaijaChatbot } from './components/NaijaChatbot';
 import { AdminPortal } from './components/AdminPortal';
-import { Bot, Sparkles, MessageSquare, ArrowUp } from 'lucide-react';
+import { DraggableAiButton } from './components/DraggableAiButton';
+import { Bot, Sparkles, MessageSquare, ArrowUp, ChevronLeft, ChevronRight, MessageCircle } from 'lucide-react';
 import { Analytics } from '@vercel/analytics/react';
 import { trackPageView, trackClick, syncLocalRecordsToServer, initGlobalClickListener } from './utils/analytics';
 
@@ -35,6 +36,26 @@ export default function App() {
   const [chatbotContext, setChatbotContext] = useState<any>(undefined);
   const [initialChatbotPrompt, setInitialChatbotPrompt] = useState<string | undefined>(undefined);
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [isAiButtonExpanded, setIsAiButtonExpanded] = useState<boolean>(() => {
+    if (typeof window === 'undefined') return true;
+    try {
+      const saved = localStorage.getItem('naija_ai_button_expanded');
+      return saved !== null ? saved === 'true' : true;
+    } catch {
+      return true;
+    }
+  });
+
+  const toggleAiButtonExpanded = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setIsAiButtonExpanded(prev => {
+      const next = !prev;
+      try {
+        localStorage.setItem('naija_ai_button_expanded', String(next));
+      } catch {}
+      return next;
+    });
+  };
 
   // Sync with browser URL popstate (Back/Forward navigation)
   useEffect(() => {
@@ -150,40 +171,31 @@ export default function App() {
         </>
       )}
 
-      {/* Persistent Floating Controls (Back to Top & Chatbot Launcher) - Hidden on Admin View */}
+      {/* Persistent Floating Controls (Back to Top & Draggable Chatbot Launcher) - Hidden on Admin View */}
       {currentView !== 'admin' && (
-        <div className="fixed bottom-5 right-5 z-40 flex flex-col items-end gap-2.5 pointer-events-none">
+        <>
           {showBackToTop && (
-            <button
-              id="floating-back-to-top-btn"
-              type="button"
-              onClick={handleScrollToTop}
-              className="pointer-events-auto group flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white/95 hover:bg-white text-stone-700 hover:text-emerald-700 shadow-md hover:shadow-lg border border-stone-200/90 backdrop-blur-xs transition-all duration-200 active:scale-95 animate-in fade-in slide-in-from-bottom-2"
-              aria-label="Scroll back to top"
-              title="Scroll back to top"
-            >
-              <ArrowUp className="w-4 h-4 text-emerald-600 group-hover:-translate-y-0.5 transition-transform duration-200" />
-              <span className="text-xs font-bold tracking-tight text-stone-700 group-hover:text-emerald-700">Top</span>
-            </button>
+            <div className="fixed bottom-24 right-5 z-40 pointer-events-none">
+              <button
+                id="floating-back-to-top-btn"
+                type="button"
+                onClick={handleScrollToTop}
+                className="pointer-events-auto group flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-white/95 hover:bg-white text-stone-700 hover:text-emerald-700 shadow-md hover:shadow-lg border border-stone-200/90 backdrop-blur-xs transition-all duration-200 active:scale-95 animate-in fade-in slide-in-from-bottom-2 cursor-pointer"
+                aria-label="Scroll back to top"
+                title="Scroll back to top"
+              >
+                <ArrowUp className="w-4 h-4 text-emerald-600 group-hover:-translate-y-0.5 transition-transform duration-200" />
+                <span className="text-xs font-bold tracking-tight text-stone-700 group-hover:text-emerald-700">Top</span>
+              </button>
+            </div>
           )}
 
-          <button
-            id="floating-chatbot-launcher-btn"
-            type="button"
-            onClick={() => handleOpenChatbot()}
-            className="pointer-events-auto group flex items-center gap-2.5 px-4 py-3 rounded-full bg-stone-900 text-white hover:bg-emerald-800 shadow-xl border border-stone-700/60 hover:border-emerald-600 transition-all duration-200 active:scale-95"
-            title="Chat with Tizzi, your Naija Tech AI Mentor"
-          >
-            <div className="relative flex items-center justify-center w-7 h-7 rounded-full bg-emerald-600 group-hover:bg-emerald-500 text-white shrink-0 shadow-xs">
-              <Bot className="w-4 h-4" />
-              <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 border-2 border-stone-900 rounded-full animate-pulse"></span>
-            </div>
-            <div className="flex flex-col items-start pr-1">
-              <span className="text-xs font-black tracking-tight leading-none text-white">Ask Naija AI</span>
-              <span className="text-[10px] text-stone-300 font-medium leading-tight">Mentor Tizzi 🇳🇬</span>
-            </div>
-          </button>
-        </div>
+          <DraggableAiButton
+            isExpanded={isAiButtonExpanded}
+            onToggleExpand={toggleAiButtonExpanded}
+            onOpenChatbot={() => handleOpenChatbot()}
+          />
+        </>
       )}
 
       {/* Multi-turn Naija Chatbot Modal Panel */}

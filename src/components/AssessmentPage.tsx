@@ -302,7 +302,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
       </header>
 
       {/* Main Form Page Area */}
-      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+      <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 pb-24 sm:pb-28">
         
         {/* Live Cohort Match Counter */}
         {currentStep < 5 && (
