@@ -1,22 +1,59 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  ArrowRight, 
   ArrowLeft, 
-  Sparkles, 
-  Check, 
+  ArrowRight, 
+  Compass, 
   Smartphone, 
   Laptop, 
-  ShieldCheck, 
-  RotateCcw,
-  Compass,
-  Zap,
-  Clock,
-  Briefcase,
+  Clock, 
+  Zap, 
+  Briefcase, 
+  Check, 
   AlertCircle,
-  Users,
-  Bot
+  Bot,
+  Sprout,
+  RefreshCw,
+  Palette,
+  Cpu,
+  BookOpen,
+  Rocket,
+  Brain,
+  ListChecks,
+  MessageSquare,
+  Coins,
+  Wrench,
+  GraduationCap,
+  Building2,
+  MapPin,
+  Building,
+  Globe,
+  Monitor,
+  Search,
+  Award,
+  ShieldCheck,
+  Layout,
+  Video,
+  UserCheck
 } from 'lucide-react';
-import { SectionTransitionCard } from './SectionTransitionCard';
+import { SingleQuestionCard } from './SingleQuestionCard';
+import { TechNavLogo } from './TechNavLogo';
+import { AssessmentProgressIndicator } from './AssessmentProgressIndicator';
+import { 
+  HandPalette, 
+  HandSmartphone, 
+  HandMessage, 
+  HandCoins, 
+  HandChecklist, 
+  HandGlobe, 
+  HandLaptop, 
+  HandCode, 
+  HandShield, 
+  HandBook,
+  HandBriefcase,
+  HandCompass,
+  HandWrench,
+  HandVideo
+} from './HandDrawnIcons';
 import { 
   UserBiodata, 
   UserConstraints, 
@@ -27,42 +64,31 @@ import {
   QualitativeAnswers
 } from '../types';
 import { 
-  AGE_BAND_OPTIONS, 
-  GENDER_OPTIONS, 
-  STATUS_OPTIONS, 
   REGION_OPTIONS, 
-  DEVICE_OPTIONS, 
-  TIME_OPTIONS, 
-  POWER_DATA_OPTIONS, 
-  CODING_APPETITE_OPTIONS, 
-  EARNING_URGENCY_OPTIONS,
   SCENARIO_QUESTIONS,
   calculateNicheRecommendation
 } from '../data/assessmentQuestions';
 import { DiagnosisResult } from './DiagnosisResult';
-import { ALL_NICHES } from '../data/nichesData';
-import { SingleQuestionCard } from './SingleQuestionCard';
 import { saveAssessmentRecord } from '../utils/submissionStorage';
-import { trackAssessmentStart, trackAssessmentComplete, trackPageView, syncLocalRecordsToServer } from '../utils/analytics';
+import { saveAssessmentDraft, getAssessmentDraft, clearAssessmentDraft } from '../utils/assessmentDraftStorage';
+import { trackAssessmentStart, trackAssessmentComplete, trackPageView } from '../utils/analytics';
 
 interface AssessmentPageProps {
   onBackToHome: () => void;
-  initialNicheId?: string | null;
-  onOpenChatbot?: (prompt?: string, context?: any) => void;
+  initialNicheId?: string;
+  onOpenChatbot?: (prompt?: string) => void;
 }
 
 export const AssessmentPage: React.FC<AssessmentPageProps> = ({
   onBackToHome,
-  initialNicheId,
+  initialNicheId: _initialNicheId,
   onOpenChatbot
 }) => {
   // Step tracker: 1 = Biodata, 2 = Constraints, 3 = Scenarios/Aptitude, 4 = Nuance, 5 = Result
   const [currentStep, setCurrentStep] = useState<number>(1);
+  const [step1SubIndex, setStep1SubIndex] = useState<number>(0);
   const [constraintSubIndex, setConstraintSubIndex] = useState<number>(0);
   const [scenarioSubIndex, setScenarioSubIndex] = useState<number>(0);
-
-  // Interstitial transition state between sections (2, 3, 4)
-  const [activeSectionIntro, setActiveSectionIntro] = useState<number | null>(null);
 
   // Form State: clean slate so the user makes all choices themselves
   const [biodata, setBiodata] = useState<UserBiodata>({
@@ -70,7 +96,10 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
     ageBand: '',
     gender: '',
     status: '',
-    location: ''
+    location: '',
+    fieldOfStudy: '',
+    experienceLevel: '',
+    primaryInterest: ''
   });
 
   const [constraints, setConstraints] = useState<UserConstraints>({
@@ -81,7 +110,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
     earningUrgency: ''
   });
 
-  // Scenario selections: start completely blank, no preselected index 0
+  // Scenario selections: start completely blank, no preselected index
   const [scenarioAnswers, setScenarioAnswers] = useState<Record<string, number>>({});
 
   // Qualitative answers
@@ -97,260 +126,733 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
   // Validation alert state
   const [validationError, setValidationError] = useState<string | null>(null);
 
+  // Auto-saved draft restoration state
+  const [restoredFromDraft, setRestoredFromDraft] = useState<boolean>(false);
+
+  // Restore saved draft on mount if user refreshed or navigated back
+  useEffect(() => {
+    const draft = getAssessmentDraft();
+    if (draft) {
+      if (draft.biodata) setBiodata(draft.biodata);
+      if (draft.constraints) setConstraints(draft.constraints);
+      if (draft.scenarioAnswers) setScenarioAnswers(draft.scenarioAnswers);
+      if (draft.qualitative) setQualitative(draft.qualitative);
+      if (typeof draft.currentStep === 'number' && draft.currentStep >= 1) setCurrentStep(Math.min(5, Math.max(1, draft.currentStep)));
+      if (typeof draft.step1SubIndex === 'number') setStep1SubIndex(Math.max(0, Math.min(6, draft.step1SubIndex)));
+      if (typeof draft.constraintSubIndex === 'number') setConstraintSubIndex(Math.max(0, Math.min(4, draft.constraintSubIndex)));
+      if (typeof draft.scenarioSubIndex === 'number') setScenarioSubIndex(Math.max(0, Math.min(SCENARIO_QUESTIONS.length - 1, draft.scenarioSubIndex)));
+      if (draft.diagnosisResult) setDiagnosisResult(draft.diagnosisResult);
+
+      const hasMeaningfulAnswers =
+        draft.currentStep > 1 ||
+        Object.keys(draft.scenarioAnswers || {}).length > 0 ||
+        Boolean(draft.biodata?.status || draft.biodata?.location || draft.biodata?.experienceLevel);
+
+      if (hasMeaningfulAnswers) {
+        setRestoredFromDraft(true);
+      }
+    }
+  }, []);
+
+  // Automatically save progress whenever answers or step change
+  useEffect(() => {
+    saveAssessmentDraft({
+      currentStep,
+      step1SubIndex,
+      constraintSubIndex,
+      scenarioSubIndex,
+      activeSectionIntro: null,
+      biodata,
+      constraints,
+      scenarioAnswers,
+      qualitative,
+      diagnosisResult
+    });
+  }, [
+    currentStep,
+    step1SubIndex,
+    constraintSubIndex, 
+    scenarioSubIndex, 
+    biodata, 
+    constraints, 
+    scenarioAnswers, 
+    qualitative, 
+    diagnosisResult
+  ]);
+
   // Scroll to top when changing steps
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
     setValidationError(null);
-    if (currentStep === 1 && !activeSectionIntro) {
+    if (currentStep === 1) {
       trackPageView('/assessment');
       trackAssessmentStart();
     } else if (currentStep === 5) {
       trackPageView('/result');
     }
-  }, [currentStep, activeSectionIntro]);
+  }, [currentStep]);
 
-  const handleNextStep = () => {
+  // Handle final submission in Step 4
+  const handleSubmitAssessment = () => {
     setValidationError(null);
 
-    // Step 1 Validation
-    if (currentStep === 1) {
-      if (!biodata.ageBand || !biodata.gender || !biodata.status || !biodata.location) {
-        setValidationError('Please answer all 4 questions above to continue.');
-        return;
-      }
-      setActiveSectionIntro(2);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!qualitative.proudAchievement.trim()) {
+      setValidationError('Please share one small project, task, or problem you helped solve or organize recently.');
       return;
     }
 
-    // Step 2 Validation
-    if (currentStep === 2) {
-      if (!constraints.device || !constraints.timeWeekly || !constraints.powerData || !constraints.codingAppetite || !constraints.earningUrgency) {
-        setValidationError('Please answer all 5 questions about your device, time, and power setup.');
-        return;
-      }
-      setActiveSectionIntro(3);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
+    // Tally raw weighted points across the 6 cognitive domains
+    const points: Record<keyof AptitudeScores, number> = {
+      visualCreative: 0,
+      logicalStructural: 0,
+      peopleCommunication: 0,
+      analyticalDetail: 0,
+      organizationOps: 0,
+      securityCuriosity: 0,
+    };
 
-    // Step 3 Validation
-    if (currentStep === 3) {
-      const answeredAll = SCENARIO_QUESTIONS.every(q => scenarioAnswers[q.id] !== undefined);
-      if (!answeredAll) {
-        setValidationError(`Please pick an answer for all ${SCENARIO_QUESTIONS.length} questions above.`);
-        return;
-      }
-      setActiveSectionIntro(4);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-      return;
-    }
-
-    // Step 4: Submission & Calculation
-    if (currentStep === 4) {
-      if (!qualitative.proudAchievement.trim()) {
-        setValidationError('This question is compulsory: please tell us one thing you fixed, arranged, or helped with recently.');
-        return;
-      }
-
-      // Tally raw weighted points across the 6 cognitive domains
-      const points: Record<keyof AptitudeScores, number> = {
-        visualCreative: 0,
-        logicalStructural: 0,
-        peopleCommunication: 0,
-        analyticalDetail: 0,
-        organizationOps: 0,
-        securityCuriosity: 0,
-      };
-
-      SCENARIO_QUESTIONS.forEach((q) => {
-        const chosenIndex = scenarioAnswers[q.id];
-        if (chosenIndex !== undefined) {
-          const option = q.options[chosenIndex];
-          if (option && option.weights) {
-            Object.entries(option.weights).forEach(([key, val]) => {
-              const k = key as keyof AptitudeScores;
-              points[k] += (val ?? 0);
-            });
-          }
+    SCENARIO_QUESTIONS.forEach((q) => {
+      const chosenIndex = scenarioAnswers[q.id];
+      if (chosenIndex !== undefined) {
+        const option = q.options[chosenIndex];
+        if (option && option.weights) {
+          Object.entries(option.weights).forEach(([key, val]) => {
+            const k = key as keyof AptitudeScores;
+            points[k] += (val ?? 0);
+          });
         }
-      });
+      }
+    });
 
-      // Dynamic contrast normalization: scale relative to user's highest point domain
-      // to preserve authentic spikes in strength rather than flattening everyone to average
-      const maxPointVal = Math.max(...Object.values(points), 1);
+    // Dynamic contrast normalization: scale relative to user's highest point domain
+    const maxPointVal = Math.max(...Object.values(points), 1);
 
-      const aptitudeTotals: AptitudeScores = {
-        visualCreative: Math.max(1, Math.min(5, Math.round((points.visualCreative / maxPointVal) * 5))),
-        logicalStructural: Math.max(1, Math.min(5, Math.round((points.logicalStructural / maxPointVal) * 5))),
-        peopleCommunication: Math.max(1, Math.min(5, Math.round((points.peopleCommunication / maxPointVal) * 5))),
-        analyticalDetail: Math.max(1, Math.min(5, Math.round((points.analyticalDetail / maxPointVal) * 5))),
-        organizationOps: Math.max(1, Math.min(5, Math.round((points.organizationOps / maxPointVal) * 5))),
-        securityCuriosity: Math.max(1, Math.min(5, Math.round((points.securityCuriosity / maxPointVal) * 5))),
-      };
+    const aptitudeTotals: AptitudeScores = {
+      visualCreative: Math.max(1, Math.min(5, Math.round((points.visualCreative / maxPointVal) * 5))),
+      logicalStructural: Math.max(1, Math.min(5, Math.round((points.logicalStructural / maxPointVal) * 5))),
+      peopleCommunication: Math.max(1, Math.min(5, Math.round((points.peopleCommunication / maxPointVal) * 5))),
+      analyticalDetail: Math.max(1, Math.min(5, Math.round((points.analyticalDetail / maxPointVal) * 5))),
+      organizationOps: Math.max(1, Math.min(5, Math.round((points.organizationOps / maxPointVal) * 5))),
+      securityCuriosity: Math.max(1, Math.min(5, Math.round((points.securityCuriosity / maxPointVal) * 5))),
+    };
 
-      const submission: FullAssessmentSubmission = {
-        biodata,
-        constraints,
-        aptitude: aptitudeTotals,
-        qualitative
-      };
+    const submission: FullAssessmentSubmission = {
+      biodata,
+      constraints,
+      aptitude: aptitudeTotals,
+      qualitative
+    };
 
-      const computed = calculateNicheRecommendation(submission);
-      const savedRecord = saveAssessmentRecord(submission, computed);
-      trackAssessmentComplete({
-        recordId: savedRecord.id,
-        nicheId: computed.primaryNiche.id,
-        nicheTitle: computed.primaryNiche.title,
-        matchScore: computed.matchScore,
-        device: submission.constraints.device,
-        weeklyHours: submission.constraints.timeWeekly,
-        location: submission.biodata.location || 'Nigeria',
-      });
-      syncLocalRecordsToServer();
-      setDiagnosisResult(computed);
-      setCurrentStep(5);
-    }
+    const computed = calculateNicheRecommendation(submission);
+    const savedRecord = saveAssessmentRecord(submission, computed);
+    trackAssessmentComplete({
+      recordId: savedRecord.id,
+      nicheId: computed.primaryNiche.id,
+      nicheTitle: computed.primaryNiche.title,
+      matchScore: computed.matchScore,
+      device: submission.constraints.device,
+      weeklyHours: submission.constraints.timeWeekly,
+      location: submission.biodata.location || 'Nigeria',
+    });
+    setDiagnosisResult(computed);
+    setCurrentStep(5);
   };
 
+  // Step 1 Questions: Conversational, relatable, psychological
+  const step1Questions = [
+    {
+      field: 'experienceLevel' as keyof UserBiodata,
+      title: "Where are you on your journey right now?",
+      subtitle: "No tests, no jargon. We tailor your starting pace to where you actually are today.",
+      categoryBadge: "Your Starting Point",
+      customTopSlot: (
+        <div className="p-4 rounded-xl bg-stone-50 border border-stone-200/90 mb-1">
+          <label htmlFor="bio-name-input" className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5">
+            What should we call you? <span className="text-stone-400 font-normal lowercase">(optional)</span>
+          </label>
+          <input
+            id="bio-name-input"
+            type="text"
+            placeholder="e.g. Tosin, Chidi, Amina, Aisha"
+            value={biodata.fullName || ''}
+            onChange={(e) => setBiodata(prev => ({ ...prev, fullName: e.target.value }))}
+            className="w-full px-3.5 py-2.5 rounded-lg border border-stone-300 bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700 placeholder:text-stone-400 transition-all"
+          />
+        </div>
+      ),
+      options: [
+        {
+          value: 'novice_total_beginner',
+          label: 'Total Beginner',
+          sublabel: 'Brand new to tech, looking for a welcoming, jargon-free starting path',
+          icon: 'sprout'
+        },
+        {
+          value: 'intermediate_career_changer',
+          label: 'Career Switcher',
+          sublabel: 'Bringing experience from another field into high-income tech',
+          icon: 'refresh'
+        },
+        {
+          value: 'skill_builder_advancing',
+          label: 'Skill Builder',
+          sublabel: 'Have basic computer skills, ready to master a high-paying specialty',
+          icon: 'zap'
+        }
+      ]
+    },
+    {
+      field: 'fieldOfStudy' as keyof UserBiodata,
+      title: "What did you study or what is your academic background?",
+      subtitle: "Your background is a superpower! Every field naturally shines in specific tech niches.",
+      categoryBadge: "Educational Foundation",
+      options: [
+        {
+          value: 'arts_humanities',
+          label: 'Arts, Languages & Media',
+          sublabel: 'Literature, Languages, Mass Comm, Creative Arts, Theatre',
+          icon: 'palette'
+        },
+        {
+          value: 'commercial_business',
+          label: 'Business & Finance',
+          sublabel: 'Accounting, Economics, Business Admin, Banking, Marketing',
+          icon: 'briefcase'
+        },
+        {
+          value: 'sciences_health',
+          label: 'Sciences & Tech',
+          sublabel: 'Computer Science, Engineering, Physical Sciences, Pharmacy, Nursing',
+          icon: 'cpu'
+        },
+        {
+          value: 'social_sciences_education',
+          label: 'Social Sciences & Education',
+          sublabel: 'Education, Sociology, Psychology, Political Science',
+          icon: 'book'
+        },
+        {
+          value: 'secondary_school',
+          label: 'Secondary School / O-Level',
+          sublabel: 'High school graduate ready to dive straight into practical digital skills',
+          icon: 'graduation'
+        },
+        {
+          value: 'self_taught_other',
+          label: 'Self-Taught & Practical Life',
+          sublabel: 'Learned through business, hands-on trade, or informal exploration',
+          icon: 'brain'
+        }
+      ]
+    },
+    {
+      field: 'primaryInterest' as keyof UserBiodata,
+      title: "What kind of activities naturally energize you?",
+      subtitle: "What you naturally enjoy reveals where your deepest talent and earning power live.",
+      categoryBadge: "Natural Curiosity",
+      options: [
+        {
+          value: 'colors_visual_design',
+          label: 'Colors, Visuals & Styling',
+          sublabel: 'Playing with colors, typography, screen layouts, photo/video editing',
+          icon: 'palette'
+        },
+        {
+          value: 'investigating_puzzles',
+          label: 'Solving Puzzles & Logic',
+          sublabel: 'Untangling why things break, brain teasers, strategy games, riddles',
+          icon: 'brain'
+        },
+        {
+          value: 'organizing_systems',
+          label: 'Organizing Systems & Lists',
+          sublabel: 'Planning schedules, tidying messy files, structured checklists',
+          icon: 'checklist'
+        },
+        {
+          value: 'communicating_helping',
+          label: 'Talking, Advising & Storytelling',
+          sublabel: 'Explaining ideas, counseling, writing catchy posts, helping people',
+          icon: 'message'
+        },
+        {
+          value: 'numbers_money',
+          label: 'Numbers, Margins & Deals',
+          sublabel: 'Tracking money, calculating profits, finding bargains, spreadsheets',
+          icon: 'coins'
+        },
+        {
+          value: 'building_gadgets',
+          label: 'Building Gadgets & Tinkering',
+          sublabel: 'Hands-on experimenting, taking gadgets apart, coding software logic',
+          icon: 'wrench'
+        }
+      ]
+    },
+    {
+      field: 'status' as keyof UserBiodata,
+      title: "What does your everyday life look like right now?",
+      subtitle: "We ensure your study roadmap fits your real schedule without stress or burnout.",
+      categoryBadge: "Current Routine",
+      options: [
+        {
+          value: 'student_undergrad',
+          label: 'Undergrad / College Student',
+          sublabel: 'Balancing school lectures with building career-ready tech skills',
+          icon: 'graduation'
+        },
+        {
+          value: 'working_non_tech',
+          label: 'Working a Non-Tech Job',
+          sublabel: 'Currently employed and looking for a lucrative, flexible career pivot',
+          icon: 'building'
+        },
+        {
+          value: 'self_employed',
+          label: 'Self-Employed / Running a Business',
+          sublabel: 'Managing my own business, trade, or independent hustle',
+          icon: 'rocket'
+        },
+        {
+          value: 'nysc_member',
+          label: 'NYSC Youth Corp Member',
+          sublabel: 'Serving Nigeria and preparing for immediate post-service income',
+          icon: 'award'
+        },
+        {
+          value: 'unemployed_grad',
+          label: 'Job Seeker / Recent Graduate',
+          sublabel: 'Ready to dedicate focused daily time to tech mastery and job placement',
+          icon: 'search'
+        }
+      ]
+    },
+    {
+      field: 'ageBand' as keyof UserBiodata,
+      title: "Which age bracket describes you?",
+      subtitle: "Every life stage has distinct grant perks, fellowships, and career advantages.",
+      categoryBadge: "Life Stage",
+      options: [
+        {
+          value: 'under_18',
+          label: 'Under 18',
+          sublabel: 'Getting an early head start before university',
+          icon: 'rocket'
+        },
+        {
+          value: '18_22',
+          label: '18 to 22 years',
+          sublabel: 'Early university & foundational skill builder',
+          icon: 'graduation'
+        },
+        {
+          value: '23_27',
+          label: '23 to 27 years',
+          sublabel: 'Recent graduate or early career accelerator',
+          icon: 'briefcase'
+        },
+        {
+          value: '28_34',
+          label: '28 to 34 years',
+          sublabel: 'Mid-career switch or income acceleration',
+          icon: 'clock'
+        },
+        {
+          value: '35_plus',
+          label: '35+ years',
+          sublabel: 'Experienced professional expanding into global digital skills',
+          icon: 'award'
+        }
+      ]
+    },
+    {
+      field: 'gender' as keyof UserBiodata,
+      title: "What is your gender?",
+      subtitle: "Helps match female learners with fully-sponsored initiatives (She Code Africa, laptop grants).",
+      categoryBadge: "Profile Matching",
+      options: [
+        {
+          value: 'female',
+          label: 'Female',
+          sublabel: 'Unlocks dedicated women-in-tech grants, fellowships & laptop funds',
+          icon: 'users'
+        },
+        {
+          value: 'male',
+          label: 'Male',
+          sublabel: 'Standard diagnostic, scholarship and community matching',
+          icon: 'users'
+        },
+        {
+          value: 'prefer_not_to_say',
+          label: 'Prefer not to say',
+          sublabel: 'Neutral evaluation across all criteria',
+          icon: 'shield'
+        }
+      ]
+    },
+    {
+      field: 'location' as keyof UserBiodata,
+      title: "Where are you based right now?",
+      subtitle: "Matches you to local tech hubs, 3MTT learning centers, and developer meetups.",
+      categoryBadge: "Location & Ecosystem",
+      options: [
+        {
+          value: 'lagos',
+          label: 'Lagos State',
+          sublabel: 'Yaba, Ikeja, Lekki tech corridor & innovation ecosystem',
+          icon: 'building'
+        },
+        {
+          value: 'abuja_fct',
+          label: 'Abuja (FCT)',
+          sublabel: 'Capital innovation hubs & national tech initiatives',
+          icon: 'building'
+        },
+        {
+          value: 'south_south',
+          label: 'Rivers (Port Harcourt)',
+          sublabel: 'South-South digital innovation and remote hub',
+          icon: 'map-pin'
+        },
+        {
+          value: 'south_west',
+          label: 'Oyo State (Ibadan)',
+          sublabel: 'Fast-growing student and software community',
+          icon: 'compass'
+        },
+        {
+          value: 'south_east',
+          label: 'Enugu / South-East',
+          sublabel: 'Emerging tech clusters and remote tech talent',
+          icon: 'zap'
+        },
+        {
+          value: 'other_state',
+          label: 'Other State / International',
+          sublabel: 'Pick from all 36 Nigerian states or Diaspora below',
+          icon: 'globe'
+        }
+      ],
+      customBottomSlot: (
+        <div className="p-4 rounded-xl bg-stone-50 border border-stone-200">
+          <label htmlFor="bio-state-select" className="block text-xs font-semibold text-stone-700 uppercase tracking-wider mb-1.5">
+            Or pick your specific State / Region:
+          </label>
+          <select
+            id="bio-state-select"
+            value={biodata.location}
+            onChange={(e) => {
+              setBiodata(prev => ({ ...prev, location: e.target.value as NigerianRegion }));
+              setValidationError(null);
+            }}
+            className="w-full px-3.5 py-2.5 rounded-lg border border-stone-300 bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-700 font-medium"
+          >
+            <option value="">-- Choose your State or Region --</option>
+            {REGION_OPTIONS.map(opt => (
+              <option key={opt.value} value={opt.value}>{opt.label}</option>
+            ))}
+          </select>
+        </div>
+      )
+    }
+  ];
+
+  // Step 2 Questions: Real-world constraints
   const constraintQuestions = [
     {
       title: 'What device will you use for daily learning?',
       subtitle: 'Be real with us. We only recommend tech paths that work with the hardware you have right now.',
       field: 'device' as keyof UserConstraints,
       categoryBadge: 'Hardware Setup',
-      options: DEVICE_OPTIONS.map(opt => ({
-        value: opt.value,
-        label: opt.label,
-        sublabel: opt.sublabel,
-        icon: opt.value === 'phone_only' ? <Smartphone className="w-5 h-5" /> : <Laptop className="w-5 h-5" />
-      }))
+      options: [
+        {
+          value: 'phone_only',
+          label: 'Smartphone Only',
+          sublabel: 'Android or iPhone — zero laptop access right now',
+          icon: 'smartphone'
+        },
+        {
+          value: 'laptop_personal',
+          label: 'Personal Laptop',
+          sublabel: 'Your own laptop (Mac, Windows, or Linux) with full installation access',
+          icon: 'laptop'
+        },
+        {
+          value: 'shared_pc',
+          label: 'Shared PC / Cyber Café',
+          sublabel: 'Family desktop, university lab, or cafe visits (limited access hours)',
+          icon: 'laptop'
+        }
+      ]
     },
     {
       title: 'How much free time do you realistically have each week?',
       subtitle: 'Be honest with your schedule so you never burn out or abandon your tech journey.',
       field: 'timeWeekly' as keyof UserConstraints,
       categoryBadge: 'Time Availability',
-      options: TIME_OPTIONS.map(opt => ({
-        value: opt.value,
-        label: opt.label,
-        sublabel: opt.sublabel,
-        icon: <Clock className="w-5 h-5" />
-      }))
+      options: [
+        {
+          value: '5_10_hours',
+          label: '5 to 10 Hours / Week',
+          sublabel: 'Bite-sized evenings & weekends (1 to 1.5 hours daily)',
+          icon: 'clock'
+        },
+        {
+          value: '10_20_hours',
+          label: '10 to 20 Hours / Week',
+          sublabel: 'Solid part-time dedication (2 to 3 hours daily)',
+          icon: 'clock'
+        },
+        {
+          value: '20_30_hours',
+          label: '20 to 30 Hours / Week',
+          sublabel: 'Serious career accelerator (3 to 5 hours daily)',
+          icon: 'clock'
+        },
+        {
+          value: '30_plus_hours',
+          label: '30+ Hours / Week',
+          sublabel: 'Full-time immersion (unemployed grad, gap year, or leave of absence)',
+          icon: 'clock'
+        }
+      ]
     },
     {
-      title: 'What is your power and data situation?',
+      title: 'What is your power and internet situation?',
       subtitle: 'We match you to learning stacks with lightweight data needs or offline study capabilities if required.',
       field: 'powerData' as keyof UserConstraints,
-      categoryBadge: 'Light & Internet',
-      options: POWER_DATA_OPTIONS.map(opt => ({
-        value: opt.value,
-        label: opt.label,
-        sublabel: opt.sublabel,
-        icon: <Zap className="w-5 h-5" />
-      }))
+      categoryBadge: 'Power & Data',
+      options: [
+        {
+          value: 'stable_power_data',
+          label: 'Reliable Light & Daily Internet',
+          sublabel: 'Inverter, gen backup, or steady grid with Wi-Fi / data subscriptions',
+          icon: 'zap'
+        },
+        {
+          value: 'erratic_power_good_data',
+          label: 'Unstable Light, Decent Data',
+          sublabel: 'Frequent NEPA outages, reliance on phone battery & evening charging',
+          icon: 'zap'
+        },
+        {
+          value: 'mobile_data_rationed',
+          label: 'Mobile Data Strictly Rationed',
+          sublabel: 'Need low-bandwidth courses, downloadable docs, and offline coding',
+          icon: 'smartphone'
+        },
+        {
+          value: 'both_severely_constrained',
+          label: 'Both Severely Constrained',
+          sublabel: 'Need ultra-forgiving learning paths that operate with minimal resources',
+          icon: 'shield'
+        }
+      ]
     },
     {
       title: 'How do you feel about writing code?',
       subtitle: 'Tech has massive high-paying roles for both coders and non-coders alike.',
       field: 'codingAppetite' as keyof UserConstraints,
       categoryBadge: 'Coding Appetite',
-      options: CODING_APPETITE_OPTIONS.map(opt => ({
-        value: opt.value,
-        label: opt.label,
-        sublabel: opt.sublabel,
-        icon: <Compass className="w-5 h-5" />
-      }))
+      options: [
+        {
+          value: 'no_coding',
+          label: 'Zero Code Preferred',
+          sublabel: 'I prefer visual design, writing, research, or virtual management',
+          icon: 'palette'
+        },
+        {
+          value: 'open_to_light_coding',
+          label: 'Open to Light Logic / No-Code',
+          sublabel: 'I can handle visual formulas, spreadsheets, automation, and basic web styling',
+          icon: 'wrench'
+        },
+        {
+          value: 'excited_to_code',
+          label: 'Excited to Code',
+          sublabel: 'I want to build software logic, APIs, mobile apps, or backend algorithms',
+          icon: 'code'
+        }
+      ]
     },
     {
       title: 'How soon do you want to start earning income?',
       subtitle: 'Helps us balance quick-win freelance skills against long-term career mastery.',
       field: 'earningUrgency' as keyof UserConstraints,
-      categoryBadge: 'Income Urgency',
-      options: EARNING_URGENCY_OPTIONS.map(opt => ({
-        value: opt.value,
-        label: opt.label,
-        sublabel: opt.sublabel,
-        icon: <Briefcase className="w-5 h-5" />
-      }))
+      categoryBadge: 'Income Timeline',
+      options: [
+        {
+          value: 'urgent_1_3_months',
+          label: 'Urgent (1 to 3 Months)',
+          sublabel: 'Need quick-win skills to monetize on WhatsApp, Upwork, or local clients',
+          icon: 'zap'
+        },
+        {
+          value: 'medium_3_6_months',
+          label: 'Balanced (3 to 6 Months)',
+          sublabel: 'Ready to build a solid portfolio and apply for entry-level roles or gigs',
+          icon: 'briefcase'
+        },
+        {
+          value: 'patient_6_12_months',
+          label: 'Deep Mastery (6 to 12 Months)',
+          sublabel: 'Willing to learn deep technical engineering for high-leverage compensation',
+          icon: 'award'
+        }
+      ]
     }
   ];
 
-  const handlePrevStep = () => {
-    setValidationError(null);
-    if (currentStep === 4) {
-      setActiveSectionIntro(4);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
-    } else if (currentStep === 3) {
-      if (scenarioSubIndex > 0) {
-        setScenarioSubIndex(prev => prev - 1);
-      } else {
-        setActiveSectionIntro(3);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    } else if (currentStep === 2) {
-      if (constraintSubIndex > 0) {
-        setConstraintSubIndex(prev => prev - 1);
-      } else {
-        setActiveSectionIntro(2);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    } else if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-    }
+  const handleStartFresh = () => {
+    clearAssessmentDraft();
+    setRestoredFromDraft(false);
+    setBiodata({
+      fullName: '',
+      ageBand: '',
+      gender: '',
+      status: '',
+      location: '',
+      fieldOfStudy: '',
+      experienceLevel: '',
+      primaryInterest: ''
+    });
+    setConstraints({
+      device: '',
+      timeWeekly: '',
+      powerData: '',
+      codingAppetite: '',
+      earningUrgency: ''
+    });
+    setScenarioAnswers({});
+    setQualitative({
+      proudAchievement: '',
+      targetIndustry: '',
+      preferredDailyActivity: ''
+    });
+    setDiagnosisResult(null);
+    setCurrentStep(1);
+    setStep1SubIndex(0);
+    setConstraintSubIndex(0);
+    setScenarioSubIndex(0);
   };
 
   const handleRetake = () => {
-    setDiagnosisResult(null);
-    setScenarioAnswers({});
-    setConstraintSubIndex(0);
-    setScenarioSubIndex(0);
-    setActiveSectionIntro(null);
-    setCurrentStep(1);
+    handleStartFresh();
   };
 
-  const handleExploreOther = (nicheId: string) => {
-    const found = ALL_NICHES.find(n => n.id === nicheId);
-    if (found && diagnosisResult) {
-      setDiagnosisResult({
-        ...diagnosisResult,
-        primaryNiche: found,
-        matchScore: diagnosisResult.secondaryMatchScore,
-        rationale: `You are exploring ${found.title}. This is your secondary strong match, offering a complementary set of career and earnings opportunities.`
-      });
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+  const handleExploreOther = () => {
+    if (onBackToHome) {
+      onBackToHome();
     }
   };
 
   const stepLabels = [
-    'Background',
-    'Setup & Reality',
-    'Cognitive Scenarios',
-    'Final Calibration',
-    'Your Result'
+    'Your Background',
+    'Setup & Time',
+    'Everyday Scenarios',
+    'Final Touch'
   ];
 
+  // Global 19-question helpers
+  const getAnsweredGlobalIndices = (): boolean[] => {
+    return [
+      // Phase 1: Background (7)
+      Boolean(biodata.experienceLevel),
+      Boolean(biodata.fieldOfStudy),
+      Boolean(biodata.primaryInterest),
+      Boolean(biodata.status),
+      Boolean(biodata.ageBand),
+      Boolean(biodata.gender),
+      Boolean(biodata.location),
+      // Phase 2: Constraints (5)
+      Boolean(constraints.device),
+      Boolean(constraints.timeWeekly),
+      Boolean(constraints.powerData),
+      Boolean(constraints.codingAppetite),
+      Boolean(constraints.earningUrgency),
+      // Phase 3: Scenarios (6)
+      ...SCENARIO_QUESTIONS.map(q => scenarioAnswers[q.id] !== undefined),
+      // Phase 4: Reflection (1)
+      Boolean(qualitative.proudAchievement.trim())
+    ];
+  };
+
+  const safeStep1Index = Math.max(0, Math.min(step1SubIndex, Math.max(0, step1Questions.length - 1)));
+  const safeConstraintIndex = Math.max(0, Math.min(constraintSubIndex, Math.max(0, constraintQuestions.length - 1)));
+  const safeScenarioIndex = Math.max(0, Math.min(scenarioSubIndex, Math.max(0, SCENARIO_QUESTIONS.length - 1)));
+
+  const currentStep1 = step1Questions[safeStep1Index] || step1Questions[0];
+  const currentConstraint = constraintQuestions[safeConstraintIndex] || constraintQuestions[0];
+  const currentScenario = SCENARIO_QUESTIONS[safeScenarioIndex] || SCENARIO_QUESTIONS[0];
+
+  const getCurrentGlobalIndex = (): number => {
+    if (currentStep === 1) return safeStep1Index;
+    if (currentStep === 2) return 7 + safeConstraintIndex;
+    if (currentStep === 3) return 7 + 5 + safeScenarioIndex;
+    if (currentStep === 4) return 18;
+    return 18;
+  };
+
+  const getCurrentCategoryBadge = (): string => {
+    if (currentStep === 1) return currentStep1?.categoryBadge || 'Your Background';
+    if (currentStep === 2) return currentConstraint?.categoryBadge || 'Setup & Constraints';
+    if (currentStep === 3) return currentScenario?.category || 'Everyday Scenarios';
+    if (currentStep === 4) return 'Personal Small Win';
+    return '';
+  };
+
+  const handleJumpToGlobalIndex = (globalIdx: number) => {
+    setValidationError(null);
+    if (globalIdx >= 0 && globalIdx < 7) {
+      setCurrentStep(1);
+      setStep1SubIndex(globalIdx);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (globalIdx >= 7 && globalIdx < 12) {
+      setCurrentStep(2);
+      setConstraintSubIndex(globalIdx - 7);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (globalIdx >= 12 && globalIdx < 18) {
+      setCurrentStep(3);
+      setScenarioSubIndex(globalIdx - 12);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    } else if (globalIdx === 18) {
+      setCurrentStep(4);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  };
+
+  // Calculate overall progress across the entire assessment
+  const calculateOverallProgress = () => {
+    if (currentStep === 5) return 100;
+    const answeredCount = getAnsweredGlobalIndices().filter(Boolean).length;
+    return Math.min(98, Math.round((answeredCount / 19) * 100));
+  };
+
   return (
-    <div id="assessment-page-root" className="min-h-screen bg-stone-50 flex flex-col text-stone-900">
-      
-      {/* Top Sticky Header */}
-      <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+    <div className="min-h-screen bg-[#F1F0FF] text-slate-900 flex flex-col font-sans selection:bg-[#D4F938] selection:text-black">
+      {/* Top Header */}
+      <header className="bg-white border-b-2 border-black sticky top-0 z-30">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 sm:gap-3.5">
             <button
-              id="assessment-back-to-home-btn"
               type="button"
               onClick={onBackToHome}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-stone-600 hover:text-stone-900 hover:bg-stone-100 transition-colors text-xs sm:text-sm font-medium cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-black bg-white text-black hover:bg-stone-50 transition-all text-xs sm:text-sm font-bold shadow-neo-sm cursor-pointer"
+              title="Return to Guide"
             >
               <ArrowLeft className="w-4 h-4" />
-              <span>Back to Guide</span>
+              <span className="hidden sm:inline">Back</span>
             </button>
-            <div className="h-5 w-px bg-stone-200 hidden sm:block"></div>
-            <div className="hidden sm:flex items-center gap-2 text-stone-900 font-bold text-sm">
-              <Compass className="w-4 h-4 text-emerald-700" />
-              <span>Naija Tech Guide</span>
-            </div>
+            <div className="h-6 w-0.5 bg-black/20"></div>
+            <button
+              type="button"
+              onClick={onBackToHome}
+              className="cursor-pointer hover:opacity-90 transition-opacity text-left flex items-center"
+              title="TechNav Home"
+            >
+              <TechNavLogo size="sm" />
+            </button>
           </div>
 
           <div className="flex items-center gap-3">
@@ -367,402 +869,235 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
             )}
 
             {currentStep < 5 ? (
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-stone-500 font-medium hidden sm:inline">
-                  {activeSectionIntro ? `Section 0${activeSectionIntro} of 4:` : `Section 0${currentStep} of 4:`}
-                </span>
-                <span className="text-xs font-semibold text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-md border border-emerald-200">
-                  {activeSectionIntro ? stepLabels[activeSectionIntro - 1] : stepLabels[currentStep - 1]}
-                </span>
+              <div className="flex items-center gap-2 text-xs font-mono tracking-wider uppercase text-stone-500">
+                <span className="font-semibold text-stone-900">Phase 0{currentStep}/04</span>
+                <span aria-hidden="true" className="text-stone-300">·</span>
+                <span className="text-stone-700 font-sans normal-case font-medium">{stepLabels[currentStep - 1]}</span>
               </div>
             ) : (
-              <span className="text-xs font-bold text-emerald-800 bg-emerald-100 px-3 py-1 rounded-full border border-emerald-300">
-                Diagnosis Complete
+              <span className="text-xs font-semibold text-stone-900 font-mono tracking-wide uppercase">
+                Diagnostic Complete
               </span>
             )}
           </div>
         </div>
 
-        {/* Step Progress Bar */}
+        {/* Subtle, non-intrusive 4-phase segmented bar in header */}
         {currentStep < 5 && (
-          <div className="h-1 w-full bg-stone-100">
-            <div 
-              className="h-full bg-emerald-700 transition-all duration-300 ease-out"
-              style={{ width: `${((activeSectionIntro ? activeSectionIntro - 0.5 : currentStep) / 4) * 100}%` }}
-            ></div>
-          </div>
+          <AssessmentProgressIndicator
+            currentStep={currentStep}
+            currentGlobalIndex={getCurrentGlobalIndex()}
+            answeredGlobalIndices={getAnsweredGlobalIndices()}
+            variant="header-bar"
+          />
         )}
       </header>
 
-      {/* Main Form Page Area */}
+      {/* Main Page Area */}
       <main className="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 pb-24 sm:pb-28">
         
-        {/* Section Transition Interstitial Screen */}
-        {activeSectionIntro !== null ? (
-          <div className="animate-in fade-in duration-200">
-            {activeSectionIntro === 2 && (
-              <SectionTransitionCard
-                sectionNumber={2}
-                totalSections={4}
-                completedSectionName="Section 01: Background & Origin"
-                nextSectionTitle="Real-World Constraints"
-                nextSectionSubtitle="We evaluate your daily hardware, weekly study hours, and electricity situation so we never recommend a pathway that requires tools you don't possess."
-                keyPoints={[
-                  "Your primary learning device (Smartphone vs. Shared PC vs. Dedicated Laptop)",
-                  "Realistic weekly free hours to avoid burnout and abandonment",
-                  "Power stability and internet data access in your area",
-                  "Honest preference for coding vs. non-coding digital careers",
-                  "Financial horizon and when you realistically need income"
-                ]}
-                questionCountText="5 practical questions"
-                estimatedTimeText="60 to 90 seconds"
-                onContinue={() => {
-                  setActiveSectionIntro(null);
-                  setCurrentStep(2);
-                  setConstraintSubIndex(0);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                onBack={() => {
-                  setActiveSectionIntro(null);
-                  setCurrentStep(1);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-              />
-            )}
-
-            {activeSectionIntro === 3 && (
-              <SectionTransitionCard
-                sectionNumber={3}
-                totalSections={4}
-                completedSectionName="Section 02: Hardware & Constraints"
-                nextSectionTitle="Cognitive Style & Scenarios"
-                nextSectionSubtitle="Five realistic everyday situations involving broken banking apps, disorganized team files, or messy spreadsheets. Pick your natural, honest reaction, because there are no right or wrong answers."
-                keyPoints={[
-                  "What frustrates you most when digital tools malfunction",
-                  "What kind of daily creative output gives you the most satisfaction",
-                  "How your mind organizes tasks, files, and project goals",
-                  "Your balance between deep logical analysis and visual or human empathy"
-                ]}
-                questionCountText="5 scenario questions"
-                estimatedTimeText="60 seconds"
-                onContinue={() => {
-                  setActiveSectionIntro(null);
-                  setCurrentStep(3);
-                  setScenarioSubIndex(0);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                onBack={() => {
-                  setActiveSectionIntro(null);
-                  setCurrentStep(2);
-                  setConstraintSubIndex(constraintQuestions.length - 1);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-              />
-            )}
-
-            {activeSectionIntro === 4 && (
-              <SectionTransitionCard
-                sectionNumber={4}
-                totalSections={4}
-                completedSectionName="Section 03: Cognitive Style & Scenarios"
-                nextSectionTitle="Final Calibration & Reflection"
-                nextSectionSubtitle="You are one question away from your personalized diagnosis. Tell us one thing you arranged, fixed, or helped someone with recently so your Day-One proof mission is anchored in reality."
-                keyPoints={[
-                  "A real task or project you solved in the past 6 months",
-                  "Personal strengths calibration against Nigerian industry demand",
-                  "Unlocks your tailored Day-One Proof Project"
-                ]}
-                questionCountText="1 compulsory reflection"
-                estimatedTimeText="30 seconds"
-                onContinue={() => {
-                  setActiveSectionIntro(null);
-                  setCurrentStep(4);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-                onBack={() => {
-                  setActiveSectionIntro(null);
-                  setCurrentStep(3);
-                  setScenarioSubIndex(SCENARIO_QUESTIONS.length - 1);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }}
-              />
-            )}
-          </div>
-        ) : (
-          <>
-            {/* Live Cohort Match Counter */}
-            {currentStep < 5 && (
-              <div className="mb-8 flex items-center justify-between text-xs text-stone-600 bg-stone-100/70 border border-stone-200/80 px-4 py-2.5 rounded-xl">
-                <div className="flex items-center gap-2 text-stone-800 font-medium">
-                  <span className="w-2 h-2 rounded-full bg-emerald-600"></span>
-                  <span>
-                    {currentStep === 1 && (biodata.location ? `Calibrating against 380+ learner profiles from ${biodata.location.replace(/_/g, ' ')}...` : 'Calibrating with 2,480+ Nigerian youth profiles in our community...')}
-                    {currentStep === 2 && (constraints.device === 'phone_only' ? '📱 840+ learners in our community started on smartphone only.' : constraints.device ? '💻 610+ learners started on laptop.' : 'Calibrating against your hardware & time setup...')}
-                    {currentStep === 3 && 'Comparing your problem-solving style with 12 practical tech pathways...'}
-                    {currentStep === 4 && 'Almost there: generating your personalized Day-One mission...'}
-                  </span>
-                </div>
-                <span className="text-[11px] text-stone-500 font-mono hidden sm:inline">
-                  Community Calibration
+        {/* Auto-Resume Notification Banner */}
+        {restoredFromDraft && currentStep < 5 && (
+          <div 
+            id="assessment-resume-banner" 
+            className="max-w-2xl mx-auto mb-6 p-4 rounded-2xl bg-emerald-50 border border-emerald-200/90 text-emerald-950 text-xs sm:text-sm flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs animate-in fade-in slide-in-from-top-2 duration-300"
+          >
+            <div className="flex items-start sm:items-center gap-2.5">
+              <Compass className="w-4 h-4 text-emerald-700 shrink-0 mt-0.5 sm:mt-0" />
+              <div>
+                <span className="font-bold text-emerald-950">Welcome back! </span>
+                <span className="text-emerald-900">
+                  We saved your progress. Resumed at Step {currentStep} of 4.
                 </span>
               </div>
-            )}
-
-        {/* Step 1: BIODATA */}
-        {currentStep === 1 && (
-          <div id="step-1-biodata" className="space-y-6 animate-in fade-in duration-200">
-            <div>
-              <div className="text-xs font-mono font-semibold tracking-wider uppercase text-emerald-800 mb-2">
-                Step 01 of 04 · Getting To Know You
-              </div>
-              <h1 className="font-serif-display text-3xl sm:text-4xl text-stone-900 font-normal tracking-tight leading-tight">
-                First, tell us a little about yourself
-              </h1>
-              <p className="text-stone-600 text-sm sm:text-base mt-2 max-w-xl leading-relaxed font-sans">
-                No long forms or trick questions. We just want to tailor your tech roadmap to your stage in life, what opportunities exist near you, and local tech communities you can join.
-              </p>
             </div>
-
-            <div className="bg-white rounded-2xl border border-stone-200/90 p-6 sm:p-9 shadow-[0_4px_24px_-6px_rgba(0,0,0,0.05)] space-y-7">
-              {/* Optional Name */}
-              <div>
-                <label htmlFor="bio-name-input" className="block text-sm font-semibold text-stone-900 mb-1">
-                  What should we call you? <span className="text-stone-400 font-normal text-xs">(optional)</span>
-                </label>
-                <p className="text-xs text-stone-500 mb-2.5">
-                  Your first name or nickname — so your tailored tech roadmap addresses you personally!
-                </p>
-                <input
-                  id="bio-name-input"
-                  type="text"
-                  placeholder="e.g. Tosin, Chidi, Amina"
-                  value={biodata.fullName || ''}
-                  onChange={(e) => setBiodata({ ...biodata, fullName: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-stone-300/90 bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-800 focus:bg-white transition-all placeholder:text-stone-400"
-                />
-              </div>
-
-              {/* Age Bracket */}
-              <div>
-                <label className="block text-sm font-semibold text-stone-900 mb-1">
-                  1. How old are you?
-                </label>
-                <p className="text-xs text-stone-500 mb-3">
-                  Every stage has unique advantages — from student hackathons to fellowships for career-switchers.
-                </p>
-                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {AGE_BAND_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        setBiodata({ ...biodata, ageBand: opt.value });
-                        setValidationError(null);
-                      }}
-                      className={`p-4 rounded-xl border text-left transition-all ${
-                        biodata.ageBand === opt.value
-                          ? 'border-emerald-800 bg-emerald-50/80 text-emerald-950 font-semibold ring-1 ring-emerald-800/40 shadow-2xs'
-                          : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50/50 text-stone-700'
-                      }`}
-                    >
-                      <div className="text-xs sm:text-sm font-semibold">{opt.label}</div>
-                      {opt.sublabel && (
-                        <div className="text-[11px] text-stone-500 mt-1 leading-snug">{opt.sublabel}</div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Gender */}
-              <div>
-                <div className="flex items-baseline justify-between mb-1">
-                  <label className="block text-sm font-semibold text-stone-900">
-                    2. What is your gender?
-                  </label>
-                  <span className="text-[11px] text-emerald-800 font-medium hidden sm:inline">
-                    Unlocks women-in-tech grants
-                  </span>
-                </div>
-                <p className="text-xs text-stone-500 mb-3">
-                  Helps us match female learners with fully-sponsored initiatives (like She Code Africa, Ingressive For Good, and tech laptop grants).
-                </p>
-                <div className="grid grid-cols-3 gap-3">
-                  {GENDER_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        setBiodata({ ...biodata, gender: opt.value });
-                        setValidationError(null);
-                      }}
-                      className={`p-3.5 rounded-xl border text-center transition-all ${
-                        biodata.gender === opt.value
-                          ? 'border-emerald-800 bg-emerald-50/80 text-emerald-950 font-semibold ring-1 ring-emerald-800/40 shadow-2xs'
-                          : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50/50 text-stone-700'
-                      }`}
-                    >
-                      <span className="text-xs sm:text-sm font-medium">{opt.label}</span>
-                      {opt.sublabel && (
-                        <span className="block text-[10px] text-emerald-700 mt-0.5 font-normal leading-tight">
-                          {opt.sublabel}
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Current Status */}
-              <div>
-                <label className="block text-sm font-semibold text-stone-900 mb-1">
-                  3. What does your day-to-day look like right now?
-                </label>
-                <p className="text-xs text-stone-500 mb-3">
-                  We want to ensure your learning pace fits comfortably into your real life without burning you out.
-                </p>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {STATUS_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      type="button"
-                      onClick={() => {
-                        setBiodata({ ...biodata, status: opt.value });
-                        setValidationError(null);
-                      }}
-                      className={`p-4 rounded-xl border text-left transition-all ${
-                        biodata.status === opt.value
-                          ? 'border-emerald-800 bg-emerald-50/80 text-emerald-950 font-semibold ring-1 ring-emerald-800/40 shadow-2xs'
-                          : 'border-stone-200 bg-white hover:border-stone-300 hover:bg-stone-50/50 text-stone-700'
-                      }`}
-                    >
-                      <div className="text-xs sm:text-sm font-semibold">{opt.label}</div>
-                      {opt.sublabel && (
-                        <div className="text-xs text-stone-500 mt-1 leading-relaxed">{opt.sublabel}</div>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Location */}
-              <div>
-                <label htmlFor="bio-location-select" className="block text-sm font-semibold text-stone-900 mb-1">
-                  4. Where in Nigeria are you based right now?
-                </label>
-                <p className="text-xs text-stone-500 mb-3">
-                  Helps us recommend physical tech hubs, state 3MTT learning centers, and developer meetups close to your area.
-                </p>
-                <select
-                  id="bio-location-select"
-                  value={biodata.location}
-                  onChange={(e) => {
-                    setBiodata({ ...biodata, location: e.target.value as NigerianRegion });
-                    setValidationError(null);
-                  }}
-                  className="w-full px-4 py-3 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-800"
-                >
-                  <option value="">-- Choose your state or region --</option>
-                  {REGION_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+            <div className="flex items-center gap-3 shrink-0 self-end sm:self-auto">
+              <button
+                type="button"
+                onClick={handleStartFresh}
+                className="text-xs font-bold text-stone-600 hover:text-stone-900 underline underline-offset-2 cursor-pointer transition-colors"
+              >
+                Start fresh instead
+              </button>
+              <button
+                type="button"
+                onClick={() => setRestoredFromDraft(false)}
+                className="text-xs font-semibold px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-900 cursor-pointer transition-colors"
+              >
+                Dismiss
+              </button>
             </div>
           </div>
         )}
 
-        {/* Step 2: CONSTRAINTS - One Question at a time */}
-        {currentStep === 2 && (
-          <div id="step-2-constraints" className="animate-in fade-in duration-200">
+        {/* Validation Alert */}
+        {currentStep < 5 && validationError && (
+          <div className="max-w-2xl mx-auto mb-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm font-medium flex items-center gap-2.5 animate-in fade-in">
+            <AlertCircle className="w-5 h-5 text-amber-700 shrink-0" />
+            <span>{validationError}</span>
+          </div>
+        )}
+
+        {/* Subtle, non-intrusive card-level segmented dots indicator */}
+        {currentStep < 5 && (
+          <AssessmentProgressIndicator
+            currentStep={currentStep}
+            currentGlobalIndex={getCurrentGlobalIndex()}
+            answeredGlobalIndices={getAnsweredGlobalIndices()}
+            categoryBadge={getCurrentCategoryBadge()}
+            onJumpToGlobalIndex={handleJumpToGlobalIndex}
+            variant="dots"
+          />
+        )}
+
+        {/* Step 1: BIODATA & BACKGROUND - One Card at a Time */}
+        {currentStep === 1 && currentStep1 && (
+          <div id="step-1-biodata" className="animate-in fade-in duration-200">
             <SingleQuestionCard
-              questionNumber={constraintSubIndex + 1}
-              totalQuestions={constraintQuestions.length}
-              stepNumber={2}
-              stepName="Your Setup & Time"
-              categoryBadge={constraintQuestions[constraintSubIndex].categoryBadge}
-              title={constraintQuestions[constraintSubIndex].title}
-              subtitle={constraintQuestions[constraintSubIndex].subtitle}
-              options={constraintQuestions[constraintSubIndex].options}
-              selectedValue={constraints[constraintQuestions[constraintSubIndex].field]}
+              questionNumber={safeStep1Index + 1}
+              totalQuestions={step1Questions.length}
+              stepNumber={1}
+              stepName="Your Background"
+              categoryBadge={currentStep1?.categoryBadge || 'Your Background'}
+              title={currentStep1.title}
+              subtitle={currentStep1.subtitle}
+              customTopSlot={currentStep1.customTopSlot}
+              customBottomSlot={currentStep1.customBottomSlot}
+              options={currentStep1.options}
+              selectedValue={biodata[currentStep1.field]}
+              hideInternalProgressBar={true}
               onSelectOption={(val) => {
-                setConstraints(prev => ({ ...prev, [constraintQuestions[constraintSubIndex].field]: val as string }));
+                setBiodata(prev => ({ ...prev, [currentStep1.field]: val as string }));
                 setValidationError(null);
               }}
               onNext={() => {
-                const currentVal = constraints[constraintQuestions[constraintSubIndex].field];
+                const currentVal = biodata[currentStep1.field];
                 if (!currentVal) {
                   setValidationError('Please select an option to continue.');
                   return;
                 }
                 setValidationError(null);
-                if (constraintSubIndex < constraintQuestions.length - 1) {
-                  setConstraintSubIndex(prev => prev + 1);
+                if (safeStep1Index < step1Questions.length - 1) {
+                  setStep1SubIndex(safeStep1Index + 1);
                 } else {
-                  // Final question in constraints
-                  if (!constraints.device || !constraints.timeWeekly || !constraints.powerData || !constraints.codingAppetite || !constraints.earningUrgency) {
-                    setValidationError('Please answer all 5 questions about your device, time, and power setup.');
-                    return;
-                  }
-                  setActiveSectionIntro(3);
+                  // Move directly into Step 2 without interstitial stop
+                  setCurrentStep(2);
+                  setConstraintSubIndex(0);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
               }}
               onPrev={() => {
                 setValidationError(null);
-                if (constraintSubIndex > 0) {
-                  setConstraintSubIndex(prev => prev - 1);
+                if (safeStep1Index > 0) {
+                  setStep1SubIndex(safeStep1Index - 1);
                 } else {
-                  setActiveSectionIntro(2);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  onBackToHome();
                 }
               }}
-              isFirst={constraintSubIndex === 0}
-              isLast={constraintSubIndex === constraintQuestions.length - 1}
-              nextButtonLabel={constraintSubIndex === constraintQuestions.length - 1 ? 'Complete Section 2' : 'Next Question'}
-              prevButtonLabel={constraintSubIndex === 0 ? 'Section 2 Overview' : 'Previous Question'}
-              answeredIndices={constraintQuestions.map(q => Boolean(constraints[q.field]))}
+              isFirst={safeStep1Index === 0}
+              isLast={safeStep1Index === step1Questions.length - 1}
+              nextButtonLabel={safeStep1Index === step1Questions.length - 1 ? 'Go to Section 2' : 'Next Question'}
+              prevButtonLabel={safeStep1Index === 0 ? 'Home' : 'Back'}
+              answeredIndices={step1Questions.map(q => Boolean(biodata[q.field]))}
               onJumpToQuestion={(idx) => {
                 setValidationError(null);
-                setConstraintSubIndex(idx);
+                setStep1SubIndex(Math.max(0, Math.min(step1Questions.length - 1, idx)));
               }}
               autoAdvanceOnSelect={true}
             />
           </div>
         )}
 
-        {/* Step 3: SCENARIOS - One Question at a time */}
-        {currentStep === 3 && (
-          <div id="step-3-scenarios" className="animate-in fade-in duration-200">
+        {/* Step 2: CONSTRAINTS - One Question at a Time */}
+        {currentStep === 2 && currentConstraint && (
+          <div id="step-2-constraints" className="animate-in fade-in duration-200">
             <SingleQuestionCard
-              questionNumber={scenarioSubIndex + 1}
-              totalQuestions={SCENARIO_QUESTIONS.length}
-              stepNumber={3}
-              stepName="Cognitive Style"
-              categoryBadge={SCENARIO_QUESTIONS[scenarioSubIndex].category}
-              title={SCENARIO_QUESTIONS[scenarioSubIndex].title}
-              subtitle={SCENARIO_QUESTIONS[scenarioSubIndex].scenario}
-              options={SCENARIO_QUESTIONS[scenarioSubIndex].options.map((opt, optIdx) => ({
-                value: optIdx,
-                label: opt.text,
-                sublabel: opt.description
-              }))}
-              selectedValue={scenarioAnswers[SCENARIO_QUESTIONS[scenarioSubIndex].id]}
+              questionNumber={safeConstraintIndex + 1}
+              totalQuestions={constraintQuestions.length}
+              stepNumber={2}
+              stepName="Your Setup & Time"
+              categoryBadge={currentConstraint?.categoryBadge || 'Setup & Constraints'}
+              title={currentConstraint.title}
+              subtitle={currentConstraint.subtitle}
+              options={currentConstraint.options}
+              selectedValue={constraints[currentConstraint.field]}
+              hideInternalProgressBar={true}
               onSelectOption={(val) => {
-                setScenarioAnswers(prev => ({ ...prev, [SCENARIO_QUESTIONS[scenarioSubIndex].id]: Number(val) }));
+                setConstraints(prev => ({ ...prev, [currentConstraint.field]: val as string }));
                 setValidationError(null);
               }}
               onNext={() => {
-                const currentAnswer = scenarioAnswers[SCENARIO_QUESTIONS[scenarioSubIndex].id];
+                const currentVal = constraints[currentConstraint.field];
+                if (!currentVal) {
+                  setValidationError('Please select an option to continue.');
+                  return;
+                }
+                setValidationError(null);
+                if (safeConstraintIndex < constraintQuestions.length - 1) {
+                  setConstraintSubIndex(safeConstraintIndex + 1);
+                } else {
+                  // Move directly into Step 3 without interstitial stop
+                  setCurrentStep(3);
+                  setScenarioSubIndex(0);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }}
+              onPrev={() => {
+                setValidationError(null);
+                if (safeConstraintIndex > 0) {
+                  setConstraintSubIndex(safeConstraintIndex - 1);
+                } else {
+                  setCurrentStep(1);
+                  setStep1SubIndex(step1Questions.length - 1);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }
+              }}
+              isFirst={false}
+              isLast={safeConstraintIndex === constraintQuestions.length - 1}
+              nextButtonLabel={safeConstraintIndex === constraintQuestions.length - 1 ? 'Go to Scenarios' : 'Next Question'}
+              prevButtonLabel={safeConstraintIndex === 0 ? 'Section 1' : 'Back'}
+              answeredIndices={constraintQuestions.map(q => Boolean(constraints[q.field]))}
+              onJumpToQuestion={(idx) => {
+                setValidationError(null);
+                setConstraintSubIndex(Math.max(0, Math.min(constraintQuestions.length - 1, idx)));
+              }}
+              autoAdvanceOnSelect={true}
+            />
+          </div>
+        )}
+
+        {/* Step 3: SCENARIO QUESTIONS - One Scenario at a Time */}
+        {currentStep === 3 && currentScenario && (
+          <div id="step-3-scenarios" className="animate-in fade-in duration-200">
+            <SingleQuestionCard
+              questionNumber={safeScenarioIndex + 1}
+              totalQuestions={SCENARIO_QUESTIONS.length}
+              stepNumber={3}
+              stepName="Everyday Scenarios"
+              categoryBadge={currentScenario?.category || 'Everyday Scenarios'}
+              title={currentScenario.title}
+              subtitle={currentScenario.scenario}
+              options={currentScenario.options.map((opt, optIdx) => ({
+                value: optIdx,
+                label: opt.text,
+                sublabel: opt.description,
+                icon: opt.icon
+              }))}
+              selectedValue={scenarioAnswers[currentScenario.id]}
+              hideInternalProgressBar={true}
+              onSelectOption={(val) => {
+                setScenarioAnswers(prev => ({ ...prev, [currentScenario.id]: Number(val) }));
+                setValidationError(null);
+              }}
+              onNext={() => {
+                const currentAnswer = scenarioAnswers[currentScenario.id];
                 if (currentAnswer === undefined) {
                   setValidationError('Please select an option to continue.');
                   return;
                 }
                 setValidationError(null);
-                if (scenarioSubIndex < SCENARIO_QUESTIONS.length - 1) {
-                  setScenarioSubIndex(prev => prev + 1);
+                if (safeScenarioIndex < SCENARIO_QUESTIONS.length - 1) {
+                  setScenarioSubIndex(safeScenarioIndex + 1);
                 } else {
                   // Check if all scenario questions are answered
                   const answeredAll = SCENARIO_QUESTIONS.every(q => scenarioAnswers[q.id] !== undefined);
@@ -770,148 +1105,228 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
                     setValidationError(`Please answer all ${SCENARIO_QUESTIONS.length} questions.`);
                     return;
                   }
-                  setActiveSectionIntro(4);
+                  // Move directly into Step 4
+                  setCurrentStep(4);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
               }}
               onPrev={() => {
                 setValidationError(null);
-                if (scenarioSubIndex > 0) {
-                  setScenarioSubIndex(prev => prev - 1);
+                if (safeScenarioIndex > 0) {
+                  setScenarioSubIndex(safeScenarioIndex - 1);
                 } else {
-                  setActiveSectionIntro(3);
+                  setCurrentStep(2);
+                  setConstraintSubIndex(constraintQuestions.length - 1);
                   window.scrollTo({ top: 0, behavior: 'smooth' });
                 }
               }}
-              isFirst={scenarioSubIndex === 0}
-              isLast={scenarioSubIndex === SCENARIO_QUESTIONS.length - 1}
-              nextButtonLabel={scenarioSubIndex === SCENARIO_QUESTIONS.length - 1 ? 'Complete Section 3' : 'Next Question'}
-              prevButtonLabel={scenarioSubIndex === 0 ? 'Section 3 Overview' : 'Previous Question'}
+              isFirst={false}
+              isLast={safeScenarioIndex === SCENARIO_QUESTIONS.length - 1}
+              nextButtonLabel={safeScenarioIndex === SCENARIO_QUESTIONS.length - 1 ? 'Go to Final Step' : 'Next Question'}
+              prevButtonLabel={safeScenarioIndex === 0 ? 'Section 2' : 'Back'}
               answeredIndices={SCENARIO_QUESTIONS.map(q => scenarioAnswers[q.id] !== undefined)}
               onJumpToQuestion={(idx) => {
                 setValidationError(null);
-                setScenarioSubIndex(idx);
+                setScenarioSubIndex(Math.max(0, Math.min(SCENARIO_QUESTIONS.length - 1, idx)));
               }}
               autoAdvanceOnSelect={true}
             />
           </div>
         )}
 
-        {/* Step 4: QUALITATIVE NUANCE */}
+        {/* Step 4: FINAL TOUCH & PERSONAL VOICE */}
         {currentStep === 4 && (
-          <div id="step-4-nuance" className="space-y-6 animate-in fade-in duration-200">
-            <div>
-              <div className="text-xs font-mono font-semibold tracking-wider uppercase text-emerald-800 mb-2">
-                Step 04 of 04 · Personal Voice & Proof
-              </div>
-              <h1 className="font-serif-display text-3xl sm:text-4xl text-stone-900 font-normal tracking-tight leading-tight">
-                Almost done: one personal reflection
-              </h1>
-              <p className="text-stone-600 text-sm sm:text-base mt-2 max-w-xl leading-relaxed font-sans">
-                Tell us a problem you solved or personal strength so we can tailor your Day-One proof project.
-              </p>
-            </div>
-
-            <div className="bg-white rounded-2xl border border-stone-200/90 p-6 sm:p-9 shadow-[0_4px_24px_-6px_rgba(0,0,0,0.05)] space-y-7">
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="block text-xs font-semibold tracking-wider uppercase text-stone-800">
-                    1. Tell us one thing you fixed, arranged, or helped someone with recently{' '}
-                    <span className="text-rose-600 font-medium ml-1">* (required)</span>
-                  </label>
+          <div id="step-4-nuance" className="w-full max-w-2xl mx-auto space-y-7 animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl border border-stone-200/90 p-6 sm:p-9 shadow-[0_2px_12px_rgba(0,0,0,0.03)] space-y-8">
+              {/* Header */}
+              <div>
+                <div className="flex items-center gap-2 text-xs font-mono tracking-wider uppercase text-stone-500 mb-2">
+                  <span className="font-semibold text-stone-900">Part 04</span>
+                  <span aria-hidden="true" className="text-stone-300">/</span>
+                  <span className="text-stone-700 font-sans normal-case font-medium">Final Reflection & Anchor</span>
                 </div>
-                <p className="text-xs text-stone-500 leading-relaxed">
-                  Doesn't have to be tech! Could be planning an event, troubleshooting a phone issue, editing a short video, organizing orders on WhatsApp, or keeping accounts.
+                <h2 className="font-serif-display text-2xl sm:text-3xl text-stone-900 font-normal leading-[1.25] tracking-tight">
+                  Almost done! One quick reflection
+                </h2>
+                <p className="text-sm sm:text-base text-stone-600 mt-2 leading-relaxed font-sans font-normal">
+                  Tell us a small win, project, or problem you helped solve recently. We anchor your Day-One proof mission on this!
                 </p>
+              </div>
+
+              {/* Question 1: Quick reflection with clickable inspiration chips */}
+              <div className="space-y-3">
+                <label className="block text-sm font-semibold text-stone-900">
+                  What is something you fixed, arranged, or helped someone with recently?{' '}
+                  <span className="text-rose-600 font-medium">*</span>
+                </label>
+                <p className="text-xs text-stone-500">
+                  Tap a suggestion or write your own in plain words:
+                </p>
+                
+                {/* Suggestion Chips */}
+                <div className="flex flex-wrap gap-2">
+                  {[
+                    { label: 'Designed a flyer or logo on Canva', icon: <HandPalette className="w-3.5 h-3.5 text-stone-500 shrink-0" />, text: 'I designed a promotional flyer and logo for a friend using Canva.' },
+                    { label: 'Fixed a phone or app glitch', icon: <HandSmartphone className="w-3.5 h-3.5 text-stone-500 shrink-0" />, text: 'I helped troubleshoot smartphone settings and connectivity issues for a friend.' },
+                    { label: 'Organized customer orders on WhatsApp', icon: <HandMessage className="w-3.5 h-3.5 text-stone-500 shrink-0" />, text: 'I organized customer orders, receipts, and delivery notes using WhatsApp and spreadsheets.' },
+                    { label: 'Tracked sales or budget in Excel', icon: <HandCoins className="w-3.5 h-3.5 text-stone-500 shrink-0" />, text: 'I created a simple spreadsheet to track sales, expenses, and profit margins.' },
+                    { label: 'Planned an event or project schedule', icon: <HandChecklist className="w-3.5 h-3.5 text-stone-500 shrink-0" />, text: 'I helped plan an event timeline and coordinated logistics with a group of friends.' }
+                  ].map((chip, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        setQualitative(prev => ({ ...prev, proudAchievement: chip.text }));
+                        setValidationError(null);
+                      }}
+                      className="inline-flex items-center gap-1.5 text-xs px-3 py-1.5 rounded-lg border border-stone-200 bg-white hover:border-stone-400 hover:text-stone-900 text-stone-600 transition-colors text-left cursor-pointer"
+                    >
+                      {chip.icon}
+                      <span>{chip.label}</span>
+                    </button>
+                  ))}
+                </div>
+
                 <textarea
                   id="qualitative-achievement-input"
-                  rows={4}
-                  required
+                  rows={3}
                   value={qualitative.proudAchievement}
                   onChange={(e) => {
-                    setQualitative({ ...qualitative, proudAchievement: e.target.value });
+                    setQualitative(prev => ({ ...prev, proudAchievement: e.target.value }));
                     if (validationError) setValidationError(null);
                   }}
-                  placeholder="e.g., I helped organize customer orders for a friend's bake shop using Google Sheets and WhatsApp..."
+                  placeholder="e.g. I helped organize customer orders on WhatsApp, designed a social flyer, or helped someone fix a computer issue..."
                   className={`w-full p-4 rounded-xl border bg-stone-50/50 text-stone-900 text-sm focus:outline-none focus:ring-2 focus:bg-white transition-all placeholder:text-stone-400 ${
                     validationError && !qualitative.proudAchievement.trim()
                       ? 'border-rose-400 focus:ring-rose-500 bg-rose-50/30'
-                      : 'border-stone-300 focus:ring-emerald-800'
+                      : 'border-stone-300 focus:ring-stone-900'
                   }`}
-                ></textarea>
-                <p className="text-[11px] text-stone-400">
-                  {qualitative.proudAchievement.trim().length > 0 ? (
-                    <span className="text-emerald-800 font-medium">✓ Saved. This will shape your Day-One mission.</span>
-                  ) : (
-                    <span>Please enter a brief sentence to continue.</span>
-                  )}
-                </p>
+                />
               </div>
 
-              <div className="space-y-2">
-                <label className="block text-xs font-semibold tracking-wider uppercase text-stone-700">
-                  2. What kind of industry or topic sounds exciting to you? <span className="text-stone-400 font-normal lowercase">(optional)</span>
+              {/* Question 2: Exciting Industry Field (Clean Visual Cards) */}
+              <div className="space-y-3">
+                <label className="block text-sm font-display font-bold text-black">
+                  What kind of field or topic sounds exciting to you? <span className="text-stone-500 text-xs font-normal">(optional)</span>
                 </label>
-                <select
-                  id="qualitative-industry-select"
-                  value={qualitative.targetIndustry}
-                  onChange={(e) => setQualitative({ ...qualitative, targetIndustry: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-800"
-                >
-                  <option value="">-- Pick an area that interests you (Optional) --</option>
-                  <option value="Software & SaaS Platforms">Software & Cloud Tech (Web apps, SaaS platforms, developer tools)</option>
-                  <option value="Fintech & Mobile Money">Banking & Money Apps (Fintech, savings, payments)</option>
-                  <option value="E-commerce & Logistics">Shopping & Delivery Apps (Jumia, Chowdeck, logistics)</option>
-                  <option value="Digital Marketing & Growth">Digital Marketing & Performance Growth (Ads, SEO, Funnels, Email Campaigns)</option>
-                  <option value="Branding & Creative Design">Branding & Creative Design (Logos, Visual Identity, Brand Kits, Art Direction)</option>
-                  <option value="Education & EdTech">Education & EdTech (Online Learning, Teaching, Training, Course Creation)</option>
-                  <option value="Creator Economy & Media">Social Media & Creators (TikTok, YouTube, Instagram, X)</option>
-                  <option value="Health & EdTech">Healthcare & Biotechnology</option>
-                  <option value="Global Remote Freelancing">Working for Foreign Clients & Companies (Remote Freelancing)</option>
-                </select>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[
+                    { value: 'Branding & Creative Design', label: 'Design & Aesthetics', sublabel: 'Brand styling, logos, UI screens, visuals', icon: <HandPalette className="w-4 h-4" /> },
+                    { value: 'Software & SaaS Platforms', label: 'Apps & Software', sublabel: 'Everyday smartphone & web apps', icon: <HandSmartphone className="w-4 h-4" /> },
+                    { value: 'Fintech & Mobile Money', label: 'Money & Fintech', sublabel: 'Savings apps, digital payments & wallets', icon: <HandCoins className="w-4 h-4" /> },
+                    { value: 'E-commerce & Logistics', label: 'Shopping & Delivery', sublabel: 'Online stores, orders & retail logistics', icon: <HandBriefcase className="w-4 h-4" /> },
+                    { value: 'Creator Economy & Media', label: 'Media & Creators', sublabel: 'Social media, video, storytelling', icon: <HandVideo className="w-4 h-4" /> },
+                    { value: 'Global Remote Freelancing', label: 'Global Remote Work', sublabel: 'Working with foreign clients from home', icon: <HandGlobe className="w-4 h-4" /> }
+                  ].map((item) => (
+                    <button
+                      key={item.value}
+                      type="button"
+                      onClick={() => setQualitative(prev => ({ ...prev, targetIndustry: item.value }))}
+                      className={`p-4 rounded-2xl border-2 border-black text-left transition-all flex items-center justify-between gap-3 cursor-pointer ${
+                        qualitative.targetIndustry === item.value
+                          ? 'bg-[#D4F938] text-black shadow-neo font-bold'
+                          : 'bg-white hover:bg-stone-50 text-black shadow-neo-sm'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-8 h-8 rounded-lg border border-black flex items-center justify-center shrink-0 ${
+                          qualitative.targetIndustry === item.value
+                            ? 'bg-black text-white'
+                            : 'bg-stone-100 text-black'
+                        }`}>
+                          {item.icon}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-bold truncate">{item.label}</div>
+                          <div className="text-xs text-stone-600 mt-0.5 line-clamp-1">{item.sublabel}</div>
+                        </div>
+                      </div>
+                      {qualitative.targetIndustry === item.value && (
+                        <div className="w-5 h-5 rounded-full bg-black text-[#D4F938] flex items-center justify-center shrink-0">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <label className="block text-xs font-semibold tracking-wider uppercase text-stone-700">
-                  3. Which day-to-day task sounds most appealing to you? <span className="text-stone-400 font-normal lowercase">(optional)</span>
+              {/* Question 3: Daily Work Style */}
+              <div className="space-y-3">
+                <label className="block text-sm font-display font-bold text-black">
+                  Which daily work rhythm sounds most fun to you? <span className="text-stone-500 text-xs font-normal">(optional)</span>
                 </label>
-                <select
-                  id="qualitative-activity-select"
-                  value={qualitative.preferredDailyActivity || ''}
-                  onChange={(e) => setQualitative({ ...qualitative, preferredDailyActivity: e.target.value })}
-                  className="w-full px-4 py-3 rounded-xl border border-stone-300 bg-white text-stone-900 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-800 font-medium"
-                >
-                  <option value="">-- Choose what kind of day-to-day work you enjoy most --</option>
-                  <optgroup label="💻 Software Building & Coding (High Variety)">
-                    <option value="fullstack_building">Full-Stack Web App Building: Coding complete web apps from scratch (connecting UI to live databases & user logins)</option>
-                    <option value="frontend_coding">Frontend Web Development: Coding interactive, sleek web apps with modern React, JavaScript & responsive animations</option>
-                    <option value="backend_systems">Backend & API Engineering: Writing server code, designing databases, and handling secure payment gateways (Paystack/Flutterwave)</option>
-                    <option value="coding">Software Engineering & Problem-Solving: Writing clean code, building automated scripts, and cracking technical puzzles</option>
-                    <option value="mobile_building">Mobile & App Creation: Coding user-friendly mobile and web experiences that run smoothly on smartphones</option>
-                  </optgroup>
-                  <optgroup label="🎨 Design & Creative Arts">
-                    <option value="design">UI/UX Product Design: Designing user screens, mobile app wireframes, and interactive prototypes in Figma</option>
-                    <option value="branding">Branding & Visual Identity: Crafting brand identities, custom logos, visual guideline decks, and aesthetics</option>
-                  </optgroup>
-                  <optgroup label="📊 Data, Quality & Security">
-                    <option value="data">Data Analytics & Insights: Querying databases, finding sales trends, and building visual dashboards in Excel/SQL</option>
-                    <option value="testing_security">QA Testing & Cyber Defense: Hunting software bugs, automated testing, securing systems, and protecting accounts</option>
-                  </optgroup>
-                  <optgroup label="🚀 Growth, Content & Operations">
-                    <option value="digital_marketing">Digital Marketing & Growth: Running paid ad campaigns, driving customer traffic, and optimizing funnels</option>
-                    <option value="writing">Technical Writing: Writing step-by-step guides, documentation, tutorials, and tech explainers</option>
-                    <option value="education">Education & Teaching: Designing online lessons, creating tutorials, and training learners</option>
-                    <option value="operations">Virtual Operations & Tech Support: Organizing calendars, managing client tasks, and coordinating projects</option>
-                  </optgroup>
-                </select>
-                <p className="text-[11px] text-stone-400">
-                  Directly weights your daily preference into the diagnostic matching matrix.
-                </p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {[
+                    { value: 'design', label: 'Designing Screen Layouts', sublabel: 'Aesthetic buttons, user screens & Figma layouts', icon: <HandPalette className="w-4 h-4" /> },
+                    { value: 'frontend_coding', label: 'Building Interactive Web Apps', sublabel: 'Coding interactive web pages & mobile tools', icon: <HandCode className="w-4 h-4" /> },
+                    { value: 'data', label: 'Numbers & Data Insights', sublabel: 'Finding trends in numbers, sales & charts', icon: <HandCoins className="w-4 h-4" /> },
+                    { value: 'testing_security', label: 'Testing Apps & Finding Glitches', sublabel: 'Bug hunting, quality assurance & security', icon: <HandShield className="w-4 h-4" /> },
+                    { value: 'writing', label: 'Writing Guides & Helping People', sublabel: 'Beginner tutorials, documentation & support', icon: <HandBook className="w-4 h-4" /> },
+                    { value: 'operations', label: 'Coordinating & Organizing', sublabel: 'Managing tasks, schedules & workflows', icon: <HandChecklist className="w-4 h-4" /> }
+                  ].map((item) => (
+                    <button
+                      key={item.value}
+                      type="button"
+                      onClick={() => setQualitative(prev => ({ ...prev, preferredDailyActivity: item.value }))}
+                      className={`p-4 rounded-2xl border-2 border-black text-left transition-all flex items-center justify-between gap-3 cursor-pointer ${
+                        qualitative.preferredDailyActivity === item.value
+                          ? 'bg-[#D4F938] text-black shadow-neo font-bold'
+                          : 'bg-white hover:bg-stone-50 text-black shadow-neo-sm'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div className={`w-8 h-8 rounded-lg border border-black flex items-center justify-center shrink-0 ${
+                          qualitative.preferredDailyActivity === item.value
+                            ? 'bg-black text-white'
+                            : 'bg-stone-100 text-black'
+                        }`}>
+                          {item.icon}
+                        </div>
+                        <div className="min-w-0">
+                          <div className="text-sm font-bold truncate">{item.label}</div>
+                          <div className="text-xs text-stone-600 mt-0.5 line-clamp-1">{item.sublabel}</div>
+                        </div>
+                      </div>
+                      {qualitative.preferredDailyActivity === item.value && (
+                        <div className="w-5 h-5 rounded-full bg-black text-[#D4F938] flex items-center justify-center shrink-0">
+                          <Check className="w-3 h-3 stroke-[3]" />
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              <div className="p-4 rounded-xl bg-stone-100/70 border border-stone-200 text-xs sm:text-sm text-stone-700 flex items-center gap-3">
-                <ShieldCheck className="w-5 h-5 text-emerald-800 shrink-0" />
-                <span>All set! Click below to see your realistic tech career match and Day-One roadmap.</span>
+              {/* Step Controls */}
+              <div className="pt-6 border-t-2 border-black/10 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setCurrentStep(3);
+                    setScenarioSubIndex(SCENARIO_QUESTIONS.length - 1);
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                  }}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl border-2 border-black bg-white text-black text-xs sm:text-sm font-bold shadow-neo-sm hover:bg-stone-50 transition-all cursor-pointer"
+                >
+                  <ArrowLeft className="w-4 h-4" />
+                  <span>Back to Scenarios</span>
+                </button>
+
+                <button
+                  id="assessment-reveal-results-btn"
+                  type="button"
+                  onClick={handleSubmitAssessment}
+                  disabled={!qualitative.proudAchievement.trim()}
+                  className={`w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl text-base font-display font-bold border-2 border-black transition-all ${
+                    qualitative.proudAchievement.trim()
+                      ? 'bg-[#13141F] text-white shadow-neo-purple hover:translate-x-0.5 active:translate-x-1 cursor-pointer'
+                      : 'bg-stone-200 text-stone-500 border-stone-300 cursor-not-allowed'
+                  }`}
+                >
+                  <span>Reveal My Career Match</span>
+                  <ArrowRight className="w-5 h-5" />
+                </button>
               </div>
             </div>
           </div>
@@ -930,53 +1345,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
           </div>
         )}
 
-        {/* Validation Alert */}
-        {currentStep < 5 && validationError && (
-          <div className="mt-6 p-4 rounded-xl bg-amber-50 border border-amber-200 text-amber-900 text-xs sm:text-sm font-medium flex items-center gap-2.5 animate-in fade-in">
-            <AlertCircle className="w-5 h-5 text-amber-700 shrink-0" />
-            <span>{validationError}</span>
-          </div>
-        )}
-
-        {/* Form Page Navigation Buttons for Step 1 and Step 4 */}
-        {(currentStep === 1 || currentStep === 4) && (
-          <div className="mt-8 pt-6 border-t border-stone-200/80 flex items-center justify-between">
-            {currentStep > 1 ? (
-              <button
-                type="button"
-                onClick={handlePrevStep}
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-600 text-xs sm:text-sm font-medium hover:bg-stone-50 hover:text-stone-900 transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Previous Step</span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={onBackToHome}
-                className="text-xs sm:text-sm text-stone-500 hover:text-stone-800 transition-colors font-medium"
-              >
-                Cancel & Return Home
-              </button>
-            )}
-
-            <button
-              id="assessment-page-next-btn"
-              type="button"
-              onClick={handleNextStep}
-              className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-emerald-800 text-white text-xs sm:text-sm font-semibold hover:bg-emerald-900 active:scale-[0.99] transition-all shadow-sm cursor-pointer"
-            >
-              <span>{currentStep === 4 ? 'See My Career Match' : 'Continue to Next Step'}</span>
-              <ArrowRight className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-
-          </>
-        )}
-
       </main>
-
     </div>
   );
 };

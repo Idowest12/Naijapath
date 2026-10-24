@@ -286,37 +286,61 @@ ${userContextString}`;
       const ai = getAiClient();
       const contents = buildGeminiContents(messages);
 
-      // Timeout wrapper to guarantee snappy responses (15s for mobile connections)
-      const timeoutPromise = new Promise<never>((_, reject) =>
-        setTimeout(() => reject(new Error("GEMINI_TIMEOUT")), 15000)
-      );
+      // Model priority list: 'gemini-3.1-flash-lite' is fast and resilient against 503 spikes,
+      // with 'gemini-3.8-flash' as alternative.
+      const candidateModels = ["gemini-3.1-flash-lite", "gemini-3.8-flash"];
+      let replyText = "";
+      let usedModel = "";
 
-      const generatePromise = ai.models.generateContent({
-        model: "gemini-3.8-flash",
-        contents,
-        config: {
-          systemInstruction,
-          temperature: 0.7,
-        },
-      });
+      for (const model of candidateModels) {
+        try {
+          const timeoutPromise = new Promise<never>((_, reject) =>
+            setTimeout(() => reject(new Error("MODEL_TIMEOUT")), 9000)
+          );
 
-      const response: any = await Promise.race([generatePromise, timeoutPromise]);
-      const replyText = response?.text || "I am right here with you. What specific question or topic can I break down for you next?";
+          const generatePromise = ai.models.generateContent({
+            model,
+            contents,
+            config: {
+              systemInstruction,
+              temperature: 0.7,
+            },
+          });
 
+          const response: any = await Promise.race([generatePromise, timeoutPromise]);
+          if (response && response.text && response.text.trim().length > 0) {
+            replyText = response.text.trim();
+            usedModel = model;
+            break;
+          }
+        } catch {
+          // Model unavailable or high demand, proceed quietly to next candidate
+          continue;
+        }
+      }
+
+      if (replyText) {
+        return res.json({
+          reply: replyText,
+          source: "gemini",
+          model: usedModel,
+        });
+      }
+
+      // If all candidate models encounter transient high demand, serve instant mentor engine answer
+      const fallbackReply = generateSmartMentorResponse(lastUserMsg, context);
       return res.json({
-        reply: replyText,
-        source: "gemini",
+        reply: fallbackReply,
+        source: "mentor-engine",
       });
-    } catch (aiErr: any) {
-      console.warn("Gemini API call warning/timeout, using mentor engine fallback:", aiErr?.message || aiErr);
+    } catch {
       const fallbackReply = generateSmartMentorResponse(lastUserMsg, context);
       return res.json({
         reply: fallbackReply,
         source: "mentor-engine",
       });
     }
-  } catch (err: any) {
-    console.error("Chat endpoint error, returning resilient mentor reply:", err);
+  } catch {
     const fallbackReply = generateSmartMentorResponse(lastUserMsg, context);
     return res.json({
       reply: fallbackReply,

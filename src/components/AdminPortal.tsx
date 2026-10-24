@@ -21,7 +21,6 @@ import {
   Clock,
   LogOut,
   MousePointerClick,
-  Sparkles,
   Award,
   Bot,
   Layers,
@@ -372,46 +371,48 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
   // -------------------------------------------------------------
   if (!token) {
     return (
-      <div className="min-h-screen bg-stone-900 text-stone-100 flex flex-col justify-between p-4 sm:p-6 antialiased">
+      <div className="min-h-screen bg-[#13141F] text-white flex flex-col justify-between p-4 sm:p-6 antialiased font-sans">
         {/* Top Header */}
         <div className="max-w-md mx-auto w-full pt-4 flex items-center justify-between">
           <button
             id="admin-return-public-site-btn"
             type="button"
             onClick={onBackToSite}
-            className="inline-flex items-center gap-2 text-xs font-semibold text-stone-400 hover:text-white transition-colors"
+            className="inline-flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white text-black border-2 border-black text-xs font-display font-extrabold shadow-neo-sm hover:bg-[#D4F938] active:translate-x-0.5 active:translate-y-0.5 transition-all cursor-pointer"
           >
-            <ArrowLeft className="w-4 h-4" />
-            <span>Return to Public App</span>
+            <ArrowLeft className="w-4 h-4 text-black" />
+            <span>Return to App</span>
           </button>
-          <span className="text-[11px] font-mono text-emerald-400 bg-emerald-950/80 px-2 py-0.5 rounded border border-emerald-800/60">
-            SECURE LINK /admin
+          <span className="text-[11px] font-mono-tech uppercase font-bold text-black bg-[#D4F938] px-2.5 py-1 rounded-full border-2 border-black shadow-neo-sm">
+            Admin Auth Gate
           </span>
         </div>
 
         {/* Center Card */}
         <div className="max-w-md mx-auto w-full my-auto py-8">
-          <div className="bg-stone-950/90 border border-stone-800 rounded-2xl p-6 sm:p-8 shadow-2xl backdrop-blur-md relative overflow-hidden">
-            {/* Top Accent Line */}
-            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-600 via-teal-500 to-emerald-400" />
+          <div className="bg-white text-black border-2 border-black rounded-3xl p-6 sm:p-8 shadow-neo-xl relative overflow-hidden">
+            {/* Top Accent Strip */}
+            <div className="absolute top-0 left-0 right-0 h-2 bg-[#D4F938] border-b-2 border-black" />
 
             {/* Icon Header */}
-            <div className="flex flex-col items-center text-center mb-6">
-              <div className="w-14 h-14 rounded-2xl bg-emerald-900/30 border border-emerald-500/30 flex items-center justify-center text-emerald-400 mb-3 shadow-inner">
-                <ShieldCheck className="w-7 h-7 text-emerald-400" />
+            <div className="flex flex-col items-center text-center mb-6 pt-2">
+              <div className="w-14 h-14 rounded-2xl bg-[#D4F938] border-2 border-black flex items-center justify-center text-black mb-3 shadow-neo-sm font-display font-black text-xl">
+                <ShieldCheck className="w-7 h-7 text-black" />
               </div>
-              <h1 className="text-xl font-black tracking-tight text-white">Owner & Admin Gateway</h1>
-              <p className="text-xs text-stone-400 mt-1 max-w-xs">
-                Private analytics portal tracking candidate traffic, button clicks, and top 10 recommended career paths.
+              <h1 className="text-2xl font-display font-black tracking-tight text-black uppercase">
+                Admin Gateway
+              </h1>
+              <p className="text-xs text-black/70 mt-1 max-w-xs font-sans">
+                Private analytics portal tracking candidate traffic, button clicks, and top recommended career paths.
               </p>
             </div>
 
             {/* Form */}
             <form onSubmit={handleLogin} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-stone-300 mb-1.5 flex items-center justify-between">
+                <label className="block text-xs font-mono-tech font-bold uppercase tracking-wider text-black mb-1.5 flex items-center justify-between">
                   <span>Admin Secret Passkey</span>
-                  <KeyRound className="w-3.5 h-3.5 text-stone-500" />
+                  <KeyRound className="w-3.5 h-3.5 text-black" />
                 </label>
                 <div className="relative">
                   <input
@@ -419,14 +420,14 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
                     type={showPasskey ? 'text' : 'password'}
                     value={passkeyInput}
                     onChange={(e) => setPasskeyInput(e.target.value)}
-                    placeholder="Enter your admin secret PIN..."
-                    className="w-full bg-stone-900 border border-stone-700 rounded-xl px-4 py-3 text-sm text-white placeholder-stone-500 focus:outline-hidden focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 pr-11 transition-all"
+                    placeholder="Enter admin passkey..."
+                    className="w-full bg-[#F8F7FF] border-2 border-black rounded-xl px-4 py-3 text-sm text-black placeholder:text-stone-400 focus:outline-none focus:ring-2 focus:ring-[#5D45FD] pr-11 font-mono-tech transition-all"
                     autoFocus
                   />
                   <button
                     type="button"
                     onClick={() => setShowPasskey(!showPasskey)}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-stone-400 hover:text-stone-200 p-1"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-black hover:opacity-75 p-1 cursor-pointer"
                     title={showPasskey ? 'Hide passkey' : 'Show passkey'}
                   >
                     {showPasskey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -435,9 +436,9 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
               </div>
 
               {loginError && (
-                <div className="p-3 rounded-xl bg-red-950/70 border border-red-800 text-red-300 text-xs flex items-start gap-2 animate-in fade-in duration-200">
-                  <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
-                  <span>{loginError}</span>
+                <div className="p-3 rounded-xl bg-[#FED74C] border-2 border-black text-black text-xs flex items-start gap-2 shadow-neo-sm">
+                  <AlertTriangle className="w-4 h-4 text-black shrink-0 mt-0.5" />
+                  <span className="font-medium">{loginError}</span>
                 </div>
               )}
 
@@ -445,33 +446,33 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
                 id="admin-unlock-portal-btn"
                 type="submit"
                 disabled={isLoggingIn}
-                className="w-full py-3 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm flex items-center justify-center gap-2 transition-all shadow-lg shadow-emerald-950 active:scale-98 disabled:opacity-50"
+                className="w-full py-3 px-4 rounded-xl bg-[#D4F938] hover:bg-[#cbf425] text-black font-display font-black text-sm flex items-center justify-center gap-2 border-2 border-black shadow-neo hover:shadow-neo-lg hover:-translate-x-0.5 hover:-translate-y-0.5 active:translate-x-0.5 active:translate-y-0.5 transition-all cursor-pointer disabled:opacity-50 uppercase tracking-wider"
               >
                 {isLoggingIn ? (
                   <>
-                    <RefreshCw className="w-4 h-4 animate-spin" />
+                    <RefreshCw className="w-4 h-4 animate-spin text-black" />
                     <span>Verifying Credentials...</span>
                   </>
                 ) : (
                   <>
-                    <Unlock className="w-4 h-4" />
-                    <span>Unlock Admin Console</span>
+                    <Unlock className="w-4 h-4 text-black" />
+                    <span>Unlock Admin Console →</span>
                   </>
                 )}
               </button>
             </form>
 
             {/* Anti-hijack Information Box */}
-            <div className="mt-6 pt-5 border-t border-stone-800/80">
-              <div className="flex items-start gap-2.5 bg-stone-900/60 p-3 rounded-xl border border-stone-800 text-[11px] text-stone-400">
-                <Shield className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+            <div className="mt-6 pt-5 border-t-2 border-black/10">
+              <div className="flex items-start gap-2.5 bg-[#F1F0FF] p-3.5 rounded-xl border-2 border-black text-[11px] text-black shadow-neo-sm">
+                <Shield className="w-4 h-4 text-black shrink-0 mt-0.5" />
                 <div className="space-y-1">
-                  <span className="font-semibold text-stone-300 block">Anti-Hijacking Protection</span>
-                  <p>
-                    This console is locked behind server-verified authentication. Five consecutive failed attempts trigger a temporary lockdown.
+                  <span className="font-bold font-display uppercase tracking-wider block">Protection Enabled</span>
+                  <p className="text-black/75 font-sans">
+                    Five consecutive failed attempts trigger a temporary lockdown.
                   </p>
-                  <p className="text-emerald-400 font-mono text-[10px] mt-1 pt-1 border-t border-stone-800">
-                    Default Master Key: <span className="underline select-all">naija-admin-2026</span> (Change anytime inside).
+                  <p className="font-mono-tech text-[10px] mt-1 pt-1 border-t border-black/10 font-bold">
+                    Default Master Key: <span className="bg-[#FED74C] px-1 py-0.5 rounded border border-black">naija-admin-2026</span>
                   </p>
                 </div>
               </div>
@@ -480,7 +481,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
         </div>
 
         {/* Footer */}
-        <div className="max-w-md mx-auto w-full text-center pb-4 text-[11px] text-stone-500">
+        <div className="max-w-md mx-auto w-full text-center pb-4 text-[11px] font-mono-tech text-white/50">
           Naija Tech Career Advisor • Executive Telemetry System
         </div>
       </div>
@@ -491,26 +492,28 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
   // VIEW 2: AUTHENTICATED ADMIN DASHBOARD
   // -------------------------------------------------------------
   return (
-    <div className="min-h-screen bg-stone-950 text-stone-100 flex flex-col font-sans antialiased">
+    <div className="min-h-screen bg-[#F1F0FF] text-black flex flex-col font-sans antialiased">
       {/* Top Admin Navigation Bar */}
-      <header className="sticky top-0 z-30 bg-stone-900/95 backdrop-blur-md border-b border-stone-800 px-4 sm:px-8 py-3.5">
+      <header className="sticky top-0 z-30 bg-white border-b-2 border-black px-4 sm:px-8 py-3.5">
         <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <button
               id="admin-nav-back-to-site"
               type="button"
               onClick={onBackToSite}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-300 hover:text-white text-xs font-semibold border border-stone-700 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-[#D4F938] text-black text-xs font-display font-black border-2 border-black shadow-neo-sm transition-all active:translate-x-0.5 active:translate-y-0.5 cursor-pointer"
               title="Return to the candidate-facing app"
             >
-              <ArrowLeft className="w-3.5 h-3.5" />
+              <ArrowLeft className="w-3.5 h-3.5 text-black" />
               <span>Public Site</span>
             </button>
 
-            <div className="flex items-center gap-2 border-l border-stone-800 pl-3">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse" />
-              <h1 className="text-sm font-black tracking-tight text-white">Naija Tech Guide Admin</h1>
-              <span className="hidden sm:inline-block text-[10px] font-mono uppercase bg-emerald-950 text-emerald-400 px-2 py-0.5 rounded border border-emerald-800">
+            <div className="flex items-center gap-2 border-l-2 border-black pl-3">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse border border-black" />
+              <h1 className="text-sm font-display font-black tracking-tight text-black uppercase">
+                Naija Tech Admin
+              </h1>
+              <span className="hidden sm:inline-block text-[10px] font-mono-tech uppercase font-bold bg-[#D4F938] text-black px-2 py-0.5 rounded-full border-2 border-black shadow-neo-sm">
                 Live Telemetry
               </span>
             </div>
@@ -522,15 +525,15 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
               id="admin-toggle-autorefresh-btn"
               type="button"
               onClick={() => setAutoRefresh(!autoRefresh)}
-              className={`hidden md:inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-medium border transition-colors ${
+              className={`hidden md:inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl text-xs font-mono-tech font-bold border-2 border-black shadow-neo-sm transition-all ${
                 autoRefresh
-                  ? 'bg-emerald-950/60 border-emerald-800 text-emerald-300'
-                  : 'bg-stone-800 border-stone-700 text-stone-400'
+                  ? 'bg-[#D4F938] text-black'
+                  : 'bg-white text-black/60'
               }`}
               title="Toggle automatic 30s polling"
             >
-              <RefreshCw className={`w-3 h-3 ${autoRefresh ? 'text-emerald-400' : 'text-stone-500'}`} />
-              <span>Auto-refresh: {autoRefresh ? 'ON' : 'OFF'}</span>
+              <RefreshCw className={`w-3 h-3 text-black ${autoRefresh ? 'animate-spin' : ''}`} />
+              <span>Auto: {autoRefresh ? 'ON' : 'OFF'}</span>
             </button>
 
             {/* Sync Local Device Records Button */}
@@ -539,10 +542,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
               type="button"
               onClick={handleSyncLocalRecords}
               disabled={isSyncing}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-emerald-950 hover:bg-emerald-900 text-emerald-300 text-xs font-semibold border border-emerald-800/80 transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FED74C] hover:bg-[#D4F938] text-black text-xs font-display font-black border-2 border-black shadow-neo-sm transition-all active:translate-x-0.5 active:translate-y-0.5 disabled:opacity-50 cursor-pointer"
               title="Sync any assessment tests stored on this device into the live server database"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-emerald-400 ${isSyncing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 text-black ${isSyncing ? 'animate-spin' : ''}`} />
               <span>{isSyncing ? 'Syncing...' : 'Sync Device Records'}</span>
             </button>
 
@@ -552,10 +555,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
               type="button"
               onClick={() => token && fetchAdminStats(token)}
               disabled={isLoadingStats}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold border border-stone-700 transition-colors disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-[#D4F938] text-black text-xs font-display font-bold border-2 border-black shadow-neo-sm transition-all active:translate-x-0.5 active:translate-y-0.5 disabled:opacity-50 cursor-pointer"
               title="Refresh telemetry immediately"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-stone-300 ${isLoadingStats ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 text-black ${isLoadingStats ? 'animate-spin' : ''}`} />
               <span className="hidden sm:inline">Refresh</span>
             </button>
 
@@ -564,11 +567,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
               id="admin-change-passkey-btn"
               type="button"
               onClick={() => setShowPasskeyModal(true)}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-semibold border border-stone-700 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-[#FED74C] text-black text-xs font-display font-bold border-2 border-black shadow-neo-sm transition-all active:translate-x-0.5 active:translate-y-0.5 cursor-pointer"
               title="Change your secret passkey"
             >
-              <KeyRound className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="hidden sm:inline">Security PIN</span>
+              <KeyRound className="w-3.5 h-3.5 text-black" />
+              <span className="hidden sm:inline">PIN</span>
             </button>
 
             {/* Logout */}
@@ -576,11 +579,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
               id="admin-logout-btn"
               type="button"
               onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-950/60 hover:bg-red-900/80 text-red-300 text-xs font-semibold border border-red-800/80 transition-colors"
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-[#FF6A55] hover:bg-black hover:text-white text-white text-xs font-display font-black border-2 border-black shadow-neo-sm transition-all active:translate-x-0.5 active:translate-y-0.5 cursor-pointer"
               title="Lock and sign out of admin portal"
             >
-              <LogOut className="w-3.5 h-3.5 text-red-400" />
-              <span>Sign Out</span>
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Exit</span>
             </button>
           </div>
         </div>
@@ -627,70 +630,67 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
         )}
 
         {/* Executive Header Banner */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-stone-900/80 border border-stone-800 rounded-2xl p-5 sm:p-6 relative overflow-hidden">
-          <div className="relative z-10 space-y-1.5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#13141F] text-white border-2 border-black rounded-3xl p-5 sm:p-7 shadow-neo-lg relative overflow-hidden">
+          <div className="relative z-10 space-y-2">
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="text-xs font-bold uppercase tracking-wider text-emerald-400">
-                100% Real Live Telemetry Feed (Zero Mock Data)
+              <span className="w-2.5 h-2.5 rounded-full bg-[#D4F938] animate-pulse border border-black" />
+              <span className="text-xs font-mono-tech font-bold uppercase tracking-wider text-[#D4F938]">
+                100% Real Live Telemetry (Zero Mock Data)
               </span>
-              <span className="text-stone-500">•</span>
-              <span className="text-xs text-stone-400 font-mono">Live Synchronized</span>
+              <span className="text-white/40">•</span>
+              <span className="text-xs text-white/70 font-mono-tech">Live Synced</span>
             </div>
-            <h2 className="text-xl sm:text-2xl font-black tracking-tight text-white">
+            <h2 className="text-xl sm:text-2xl font-display font-black tracking-tight text-white uppercase">
               Direct Traffic & Live Career Recommendations
             </h2>
-            <p className="text-xs sm:text-sm text-stone-400 max-w-2xl">
-              Connected directly to user diagnostic assessments, device realities, and click funnels. Every metric is computed strictly from actual candidate interactions.
+            <p className="text-xs sm:text-sm text-white/80 max-w-2xl font-sans">
+              Connected directly to candidate diagnostic assessments, hardware setups, and click funnels. Every metric is computed strictly from actual interactions.
             </p>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 z-10">
+          <div className="flex flex-wrap items-center gap-2.5 z-10">
             <button
               id="admin-banner-sync-btn"
               type="button"
               onClick={handleSyncLocalRecords}
               disabled={isSyncing}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-950 border border-emerald-700 hover:bg-emerald-900 text-emerald-300 text-xs font-bold transition-all shadow-md active:scale-95 disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#FED74C] hover:bg-[#D4F938] text-black text-xs font-display font-black border-2 border-black shadow-neo-sm transition-all active:translate-x-0.5 active:translate-y-0.5 disabled:opacity-50 cursor-pointer"
               title="Sync any assessments completed on this browser directly into live server storage"
             >
-              <RefreshCw className={`w-3.5 h-3.5 text-emerald-400 ${isSyncing ? 'animate-spin' : ''}`} />
+              <RefreshCw className={`w-3.5 h-3.5 text-black ${isSyncing ? 'animate-spin' : ''}`} />
               <span>{isSyncing ? 'Syncing...' : 'Sync Device Records'}</span>
             </button>
             <button
               id="admin-export-csv-btn"
               type="button"
               onClick={() => downloadExport('csv')}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold transition-all shadow-md active:scale-95"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#D4F938] hover:bg-[#cbf425] text-black text-xs font-display font-black border-2 border-black shadow-neo-sm transition-all active:translate-x-0.5 active:translate-y-0.5 cursor-pointer"
               title="Download Top Recommendations as CSV"
             >
-              <FileSpreadsheet className="w-4 h-4" />
+              <FileSpreadsheet className="w-4 h-4 text-black" />
               <span>Export CSV</span>
             </button>
             <button
               id="admin-export-json-btn"
               type="button"
               onClick={() => downloadExport('json')}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-stone-800 hover:bg-stone-700 text-stone-200 text-xs font-bold border border-stone-700 transition-all active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-white hover:bg-[#FED74C] text-black text-xs font-display font-black border-2 border-black shadow-neo-sm transition-all active:translate-x-0.5 active:translate-y-0.5 cursor-pointer"
               title="Download full analytics schema as JSON"
             >
-              <FileCode2 className="w-4 h-4 text-emerald-400" />
+              <FileCode2 className="w-4 h-4 text-black" />
               <span>Export JSON</span>
             </button>
             <button
               id="admin-export-dataset-btn"
               type="button"
               onClick={exportRecordsAsJSON}
-              className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-950/80 hover:bg-emerald-900 text-emerald-300 text-xs font-bold border border-emerald-700/70 transition-all active:scale-95 cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#5D45FD] hover:bg-black text-white text-xs font-display font-black border-2 border-black shadow-neo-sm transition-all active:translate-x-0.5 active:translate-y-0.5 cursor-pointer"
               title="Download LLM Fine-Tuning Training Dataset JSON"
             >
-              <Database className="w-4 h-4 text-emerald-400" />
+              <Database className="w-4 h-4 text-white" />
               <span>AI Dataset ({getAllAssessmentRecords().length})</span>
             </button>
           </div>
-
-          {/* Decorative Corner Glow */}
-          <div className="absolute -right-16 -top-16 w-48 h-48 bg-emerald-600/10 rounded-full blur-3xl pointer-events-none" />
         </div>
 
         {/* ------------------------------------------------------------- */}
@@ -698,35 +698,35 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
         {/* ------------------------------------------------------------- */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
           {/* Card 1: Pageviews */}
-          <div className="bg-stone-900 border border-stone-800 rounded-2xl p-5 relative overflow-hidden">
-            <div className="flex items-center justify-between text-stone-400 text-xs font-semibold mb-2">
+          <div className="bg-white border-2 border-black rounded-2xl p-5 shadow-neo-sm relative overflow-hidden">
+            <div className="flex items-center justify-between text-black text-xs font-mono-tech font-bold uppercase mb-2">
               <span>Total Page Views</span>
-              <div className="w-8 h-8 rounded-lg bg-emerald-950 border border-emerald-800/60 flex items-center justify-center text-emerald-400">
+              <div className="w-8 h-8 rounded-xl bg-[#F1F0FF] border-2 border-black flex items-center justify-center text-black">
                 <ViewIcon className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            <div className="text-2xl sm:text-3xl font-display font-black text-black tracking-tight">
               {stats ? stats.totals.pageviews.toLocaleString() : '---'}
             </div>
-            <div className="mt-3 pt-3 border-t border-stone-800/80 flex items-center justify-between text-[11px] text-stone-400">
+            <div className="mt-3 pt-3 border-t-2 border-black/10 flex items-center justify-between text-[11px] font-mono-tech text-black/60">
               <span>Home: {stats?.pageviewsByPath['/'] || 0}</span>
               <span>Result: {stats?.pageviewsByPath['/result'] || 0}</span>
             </div>
           </div>
 
           {/* Card 2: Unique Visitors */}
-          <div className="bg-stone-900 border border-stone-800 rounded-2xl p-5 relative overflow-hidden">
-            <div className="flex items-center justify-between text-stone-400 text-xs font-semibold mb-2">
+          <div className="bg-white border-2 border-black rounded-2xl p-5 shadow-neo-sm relative overflow-hidden">
+            <div className="flex items-center justify-between text-black text-xs font-mono-tech font-bold uppercase mb-2">
               <span>Unique Visitors</span>
-              <div className="w-8 h-8 rounded-lg bg-blue-950 border border-blue-800/60 flex items-center justify-center text-blue-400">
+              <div className="w-8 h-8 rounded-xl bg-[#FED74C] border-2 border-black flex items-center justify-center text-black">
                 <Users className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            <div className="text-2xl sm:text-3xl font-display font-black text-black tracking-tight">
               {stats ? stats.totals.uniqueVisitors.toLocaleString() : '---'}
             </div>
-            <div className="mt-3 pt-3 border-t border-stone-800/80 flex items-center justify-between text-[11px] text-stone-400">
-              <span className="text-blue-400 font-medium">Distinct Sessions</span>
+            <div className="mt-3 pt-3 border-t-2 border-black/10 flex items-center justify-between text-[11px] font-mono-tech text-black/60">
+              <span className="font-bold text-[#5D45FD]">Distinct Users</span>
               <span>Organic Traffic</span>
             </div>
           </div>
@@ -734,73 +734,73 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
           {/* Card 3: Live User Clicks & Interactions */}
           <div 
             onClick={() => setActiveTab('clicks')}
-            className="bg-stone-900 border border-emerald-900/60 hover:border-emerald-500/80 cursor-pointer rounded-2xl p-5 relative overflow-hidden transition-all group"
+            className="bg-white border-2 border-black hover:bg-[#D4F938]/30 cursor-pointer rounded-2xl p-5 shadow-neo-sm relative overflow-hidden transition-all group"
             title="Click to view full button and action breakdown"
           >
-            <div className="flex items-center justify-between text-stone-400 text-xs font-semibold mb-2">
-              <span className="flex items-center gap-1.5 text-emerald-400">
-                <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+            <div className="flex items-center justify-between text-black text-xs font-mono-tech font-bold uppercase mb-2">
+              <span className="flex items-center gap-1.5 text-black">
+                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping border border-black" />
                 <span>Live Clicks</span>
               </span>
-              <div className="w-8 h-8 rounded-lg bg-emerald-950 border border-emerald-700/80 flex items-center justify-center text-emerald-300 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+              <div className="w-8 h-8 rounded-xl bg-[#D4F938] border-2 border-black flex items-center justify-center text-black group-hover:bg-black group-hover:text-white transition-colors">
                 <MousePointerClick className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-emerald-400 tracking-tight">
+            <div className="text-2xl sm:text-3xl font-display font-black text-[#5D45FD] tracking-tight">
               {stats ? (stats.totals.totalClicks || 0).toLocaleString() : '---'}
             </div>
-            <div className="mt-3 pt-3 border-t border-stone-800/80 flex items-center justify-between text-[11px] text-stone-400">
-              <span className="text-emerald-300 font-medium group-hover:underline">All CTAs & Links</span>
-              <span className="text-stone-500 font-mono">5s auto-sync</span>
+            <div className="mt-3 pt-3 border-t-2 border-black/10 flex items-center justify-between text-[11px] font-mono-tech text-black/60">
+              <span className="font-bold group-hover:underline">All CTAs & Links</span>
+              <span>5s auto-sync</span>
             </div>
           </div>
 
           {/* Card 4: Completion Funnel */}
-          <div className="bg-stone-900 border border-stone-800 rounded-2xl p-5 relative overflow-hidden">
-            <div className="flex items-center justify-between text-stone-400 text-xs font-semibold mb-2">
+          <div className="bg-white border-2 border-black rounded-2xl p-5 shadow-neo-sm relative overflow-hidden">
+            <div className="flex items-center justify-between text-black text-xs font-mono-tech font-bold uppercase mb-2">
               <span>Diagnostic Tests</span>
-              <div className="w-8 h-8 rounded-lg bg-amber-950 border border-amber-800/60 flex items-center justify-center text-amber-400">
+              <div className="w-8 h-8 rounded-xl bg-[#FED74C] border-2 border-black flex items-center justify-center text-black">
                 <CheckCircle2 className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            <div className="text-2xl sm:text-3xl font-display font-black text-black tracking-tight">
               {stats ? stats.totals.assessmentCompletions.toLocaleString() : '---'}
             </div>
-            <div className="mt-3 pt-3 border-t border-stone-800/80 flex items-center justify-between text-[11px] text-stone-400">
+            <div className="mt-3 pt-3 border-t-2 border-black/10 flex items-center justify-between text-[11px] font-mono-tech text-black/60">
               <span>Starts: {stats?.totals.assessmentStarts || 0}</span>
-              <span className="text-amber-400 font-bold">
+              <span className="font-bold text-black bg-[#FED74C] px-1 rounded border border-black">
                 {stats?.totals.completionRate || 0}% Done
               </span>
             </div>
           </div>
 
           {/* Card 5: AI Mentor Interactions */}
-          <div className="bg-stone-900 border border-stone-800 rounded-2xl p-5 relative overflow-hidden">
-            <div className="flex items-center justify-between text-stone-400 text-xs font-semibold mb-2">
+          <div className="bg-white border-2 border-black rounded-2xl p-5 shadow-neo-sm relative overflow-hidden">
+            <div className="flex items-center justify-between text-black text-xs font-mono-tech font-bold uppercase mb-2">
               <span>Tizzi AI Queries</span>
-              <div className="w-8 h-8 rounded-lg bg-purple-950 border border-purple-800/60 flex items-center justify-center text-purple-400">
+              <div className="w-8 h-8 rounded-xl bg-[#5D45FD] text-white border-2 border-black flex items-center justify-center">
                 <Bot className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            <div className="text-2xl sm:text-3xl font-display font-black text-[#5D45FD] tracking-tight">
               {stats ? stats.totals.chatQueries.toLocaleString() : '---'}
             </div>
-            <div className="mt-3 pt-3 border-t border-stone-800/80 flex items-center justify-between text-[11px] text-stone-400">
-              <span className="text-purple-300 font-medium">Nigerian Advisory</span>
+            <div className="mt-3 pt-3 border-t-2 border-black/10 flex items-center justify-between text-[11px] font-mono-tech text-black/60">
+              <span className="font-bold text-black">Nigerian Advisory</span>
               <span>Live Guidance</span>
             </div>
           </div>
         </div>
 
         {/* Navigation Sub-Tabs */}
-        <div className="flex items-center gap-2 border-b border-stone-800 pb-2 overflow-x-auto">
+        <div className="flex items-center gap-2 border-b-2 border-black pb-2 overflow-x-auto">
           <button
             type="button"
             onClick={() => setActiveTab('overview')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap ${
+            className={`px-4 py-2 rounded-xl text-xs font-display font-black uppercase tracking-wider transition-all whitespace-nowrap border-2 border-black cursor-pointer ${
               activeTab === 'overview'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-stone-400 hover:text-white hover:bg-stone-900'
+                ? 'bg-[#D4F938] text-black shadow-neo-sm'
+                : 'bg-white text-black hover:bg-[#FED74C]'
             }`}
           >
             Dashboard Overview
@@ -808,22 +808,22 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
           <button
             type="button"
             onClick={() => setActiveTab('top10')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-xl text-xs font-display font-black uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 border-2 border-black cursor-pointer ${
               activeTab === 'top10'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-stone-400 hover:text-white hover:bg-stone-900'
+                ? 'bg-[#D4F938] text-black shadow-neo-sm'
+                : 'bg-white text-black hover:bg-[#FED74C]'
             }`}
           >
-            <Award className="w-3.5 h-3.5 text-amber-300" />
+            <Award className="w-3.5 h-3.5" />
             <span>Top 10 Recommendations</span>
           </button>
           <button
             type="button"
             onClick={() => setActiveTab('clicks')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-xl text-xs font-display font-black uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 border-2 border-black cursor-pointer ${
               activeTab === 'clicks'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-stone-400 hover:text-white hover:bg-stone-900'
+                ? 'bg-[#D4F938] text-black shadow-neo-sm'
+                : 'bg-white text-black hover:bg-[#FED74C]'
             }`}
           >
             <MousePointerClick className="w-3.5 h-3.5" />
@@ -832,10 +832,10 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
           <button
             type="button"
             onClick={() => setActiveTab('submissions')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition-all whitespace-nowrap flex items-center gap-1.5 ${
+            className={`px-4 py-2 rounded-xl text-xs font-display font-black uppercase tracking-wider transition-all whitespace-nowrap flex items-center gap-1.5 border-2 border-black cursor-pointer ${
               activeTab === 'submissions'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-stone-400 hover:text-white hover:bg-stone-900'
+                ? 'bg-[#D4F938] text-black shadow-neo-sm'
+                : 'bg-white text-black hover:bg-[#FED74C]'
             }`}
           >
             <Database className="w-3.5 h-3.5" />
@@ -863,7 +863,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
 
               {stats?.top10Recommendations[0] && (
                 <div className="px-3 py-1.5 rounded-lg bg-emerald-950 border border-emerald-800 text-[11px] text-emerald-300 flex items-center gap-1.5 self-start sm:self-auto">
-                  <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
+                  <Award className="w-3.5 h-3.5 text-emerald-400" />
                   <span>#1 Ranked: <strong>{stats.top10Recommendations[0].nicheTitle}</strong></span>
                 </div>
               )}
@@ -1087,7 +1087,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
                         </td>
                         <td className="py-3 px-3">
                           <span className="px-2 py-0.5 rounded text-[10px] font-medium bg-stone-800 text-stone-300 border border-stone-700">
-                            {click.category}
+                            {click?.category || 'General'}
                           </span>
                         </td>
                         <td className="py-3 px-3 font-mono text-[11px] text-stone-400">

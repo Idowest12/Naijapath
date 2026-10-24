@@ -9,6 +9,9 @@ export interface StoredAssessmentRecord {
     gender: string;
     status: string;
     location: string;
+    fieldOfStudy?: string;
+    experienceLevel?: string;
+    primaryInterest?: string;
   };
   constraints: {
     device: string;
@@ -56,6 +59,9 @@ export function saveAssessmentRecord(
       gender: submission.biodata.gender || 'unspecified',
       status: submission.biodata.status || 'unspecified',
       location: submission.biodata.location || 'unspecified',
+      fieldOfStudy: submission.biodata.fieldOfStudy || 'unspecified',
+      experienceLevel: submission.biodata.experienceLevel || 'unspecified',
+      primaryInterest: submission.biodata.primaryInterest || 'unspecified',
     },
     constraints: {
       device: submission.constraints.device || 'unspecified',

@@ -1,8 +1,28 @@
 @import "tailwindcss";
 
 @layer utilities {
-  .font-serif-display {
-    font-family: 'Fraunces', Georgia, serif;
-    font-optical-sizing: auto;
+  .font-display {
+    font-family: 'Space Grotesk', 'Plus Jakarta Sans', system-ui, sans-serif;
+  }
+  .font-mono-tech {
+    font-family: 'Space Mono', monospace;
+  }
+  .shadow-neo-sm {
+    box-shadow: 2px 2px 0px #000000;
+  }
+  .shadow-neo {
+    box-shadow: 3px 3px 0px #000000;
+  }
+  .shadow-neo-lg {
+    box-shadow: 4px 4px 0px #000000;
+  }
+  .shadow-neo-xl {
+    box-shadow: 5px 5px 0px #000000;
+  }
+  .shadow-neo-purple {
+    box-shadow: 4px 4px 0px #5D45FD;
+  }
+  .shadow-neo-blue {
+    box-shadow: 4px 4px 0px #60C6F8;
   }
 }

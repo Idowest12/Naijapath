@@ -216,7 +216,7 @@ export default function App() {
   };
 
   return (
-    <div id="app-root" className="min-h-screen flex flex-col bg-stone-50 text-stone-900 font-sans antialiased relative">
+    <div id="app-root" className="min-h-screen flex flex-col bg-[#F1F0FF] text-black font-sans antialiased relative">
       {currentView === 'admin' ? (
         <AdminPortal onBackToSite={handleBackToHome} />
       ) : currentView === 'assessment' ? (
@@ -273,12 +273,12 @@ export default function App() {
                 id="floating-back-to-top-btn"
                 type="button"
                 onClick={handleScrollToTop}
-                className="pointer-events-auto group flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/95 hover:bg-white text-stone-600 hover:text-stone-950 shadow-sm hover:shadow-md border border-stone-200/90 backdrop-blur-md transition-all duration-200 active:scale-95 animate-in fade-in cursor-pointer"
+                className="pointer-events-auto group flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white hover:bg-[#D4F938] text-black border-2 border-black shadow-neo-sm transition-all duration-150 active:translate-x-0.5 active:translate-y-0.5 cursor-pointer font-display font-black text-xs"
                 aria-label="Scroll back to top"
                 title="Scroll back to top"
               >
-                <ArrowUp className="w-3.5 h-3.5 text-stone-500 group-hover:-translate-y-0.5 transition-transform duration-200" />
-                <span className="text-xs font-medium tracking-tight text-stone-600 group-hover:text-stone-900">Top</span>
+                <ArrowUp className="w-3.5 h-3.5 text-black group-hover:-translate-y-0.5 transition-transform duration-200" />
+                <span className="text-xs font-mono-tech font-bold uppercase tracking-tight text-black">Top</span>
               </button>
             </div>
           )}

@@ -6,6 +6,9 @@ import {
   Gender,
   CurrentStatus,
   NigerianRegion,
+  FieldOfStudy,
+  ExperienceLevel,
+  PrimaryInterest,
   DeviceType,
   TimeAvailable,
   PowerDataSetup,
@@ -26,6 +29,7 @@ export interface ScenarioQuestion {
   title: string;
   scenario: string;
   options: {
+    icon?: string;
     text: string;
     description: string;
     weights: {
@@ -71,6 +75,30 @@ export const REGION_OPTIONS: BiodataQuestionOption<NigerianRegion>[] = [
   { value: 'outside_nigeria', label: 'Living outside Nigeria / Abroad' },
 ];
 
+export const FIELD_OF_STUDY_OPTIONS: BiodataQuestionOption<FieldOfStudy>[] = [
+  { value: 'arts_humanities', label: 'Arts & Humanities', sublabel: 'Mass Comm, Literature, Languages, History, Law, Philosophy, Creative Arts' },
+  { value: 'sciences_health', label: 'Sciences & Healthcare', sublabel: 'Biology, Chemistry, Physics, Biochemistry, Nursing, Medicine, Agriculture' },
+  { value: 'commercial_business', label: 'Commercial & Business', sublabel: 'Accounting, Business Admin, Economics, Banking & Finance, Marketing' },
+  { value: 'engineering_tech', label: 'Engineering & Technology', sublabel: 'Electrical, Mechanical, Civil, Computer Science / IT, Polytechnic diplomas' },
+  { value: 'social_sciences_education', label: 'Social Sciences & Education', sublabel: 'Sociology, Political Science, Psychology, Education, Public Admin' },
+  { value: 'secondary_or_other', label: 'Secondary School / Self-Taught', sublabel: 'Finished SSCE, waiting for admission, or building skills independently' },
+];
+
+export const EXPERIENCE_LEVEL_OPTIONS: BiodataQuestionOption<ExperienceLevel>[] = [
+  { value: 'novice_total_beginner', label: 'Complete Novice (Total Beginner)', sublabel: 'Tech is brand new to me — I don’t know where to start and want a welcoming path' },
+  { value: 'intermediate_career_changer', label: 'Career Changer / Intermediate', sublabel: 'Working in non-tech or dabbled in digital basics, ready to pivot completely' },
+  { value: 'skill_builder_specializing', label: 'Skill Builder Seeking Specialization', sublabel: 'I know basic computer or digital tools and want to master a high-income specialty' },
+];
+
+export const PRIMARY_INTEREST_OPTIONS: BiodataQuestionOption<PrimaryInterest>[] = [
+  { value: 'colors_visual_design', label: 'Playing with Colors, Art & Styling', sublabel: 'Flyers, photography, video edits, arranging visuals, and choosing aesthetics' },
+  { value: 'investigating_puzzles', label: 'Solving Riddles & Glitches', sublabel: 'Brain teasers, taking gadgets apart, finding mistakes, and testing what broke' },
+  { value: 'organizing_systems', label: 'Organizing & Planning Systems', sublabel: 'Managing schedules, planning events, keeping checklists, and sorting chaos' },
+  { value: 'communicating_helping', label: 'Talking, Advising & Helping People', sublabel: 'Explaining ideas simply, counseling friends, writing posts, or teaching others' },
+  { value: 'numbers_money', label: 'Working with Numbers & Budgets', sublabel: 'Tracking spending, calculating profits, managing money, and spotting bargains' },
+  { value: 'building_gadgets', label: 'Building Things & Gadget Mechanics', sublabel: 'Figuring out how software and machines work under the hood and assembling parts' },
+];
+
 export const DEVICE_OPTIONS: BiodataQuestionOption<DeviceType>[] = [
   { value: 'phone_only', label: 'Smartphone Only', sublabel: 'No laptop right now; everything must work on phone' },
   { value: 'shared_or_cafe', label: 'Shared PC or Cafe', sublabel: 'Can use a family PC, friend laptop, or cyber cafe sometimes' },
@@ -92,9 +120,9 @@ export const POWER_DATA_OPTIONS: BiodataQuestionOption<PowerDataSetup>[] = [
 ];
 
 export const CODING_APPETITE_OPTIONS: BiodataQuestionOption<CodingAppetite>[] = [
-  { value: 'no_code_please', label: 'No coding at all! Keep it simple', sublabel: 'I prefer design, writing, managing, organizing, or talking to people' },
-  { value: 'willing_to_try', label: 'Open to light tools & simple steps', sublabel: 'I do not mind Excel formulas, Canva, Notion, or simple setups' },
-  { value: 'love_logic_math', label: 'I want to build software & code!', sublabel: 'Excited to write real code, apps, and solve technical puzzles' },
+  { value: 'no_code_please', label: 'Keep it 100% visual, creative, or people-focused! (No code)', sublabel: 'I prefer design, writing, managing, organizing, or talking to people' },
+  { value: 'willing_to_try', label: 'Open to simple tools & light formulas', sublabel: 'I do not mind Excel formulas, Canva, Notion, or simple setups' },
+  { value: 'love_logic_math', label: 'I love puzzles, logic & want to build real software!', sublabel: 'Excited to write real code, create interactive apps, and build systems' },
 ];
 
 export const EARNING_URGENCY_OPTIONS: BiodataQuestionOption<EarningUrgency>[] = [
@@ -105,177 +133,248 @@ export const EARNING_URGENCY_OPTIONS: BiodataQuestionOption<EarningUrgency>[] = 
 
 export const SCENARIO_QUESTIONS: ScenarioQuestion[] = [
   {
-    id: 'scenario-app-frustration',
-    category: 'Daily Apps',
-    title: 'When an app annoys you',
-    scenario: 'You are using a Nigerian bank, food, or shopping app and something feels off. What bugs you the most?',
+    id: 'scenario-colors-visuals',
+    category: 'Visual & Aesthetics',
+    title: 'When looking at an app or flyer, what catches your eye first?',
+    scenario: 'Pick what your eye and mind naturally notice right away:',
     options: [
       {
-        text: 'Ugly design, awkward visual layouts, or confusing buttons',
-        description: 'Hard-to-read text, cluttered screens, or buttons placed where your thumb cannot reach easily.',
-        weights: { visualCreative: 5, organizationOps: 2 }
-      },
-      {
-        text: 'Server timeouts, failed bank transfers, or slow backend API errors',
-        description: 'The app freezing on "Processing payment...", database connection errors, or backend crashes (APIs are the digital messengers that connect apps to bank servers).',
-        weights: { logicalStructural: 5, securityCuriosity: 4, analyticalDetail: 3 }
-      },
-      {
-        text: 'Finding broken features, calculation glitches, or layout bugs before others',
-        description: 'You immediately spot wrong calculations, buttons that do nothing, or inconsistent behavior.',
-        weights: { analyticalDetail: 5, logicalStructural: 3 }
-      },
-      {
-        text: 'Poor customer communication, unclear steps, and zero help documentation',
-        description: 'Nobody explaining clearly what happened to your money, or how to get support.',
-        weights: { peopleCommunication: 5, organizationOps: 3 }
-      }
-    ]
-  },
-  {
-    id: 'scenario-ideal-output',
-    category: 'Daily Vibe',
-    title: 'Work that feels most satisfying',
-    scenario: 'At the end of a productive day, which tangible outcome would make you feel most proud?',
-    options: [
-      {
-        text: 'A clean, aesthetic visual screen or polished brand graphics',
-        description: 'A polished mobile screen, brand deck, flyer, or UI mockup that looks world-class.',
+        icon: 'palette',
+        text: 'Colors & Visual Style',
+        description: 'Harmonious palettes, font beauty, modern styling',
         weights: { visualCreative: 5, peopleCommunication: 2 }
       },
       {
-        text: 'A working backend REST API, database schema, or secure server script',
-        description: 'Building server endpoints and database tables that process transactions accurately (an API works like a digital waiter delivering requests to the kitchen/database).',
-        weights: { logicalStructural: 5, analyticalDetail: 5, securityCuriosity: 3 }
+        icon: 'layout',
+        text: 'Neat & Clean Layout',
+        description: 'Clean spacing, organized sections, zero clutter',
+        weights: { organizationOps: 5, visualCreative: 3 }
       },
       {
-        text: 'A complete full-stack web application with responsive UI and live database',
-        description: 'Building a product from scratch where users can sign up, click buttons, and save data end-to-end.',
-        weights: { logicalStructural: 5, organizationOps: 4, visualCreative: 3 }
+        icon: 'message',
+        text: 'The Words & Offer',
+        description: 'Catchy headlines that hook attention and emotion',
+        weights: { peopleCommunication: 5, visualCreative: 2 }
       },
       {
-        text: 'A clear spreadsheet or numbers breakdown with actionable business insights',
-        description: 'Spotting sales trends, profit figures, or finding hidden patterns in messy numbers.',
-        weights: { analyticalDetail: 5, logicalStructural: 4 }
+        icon: 'search',
+        text: 'Spotting Small Flaws',
+        description: 'Noticing typos, crooked borders, or errors others miss',
+        weights: { analyticalDetail: 5, visualCreative: 2 }
       },
       {
-        text: 'An organized, decluttered workspace and smooth operational system',
-        description: 'Tidying up meeting schedules, email inboxes, and to-do lists so the whole team flows easily.',
-        weights: { organizationOps: 5, peopleCommunication: 4 }
+        icon: 'cpu',
+        text: 'How It Works Behind',
+        description: 'Curious how interactive clicks and features operate',
+        weights: { logicalStructural: 5, analyticalDetail: 3 }
       }
     ]
   },
   {
-    id: 'scenario-collaboration-style',
-    category: 'Work Style',
-    title: 'How you like to spend your hours',
-    scenario: 'What kind of work rhythm feels most energizing and natural to your personality?',
+    id: 'scenario-everyday-troubleshooting',
+    category: 'Everyday Logic',
+    title: 'A gadget or phone stops working. How do you tackle it?',
+    scenario: 'Your natural instinct to solve problems:',
     options: [
       {
-        text: 'Deep, quiet focus solving technical backend logic, algorithms, and code syntax',
-        description: 'Minimal meetings. Just you, your code editor, writing server functions and database queries.',
-        weights: { logicalStructural: 5, analyticalDetail: 5, securityCuriosity: 3 }
+        icon: 'search',
+        text: 'Methodical Detective',
+        description: 'Testing one button or setting at a time patiently',
+        weights: { analyticalDetail: 5, securityCuriosity: 4 }
       },
       {
-        text: 'Building full digital products end-to-end and connecting design with code',
-        description: 'Bridging user interfaces with server data to make complete software products come to life.',
-        weights: { logicalStructural: 5, organizationOps: 4, visualCreative: 3 }
+        icon: 'cpu',
+        text: 'System Connections',
+        description: 'Seeing how parts, power, or logic link together',
+        weights: { logicalStructural: 5, analyticalDetail: 4 }
       },
       {
-        text: 'Communicating, organizing, and helping clients or community learners',
-        description: 'Liaising with clients, answering inquiries, teaching, and coordinating deliverables.',
-        weights: { peopleCommunication: 5, organizationOps: 4 }
+        icon: 'youtube',
+        text: 'Follow Step-by-Step Guides',
+        description: 'Searching YouTube or Google for proven solutions',
+        weights: { organizationOps: 4, peopleCommunication: 3 }
       },
       {
-        text: 'Creative experimentation with visual layouts, brand styles, and user delight',
-        description: 'Trying out typography, color palettes, and arranging screen elements for visual elegance.',
-        weights: { visualCreative: 5, peopleCommunication: 3 }
+        icon: 'users',
+        text: 'Calm & Listen',
+        description: 'Asking what happened and talking through it patiently',
+        weights: { peopleCommunication: 5, organizationOps: 3 }
       },
       {
-        text: 'Investigating safety, auditing systems for vulnerabilities, and testing bugs',
-        description: 'Spotting security holes, auditing passwords, and checking that software behaves securely.',
+        icon: 'sparkles',
+        text: 'Clean, Reset & Organize',
+        description: 'Tidying storage, resetting clutter so it runs fresh',
+        weights: { organizationOps: 5, visualCreative: 3 }
+      }
+    ]
+  },
+  {
+    id: 'scenario-flow-state',
+    category: 'Flow State',
+    title: 'What activity makes 3 hours feel like 10 minutes?',
+    scenario: 'When you are in your zone, what are you usually doing?',
+    options: [
+      {
+        icon: 'palette',
+        text: 'Colors, Art & Styling',
+        description: 'Editing photos/videos, sketching, arranging aesthetics',
+        weights: { visualCreative: 5, peopleCommunication: 2 }
+      },
+      {
+        icon: 'brain',
+        text: 'Puzzles & Brain Teasers',
+        description: 'Cracking riddles, strategy games, untangling dilemmas',
+        weights: { logicalStructural: 5, analyticalDetail: 4 }
+      },
+      {
+        icon: 'message',
+        text: 'Advising & Talking',
+        description: 'Heart-to-heart counseling, storytelling, mentoring',
+        weights: { peopleCommunication: 5, organizationOps: 2 }
+      },
+      {
+        icon: 'list',
+        text: 'Organizing & Checklists',
+        description: 'Tidying spaces, filing, planning detailed schedules',
+        weights: { organizationOps: 5, analyticalDetail: 2 }
+      },
+      {
+        icon: 'coins',
+        text: 'Numbers & Budgets',
+        description: 'Tracking money, calculating profits, finding deals',
+        weights: { analyticalDetail: 5, organizationOps: 4 }
+      },
+      {
+        icon: 'shield',
+        text: 'Safety & Digital Privacy',
+        description: 'Spotting scams, securing accounts, testing privacy',
         weights: { securityCuriosity: 5, analyticalDetail: 4 }
       }
     ]
   },
   {
-    id: 'scenario-friend-in-need',
-    category: 'Friend in Need',
-    title: 'Helping a Friend Start a Venture',
-    scenario: 'A close friend is launching a new side business or brand and asks for your direct help. What role do you instinctively volunteer for?',
+    id: 'scenario-confusion-roadblock',
+    category: 'Learning Style',
+    title: 'You hit a confusing roadblock learning something new. What helps most?',
+    scenario: 'How your brain absorbs tricky concepts best:',
     options: [
       {
-        text: 'Design their logo, brand guidelines, and visual showcase flyers',
-        description: 'Create visual assets that make their new brand look trusted and established from day one.',
+        icon: 'palette',
+        text: 'Visual Picture or Demo',
+        description: 'Seeing what the finished result looks like first',
         weights: { visualCreative: 5, peopleCommunication: 2 }
       },
       {
-        text: 'Build their backend database and payment gateway integration',
-        description: 'Set up Paystack API webhooks, customer databases, and automated order confirmation scripts.',
-        weights: { logicalStructural: 5, analyticalDetail: 5, securityCuriosity: 3 }
+        icon: 'list',
+        text: 'Numbered Checklist',
+        description: 'Step 1, Step 2, Step 3 in plain everyday language',
+        weights: { organizationOps: 5, peopleCommunication: 3 }
       },
       {
-        text: 'Build their complete online store website end-to-end with shopping cart and checkout',
-        description: 'Create both the responsive customer website and the database order management system.',
-        weights: { logicalStructural: 5, organizationOps: 4, visualCreative: 3 }
+        icon: 'wrench',
+        text: 'Hands-on Tinkering',
+        description: 'Taking it apart and figuring out the rules by doing',
+        weights: { logicalStructural: 5, analyticalDetail: 5 }
       },
       {
-        text: 'Run their digital advertising campaigns, SEO, and social growth funnels',
-        description: 'Set up targeted Meta and TikTok ads to drive paying customers straight to their WhatsApp.',
-        weights: { peopleCommunication: 5, analyticalDetail: 4, visualCreative: 3 }
+        icon: 'users',
+        text: 'Talking It Out Loud',
+        description: 'Bouncing questions with a partner or learning buddy',
+        weights: { peopleCommunication: 5, organizationOps: 3 }
       },
       {
-        text: 'Set up an Excel/Google Sheet to track daily expenses, orders, and profit margins',
-        description: 'Ensure every Naira is accounted for, tracking revenue trends and inventory counts.',
-        weights: { analyticalDetail: 5, logicalStructural: 4 }
-      },
-      {
-        text: 'Organize client orders, appointment calendars, and customer service messaging',
-        description: 'Manage the day-to-day administrative flow so customer requests never get lost.',
-        weights: { organizationOps: 5, peopleCommunication: 4 }
+        icon: 'search',
+        text: 'Double-Checking Details',
+        description: 'Inspecting each piece carefully to ensure zero flaws',
+        weights: { securityCuriosity: 5, analyticalDetail: 4 }
       }
     ]
   },
   {
-    id: 'scenario-learning-project',
-    category: 'Weekend Challenge',
-    title: 'Free weekend mini-project',
-    scenario: 'If you were given 2 completely free days and unlimited high-speed data to learn one thing, what would you choose?',
+    id: 'scenario-venture-launch',
+    category: 'Team Strengths',
+    title: 'Starting a side hustle with 3 friends. What is your natural role?',
+    scenario: 'Pick where you feel most energized contributing:',
     options: [
       {
-        text: 'Code a full-stack web application with user login and a live cloud database',
-        description: 'Build an end-to-end web app using modern frameworks where users can sign in and create content.',
-        weights: { logicalStructural: 5, organizationOps: 4, visualCreative: 3 }
+        icon: 'palette',
+        text: 'Brand & Visual Stylist',
+        description: 'Designing logos, color themes, flyers, packaging',
+        weights: { visualCreative: 5, peopleCommunication: 2 }
       },
       {
-        text: 'Build a secure backend REST API with authentication and database endpoints',
-        description: 'Write server routes in Node.js or Python, test them in Postman, and deploy live to the cloud.',
-        weights: { logicalStructural: 5, analyticalDetail: 5, securityCuriosity: 4 }
+        icon: 'cpu',
+        text: 'Digital Tools Builder',
+        description: 'Setting up ordering tools, automated notifications',
+        weights: { logicalStructural: 5, organizationOps: 4 }
       },
       {
-        text: 'Code a responsive, interactive web page with modern CSS and JavaScript',
-        description: 'Build an interactive web interface with animations, dark mode, and mobile responsiveness.',
-        weights: { logicalStructural: 4, visualCreative: 4, analyticalDetail: 3 }
+        icon: 'message',
+        text: 'Community & Growth',
+        description: 'Talking to customers on WhatsApp, writing catchy posts',
+        weights: { peopleCommunication: 5, visualCreative: 2 }
       },
       {
-        text: 'Design a distinctive brand visual identity, logo mark, and app UI mockup in Figma',
-        description: 'Map out the color palette, typography hierarchy, logo mark, and clean user screens.',
+        icon: 'coins',
+        text: 'Money & Margin Tracker',
+        description: 'Accounting for every Naira, calculating profits',
+        weights: { analyticalDetail: 5, logicalStructural: 4 }
+      },
+      {
+        icon: 'list',
+        text: 'Operations & Dispatch',
+        description: 'Managing delivery schedules, keeping orders on time',
+        weights: { organizationOps: 5, peopleCommunication: 4 }
+      },
+      {
+        icon: 'shield',
+        text: 'Quality & Anti-Fraud',
+        description: 'Verifying payments, inspecting orders, preventing scams',
+        weights: { securityCuriosity: 5, analyticalDetail: 4 }
+      }
+    ]
+  },
+  {
+    id: 'scenario-weekend-project',
+    category: 'Free Curiosity',
+    title: 'Two free days and unlimited internet. What fun project do you pick?',
+    scenario: 'Zero exams, zero pressure — what sounds exciting to explore?',
+    options: [
+      {
+        icon: 'palette',
+        text: 'App Screens & Branding',
+        description: 'Designing modern screens and brand colors in Figma',
         weights: { visualCreative: 5, peopleCommunication: 3 }
       },
       {
-        text: 'Launch a digital growth campaign with targeted ads, viral hooks, and email funnels',
-        description: 'Set up ad campaigns, write high-converting copy, and track conversion analytics.',
-        weights: { peopleCommunication: 5, analyticalDetail: 4, visualCreative: 3 }
+        icon: 'cpu',
+        text: 'Code an Interactive App',
+        description: 'Writing code that creates live clickable features',
+        weights: { logicalStructural: 5, visualCreative: 3 }
       },
       {
-        text: 'Build an interactive online mini-course or video tutorial module for learners',
-        description: 'Break down a complex topic into simple step-by-step modules, practical exercises, and quizzes.',
-        weights: { peopleCommunication: 5, organizationOps: 4, logicalStructural: 3 }
+        icon: 'rocket',
+        text: 'Social Ads & Marketing',
+        description: 'Learning how to attract buyers and run viral campaigns',
+        weights: { peopleCommunication: 5, analyticalDetail: 3 }
       },
       {
-        text: 'Analyze market food price variations across 3 Nigerian cities in a clean spreadsheet',
-        description: 'Clean raw data, compute averages, and create visual bar charts showing the best deals.',
+        icon: 'coins',
+        text: 'Spreadsheets & Dashboards',
+        description: 'Turning messy data into colorful profit charts',
         weights: { analyticalDetail: 5, logicalStructural: 4 }
+      },
+      {
+        icon: 'shield',
+        text: 'Cyber Defense & Security',
+        description: 'Learning how security guardians protect accounts',
+        weights: { securityCuriosity: 5, analyticalDetail: 4 }
+      },
+      {
+        icon: 'book',
+        text: 'Teaching & Mini-Courses',
+        description: 'Creating short helpful guides that explain skills simply',
+        weights: { peopleCommunication: 5, organizationOps: 4 }
       }
     ]
   }
@@ -462,6 +561,100 @@ export function calculateNicheRecommendation(submission: FullAssessmentSubmissio
     semanticBoosts['niche-frontend'] += 18;
   }
 
+  // Experience Level Alignment
+  const expLevel = biodata.experienceLevel || '';
+  if (expLevel === 'novice_total_beginner') {
+    semanticBoosts['niche-uiux'] += 14;
+    semanticBoosts['niche-va'] += 14;
+    semanticBoosts['niche-tech-writing'] += 14;
+    semanticBoosts['niche-smm'] += 12;
+    semanticBoosts['niche-branding'] += 12;
+    semanticBoosts['niche-frontend'] += 10;
+  } else if (expLevel === 'intermediate_career_changer') {
+    semanticBoosts['niche-data'] += 14;
+    semanticBoosts['niche-pm'] += 14;
+    semanticBoosts['niche-digital-marketing'] += 14;
+    semanticBoosts['niche-qa'] += 12;
+    semanticBoosts['niche-uiux'] += 10;
+  } else if (expLevel === 'skill_builder_specializing') {
+    semanticBoosts['niche-fullstack'] += 16;
+    semanticBoosts['niche-backend'] += 16;
+    semanticBoosts['niche-cyber'] += 16;
+    semanticBoosts['niche-data'] += 12;
+    semanticBoosts['niche-qa'] += 10;
+  }
+
+  // Field of Study Alignment
+  const study = biodata.fieldOfStudy || '';
+  if (study === 'arts_humanities') {
+    semanticBoosts['niche-branding'] += 16;
+    semanticBoosts['niche-uiux'] += 14;
+    semanticBoosts['niche-tech-writing'] += 16;
+    semanticBoosts['niche-smm'] += 14;
+    semanticBoosts['niche-digital-marketing'] += 10;
+  } else if (study === 'sciences_health') {
+    semanticBoosts['niche-data'] += 16;
+    semanticBoosts['niche-backend'] += 12;
+    semanticBoosts['niche-cyber'] += 14;
+    semanticBoosts['niche-qa'] += 12;
+    semanticBoosts['niche-fullstack'] += 10;
+  } else if (study === 'commercial_business') {
+    semanticBoosts['niche-data'] += 18;
+    semanticBoosts['niche-pm'] += 16;
+    semanticBoosts['niche-digital-marketing'] += 14;
+    semanticBoosts['niche-va'] += 12;
+  } else if (study === 'engineering_tech') {
+    semanticBoosts['niche-fullstack'] += 16;
+    semanticBoosts['niche-backend'] += 16;
+    semanticBoosts['niche-frontend'] += 14;
+    semanticBoosts['niche-cyber'] += 14;
+    semanticBoosts['niche-qa'] += 12;
+  } else if (study === 'social_sciences_education') {
+    semanticBoosts['niche-edtech'] += 18;
+    semanticBoosts['niche-tech-writing'] += 14;
+    semanticBoosts['niche-pm'] += 12;
+    semanticBoosts['niche-va'] += 12;
+    semanticBoosts['niche-smm'] += 10;
+  } else if (study === 'secondary_or_other') {
+    semanticBoosts['niche-uiux'] += 10;
+    semanticBoosts['niche-frontend'] += 10;
+    semanticBoosts['niche-va'] += 12;
+    semanticBoosts['niche-branding'] += 10;
+    semanticBoosts['niche-smm'] += 10;
+  }
+
+  // Primary Natural Interest / Hobby Alignment
+  const interest = biodata.primaryInterest || '';
+  if (interest === 'colors_visual_design') {
+    semanticBoosts['niche-uiux'] += 22;
+    semanticBoosts['niche-branding'] += 24;
+    semanticBoosts['niche-frontend'] += 12;
+    semanticBoosts['niche-smm'] += 10;
+  } else if (interest === 'investigating_puzzles') {
+    semanticBoosts['niche-qa'] += 22;
+    semanticBoosts['niche-cyber'] += 22;
+    semanticBoosts['niche-backend'] += 18;
+    semanticBoosts['niche-fullstack'] += 14;
+  } else if (interest === 'organizing_systems') {
+    semanticBoosts['niche-va'] += 22;
+    semanticBoosts['niche-pm'] += 20;
+    semanticBoosts['niche-data'] += 10;
+  } else if (interest === 'communicating_helping') {
+    semanticBoosts['niche-tech-writing'] += 20;
+    semanticBoosts['niche-smm'] += 18;
+    semanticBoosts['niche-digital-marketing'] += 16;
+    semanticBoosts['niche-edtech'] += 18;
+  } else if (interest === 'numbers_money') {
+    semanticBoosts['niche-data'] += 24;
+    semanticBoosts['niche-digital-marketing'] += 12;
+    semanticBoosts['niche-backend'] += 10;
+  } else if (interest === 'building_gadgets') {
+    semanticBoosts['niche-fullstack'] += 22;
+    semanticBoosts['niche-backend'] += 18;
+    semanticBoosts['niche-frontend'] += 18;
+    semanticBoosts['niche-cyber'] += 12;
+  }
+
   // Trait scoring per niche using Signature Resonance
   const scoredNiches = ALL_NICHES.map((niche) => {
     // 1. Cognitive Aptitude Fit (0 - 100)
@@ -524,13 +717,13 @@ export function calculateNicheRecommendation(submission: FullAssessmentSubmissio
 
     // Coding appetite
     if (constraints.codingAppetite === 'no_code_please') {
-      if (niche.category === 'technical') {
+      if (niche?.category === 'technical') {
         feasibility -= 26;
       } else {
         feasibility += 12;
       }
     } else if (constraints.codingAppetite === 'love_logic_math') {
-      if (niche.category === 'technical') {
+      if (niche?.category === 'technical') {
         feasibility += 15;
       } else {
         feasibility -= 6;
@@ -598,24 +791,27 @@ export function calculateNicheRecommendation(submission: FullAssessmentSubmissio
   let learningVelocityNote = '';
 
   if (primary.niche.id === secondary.niche.id) {
-    edgeReason = `Your diagnostic responses demonstrated clear alignment with ${primary.niche.title} across all problem-solving scenarios.`;
-    practicalDifferentiator = 'Uniquely suited to your daily workflow preferences and learning goals.';
-    learningVelocityNote = 'High focus on a singular pathway accelerates your time-to-first-client.';
+    edgeReason = `Your answers showed clear, consistent alignment with ${primary.niche.title} across all problem-solving scenarios.`;
+    practicalDifferentiator = `Uniquely tailored to your schedule, hardware setup, and daily learning style.`;
+    learningVelocityNote = `Focusing single-mindedly on this track will accelerate your journey to your first client or role.`;
   } else {
-    // Determine the key difference (hardware, cognitive spike, coding appetite, or market demand)
+    // Determine the key difference (hardware, aptitude spike, timeline, or practical match)
     if (!secondary.niche.supportedOnPhone && constraints.device === 'phone_only') {
-      edgeReason = `${primary.niche.title} is prioritized over ${secondary.niche.title} because it can be started 100% on your current smartphone setup, removing hardware bottlenecks from Day One.`;
+      edgeReason = `${primary.niche.title} takes the lead because it can be started 100% on your smartphone from Day One, avoiding any hardware roadblock while you study.`;
     } else if (primary.aptitudeFit > secondary.aptitudeFit + 4) {
-      edgeReason = `${primary.niche.title} scored higher cognitive resonance (${primary.aptitudeFit}% vs ${secondary.aptitudeFit}%), indicating your natural instinct leans closer to this day-to-day problem space.`;
-    } else if (constraints.earningUrgency === 'immediate_1_3_months' && (primary.niche.category !== 'technical' || primary.niche.id === 'niche-frontend')) {
-      edgeReason = `${primary.niche.title} offers a shorter ramp-up to initial income (${primary.niche.earningHorizon}) compared to the deeper architecture required by ${secondary.niche.title}.`;
+      edgeReason = `Your answers revealed stronger natural instincts for ${primary.niche.title} (${primary.aptitudeFit}% problem-solving match vs ${secondary.aptitudeFit}%). You naturally enjoy the type of day-to-day challenges found in this track.`;
+    } else if (constraints.earningUrgency === 'immediate_1_3_months' && (primary?.niche?.category !== 'technical' || primary?.niche?.id === 'niche-frontend')) {
+      edgeReason = `${primary.niche.title} offers a much faster path to your first freelance earnings (${primary.niche.earningHorizon}) compared to the heavier technical foundation needed for ${secondary.niche.title}.`;
     } else {
-      edgeReason = `${primary.niche.title} achieved an optimal balance between your cognitive aptitude (${primary.aptitudeFit}%), practical feasibility (${primary.feasibility}%), and local/remote market demand (${primary.marketDemand}%).`;
+      edgeReason = `${primary.niche.title} came out on top because it provides the best all-around fit between your daily problem-solving style (${primary.aptitudeFit}%), your current hardware/time setup (${primary.feasibility}%), and real hiring demand (${primary.marketDemand}%).`;
     }
 
-    practicalDifferentiator = `In ${primary.niche.title}, your daily focus is centered on ${primary.niche.description.slice(0, 110)}... whereas ${secondary.niche.title} focuses more heavily on ${secondary.niche.description.slice(0, 110)}...`;
+    // Clean, complete sentences without awkward truncation
+    const primaryWork = primary.niche.shortTagline || primary.niche.title;
+    const secondaryWork = secondary.niche.shortTagline || secondary.niche.title;
+    practicalDifferentiator = `In ${primary.niche.title}, your daily work focuses on ${primaryWork.toLowerCase()}. In ${secondary.niche.title}, your focus shifts to ${secondaryWork.toLowerCase()}.`;
     
-    learningVelocityNote = `Priority #1 (${primary.niche.title}) typically targets initial market readiness in ${primary.niche.earningHorizon}, while Alternative #${2} (${secondary.niche.title}) targets ${secondary.niche.earningHorizon}.`;
+    learningVelocityNote = `In ${primary.niche.title}, you can become job-ready in about ${primary.niche.earningHorizon}. In ${secondary.niche.title}, typical readiness takes about ${secondary.niche.earningHorizon}.`;
   }
 
   // Craft honest caveat explaining why score isn't 100%
@@ -657,9 +853,31 @@ export function calculateNicheRecommendation(submission: FullAssessmentSubmissio
     ? 'provides a balanced pathway allowing you to build an impressive portfolio within 4 to 6 months'
     : 'aligns with your commitment to deep technical mastery and high-ceiling career longevity';
 
-  const rationale = `Based on your diagnostic profile ${statusText}, ${primary.niche.title} is your highest-scoring realistic match (${primary.score}% fit). It works effectively with ${deviceText} and ${urgencyText}. Your diagnostic inputs demonstrated strong ${
+  const expLevelText = biodata.experienceLevel === 'novice_total_beginner'
+    ? 'as a total beginner looking for a welcoming, jargon-free starting point'
+    : biodata.experienceLevel === 'intermediate_career_changer'
+    ? 'as a career changer bringing valuable real-world problem-solving experience'
+    : biodata.experienceLevel === 'skill_builder_specializing'
+    ? 'as an ambitious skill builder aiming for high-income specialization'
+    : '';
+
+  const studyText = biodata.fieldOfStudy === 'arts_humanities'
+    ? 'rooted in your creative and communication background'
+    : biodata.fieldOfStudy === 'commercial_business'
+    ? 'leveraging your commercial and business mindset'
+    : biodata.fieldOfStudy === 'sciences_health'
+    ? 'drawing on your scientific and investigative curiosity'
+    : biodata.fieldOfStudy === 'engineering_tech'
+    ? 'building on your technical and systems logic'
+    : biodata.fieldOfStudy === 'social_sciences_education'
+    ? 'drawing on your people and organizational insight'
+    : '';
+
+  const backgroundContext = [statusText, expLevelText, studyText].filter(Boolean).join(', ');
+
+  const rationale = `Based on your diagnostic profile ${backgroundContext || statusText}, ${primary.niche.title} is your highest-scoring realistic match (${primary.score}% fit). It works effectively with ${deviceText} and ${urgencyText}. Your diagnostic inputs demonstrated strong ${
     primary.niche.category === 'creative' 
-      ? 'visual discernment and human-centered design instincts' 
+      ? 'visual discernment, color sensitivity, and human-centered design instincts' 
       : primary.niche.category === 'technical' 
       ? 'structured analytical logic and investigative problem solving' 
       : 'organizational discipline and clear communication capabilities'

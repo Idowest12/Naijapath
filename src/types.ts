@@ -2,6 +2,9 @@ export type AgeBand = 'under_18' | '18_22' | '23_27' | '28_34' | '35_plus';
 export type Gender = 'female' | 'male' | 'prefer_not_to_say';
 export type CurrentStatus = 'student_undergrad' | 'unemployed_grad' | 'working_non_tech' | 'self_employed' | 'secondary_school';
 export type NigerianRegion = 'lagos' | 'abuja' | 'south_west' | 'south_south' | 'south_east' | 'north' | 'outside_nigeria';
+export type FieldOfStudy = 'arts_humanities' | 'sciences_health' | 'commercial_business' | 'engineering_tech' | 'social_sciences_education' | 'secondary_or_other';
+export type ExperienceLevel = 'novice_total_beginner' | 'intermediate_career_changer' | 'skill_builder_specializing';
+export type PrimaryInterest = 'colors_visual_design' | 'investigating_puzzles' | 'organizing_systems' | 'communicating_helping' | 'numbers_money' | 'building_gadgets';
 
 export type DeviceType = 'phone_only' | 'shared_or_cafe' | 'laptop_basic' | 'laptop_power';
 export type TimeAvailable = '3_to_5_hrs' | '6_to_10_hrs' | '11_to_20_hrs' | '20_plus_hrs';
@@ -15,6 +18,9 @@ export interface UserBiodata {
   gender: Gender | '';
   status: CurrentStatus | '';
   location: NigerianRegion | '';
+  fieldOfStudy?: FieldOfStudy | '';
+  experienceLevel?: ExperienceLevel | '';
+  primaryInterest?: PrimaryInterest | '';
 }
 
 export interface UserConstraints {

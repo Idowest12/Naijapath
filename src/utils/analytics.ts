@@ -86,19 +86,24 @@ function recordLocalEvent(event: {
       let clicks: Record<string, { count: number; label: string; category?: string }> = {};
       try {
         const stored = localStorage.getItem(LOCAL_CLICKS_KEY);
-        if (stored) clicks = JSON.parse(stored);
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed && typeof parsed === 'object') {
+            clicks = parsed;
+          }
+        }
       } catch {}
-      const btnId = event.buttonId || 'btn_action';
-      if (!clicks[btnId]) {
+      const btnId = event?.buttonId || 'btn_action';
+      if (!clicks[btnId] || typeof clicks[btnId] !== 'object') {
         clicks[btnId] = {
           count: 0,
-          label: event.label || btnId,
-          category: event.category || 'User Action'
+          label: event?.label || btnId,
+          category: event?.category || 'User Action'
         };
       }
-      clicks[btnId].count += 1;
-      if (event.label) clicks[btnId].label = event.label;
-      if (event.category) clicks[btnId].category = event.category;
+      clicks[btnId].count = (clicks[btnId].count || 0) + 1;
+      if (event?.label) clicks[btnId].label = event.label;
+      if (event?.category) clicks[btnId].category = event.category;
       localStorage.setItem(LOCAL_CLICKS_KEY, JSON.stringify(clicks));
     } else if (event.type === 'assessment_start') {
       counters.assessmentStarts += 1;
@@ -355,12 +360,18 @@ export function getLocalAnalyticsStats() {
     if (stored) clicksRaw = JSON.parse(stored);
   } catch {}
 
-  const clicks = Object.entries(clicksRaw).map(([id, item]) => ({
-    id,
-    label: item.label,
-    category: item.category || 'User Action',
-    count: item.count,
-  })).sort((a, b) => b.count - a.count);
+  const clicks = Object.entries(clicksRaw)
+    .filter(([_, item]) => item !== null && item !== undefined)
+    .map(([id, item]) => {
+      const it = typeof item === 'object' && item !== null ? item : { label: id, count: typeof item === 'number' ? item : 0, category: 'User Action' };
+      return {
+        id,
+        label: it.label || id,
+        category: it.category || 'User Action',
+        count: typeof it.count === 'number' ? it.count : 0,
+      };
+    })
+    .sort((a, b) => b.count - a.count);
 
   // Aggregate recommendations from records
   const recMap: Record<string, { title: string; count: number; totalScore: number }> = {};

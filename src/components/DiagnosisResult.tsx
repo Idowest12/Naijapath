@@ -1,41 +1,26 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { 
-  Sparkles, 
-  CheckCircle2, 
-  Smartphone, 
-  Laptop, 
-  Flame, 
+  ArrowLeft,
+  ArrowRight, 
   ExternalLink, 
   Share2, 
   RotateCcw, 
   Clock, 
-  Calendar, 
-  ShieldCheck, 
-  Award, 
-  ChevronRight,
+  Check, 
+  Copy, 
+  Bot, 
+  ChevronDown, 
+  ChevronUp, 
+  Compass, 
+  Sparkles,
+  CheckCircle2,
   BookOpen,
-  ArrowRight,
-  Check,
-  Copy,
-  Users,
-  MapPin,
-  X,
-  Filter,
-  UserCheck,
-  Info,
-  BarChart3,
-  Target,
-  TrendingUp,
-  AlertTriangle,
-  HelpCircle,
-  Cpu,
-  Layers,
-  Bot,
-  MessageSquare,
-  ArrowUp
+  Award
 } from 'lucide-react';
 import { RecommendationResult } from '../types';
-import { calculateMatchingProfiles, MatchingProfile } from '../utils/profileMatcher';
+import { ALL_NICHES } from '../data/nichesData';
+import { trackClick } from '../utils/analytics';
+import { TechNavLogo } from './TechNavLogo';
 
 interface DiagnosisResultProps {
   result: RecommendationResult;
@@ -45,6 +30,41 @@ interface DiagnosisResultProps {
   onOpenChatbot?: (prompt?: string, context?: any) => void;
 }
 
+// Curated paid / level up certifications for pathways
+const LEVEL_UP_DATA: Record<string, Array<{ type: string; title: string; desc: string; url: string }>> = {
+  'niche-data': [
+    { type: 'COURSE', title: 'Google Data Analytics Certificate', desc: 'Guided path on Coursera. Ask about financial aid.', url: 'https://www.coursera.org/professional-certificates/google-data-analytics' },
+    { type: 'PLATFORM', title: 'DataCamp', desc: 'Hands-on lessons in your browser.', url: 'https://www.datacamp.com' },
+    { type: 'MARKETPLACE', title: 'Udemy', desc: 'One-off courses. Wait for a sale.', url: 'https://www.udemy.com' }
+  ],
+  'niche-smm': [
+    { type: 'COURSE', title: 'Meta Social Media Marketing Professional Certificate', desc: 'Guided curriculum on Coursera with hands-on campaign simulations.', url: 'https://www.coursera.org/professional-certificates/meta-social-media-marketing' },
+    { type: 'PLATFORM', title: 'HubSpot Academy Inbound Marketing', desc: 'Free certification on content, social, and lead generation.', url: 'https://academy.hubspot.com' },
+    { type: 'MARKETPLACE', title: 'Udemy: Social Media Management Masterclass', desc: 'Practical video courses covering Canva, TikTok, and Meta ads.', url: 'https://www.udemy.com' }
+  ],
+  'niche-uiux': [
+    { type: 'COURSE', title: 'Google UX Design Professional Certificate', desc: 'Complete portfolio-building program on Coursera with financial aid.', url: 'https://www.coursera.org/professional-certificates/google-ux-design' },
+    { type: 'PLATFORM', title: 'Interaction Design Foundation (IxDF)', desc: 'Industry-recognized UX courses with student discounts.', url: 'https://www.interaction-design.org' },
+    { type: 'MARKETPLACE', title: 'Udemy: Figma UI/UX Essentials', desc: 'Hands-on prototyping tutorials from beginner to pro.', url: 'https://www.udemy.com' }
+  ],
+  'niche-frontend': [
+    { type: 'COURSE', title: 'Meta Front-End Developer Certificate', desc: 'Learn React, JavaScript, and HTML/CSS on Coursera.', url: 'https://www.coursera.org/professional-certificates/meta-front-end-developer' },
+    { type: 'PLATFORM', title: 'Scrimba Frontend Career Path', desc: 'Interactive coding directly inside the video player.', url: 'https://scrimba.com' },
+    { type: 'MARKETPLACE', title: 'Udemy: Complete Web Development Bootcamp', desc: 'Full projects and portfolio apps. Wait for regular 80% discount sales.', url: 'https://www.udemy.com' }
+  ],
+  'niche-va': [
+    { type: 'COURSE', title: 'ALX Virtual Assistant Program', desc: 'Intensive sponsored cohort for young Africans in tech ops.', url: 'https://www.alxafrica.com' },
+    { type: 'PLATFORM', title: 'Notion Certified Administrator', desc: 'Official badge proving executive workspace mastery.', url: 'https://www.notion.so/help/notion-certified' },
+    { type: 'MARKETPLACE', title: 'Udemy: Executive VA Mastery', desc: 'Learn travel planning, inbox management, and international client billing.', url: 'https://www.udemy.com' }
+  ]
+};
+
+const DEFAULT_LEVEL_UP = [
+  { type: 'COURSE', title: 'Google Professional Certificate', desc: 'Guided path on Coursera. Ask about financial aid.', url: 'https://www.coursera.org' },
+  { type: 'PLATFORM', title: 'DataCamp / Scrimba', desc: 'Hands-on lessons directly in your browser.', url: 'https://www.datacamp.com' },
+  { type: 'MARKETPLACE', title: 'Udemy', desc: 'One-off courses. Always wait for a flash sale.', url: 'https://www.udemy.com' }
+];
+
 export const DiagnosisResult: React.FC<DiagnosisResultProps> = ({
   result,
   onRetake,
@@ -52,1149 +72,540 @@ export const DiagnosisResult: React.FC<DiagnosisResultProps> = ({
   onReturnHome,
   onOpenChatbot
 }) => {
-  const { primaryNiche, secondaryNiche, matchScore, secondaryMatchScore, rationale, constraintFeasibilityNotes, submission, scoreBreakdown, priorityComparison } = result;
-  
-  const [activeOption, setActiveOption] = useState<'primary' | 'secondary'>('primary');
+  const { primaryNiche, secondaryNiche, matchScore, secondaryMatchScore, rationale, submission, constraintFeasibilityNotes } = result;
+
+  const [activeTrack, setActiveTrack] = useState<'primary' | 'secondary'>('primary');
   const [dayOneCompleted, setDayOneCompleted] = useState(false);
+  const [isAccordionOpen, setIsAccordionOpen] = useState(false);
+  const [showLearnFree, setShowLearnFree] = useState(false);
+  const [showLevelUp, setShowLevelUp] = useState(false);
+  const [resourceFilter, setResourceFilter] = useState<'all' | 'video' | 'website'>('all');
   const [copiedLink, setCopiedLink] = useState(false);
-  const [showPeerModal, setShowPeerModal] = useState(false);
-  const [showCalibrationModal, setShowCalibrationModal] = useState(false);
-  const [peerFilter, setPeerFilter] = useState<'all' | 'device' | 'pathway' | 'region'>('all');
 
-  const activeNiche = activeOption === 'primary' ? primaryNiche : secondaryNiche;
-  const activeScore = activeOption === 'primary' ? matchScore : secondaryMatchScore;
+  const activeNiche = activeTrack === 'primary' ? primaryNiche : secondaryNiche;
+  const activeScore = activeTrack === 'primary' ? matchScore : secondaryMatchScore;
 
-  const profileMatches = useMemo(() => {
-    return calculateMatchingProfiles(submission, result);
-  }, [submission, result]);
+  // Handle WhatsApp Share
+  const handleWhatsAppShare = () => {
+    trackClick('result_share_whatsapp', 'Share on WhatsApp', 'Share');
+    const text = `Hey! I just took the TechNav diagnostic and my top tech match is ${activeNiche.title} (${activeScore}% match) based on my phone and schedule. Find your lane for free here: ${window.location.origin}`;
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
+  };
 
-  const filteredPeers = useMemo(() => {
-    if (peerFilter === 'device') {
-      return profileMatches.topMatchingProfiles.filter(p => p.device === submission.constraints.device);
-    }
-    if (peerFilter === 'pathway') {
-      return profileMatches.topMatchingProfiles.filter(p => p.matchedNicheId === activeNiche.id);
-    }
-    if (peerFilter === 'region') {
-      return profileMatches.topMatchingProfiles.filter(p => p.location === submission.biodata.location);
-    }
-    return profileMatches.topMatchingProfiles;
-  }, [profileMatches, peerFilter, submission, activeNiche]);
-
-  const shareText = `I just discovered my tech pathway on TIZZITECH (Naija Tech Guide)! 
-🎯 Priority #1 Match: ${primaryNiche.title} (${matchScore}% match)
-💡 Alternative Pathway: ${secondaryNiche.title} (${secondaryMatchScore}% match)
-⚡ Day-One Mission: "${activeNiche.dayOneAction}"
-Take the 3-minute honest assessment: ${window.location.origin}`;
-
-  const handleCopyShare = () => {
-    navigator.clipboard.writeText(shareText);
+  const handleCopyLink = () => {
+    trackClick('result_copy_link', 'Copy Link', 'Share');
+    navigator.clipboard?.writeText(window.location.href);
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2500);
   };
 
-  const handleWhatsAppShare = () => {
-    const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`;
-    window.open(url, '_blank');
-  };
+  // Free resources for active niche
+  const rawResources = activeNiche.resources || [];
+  const freeResources = rawResources.length > 0 ? rawResources : [
+    { name: `${activeNiche.title} Starter Guide`, url: 'https://www.youtube.com', type: 'youtube' as const, description: 'Step-by-step breakdown for Nigerian beginners.' },
+    { name: 'Roadmap.sh Interactive Path', url: 'https://roadmap.sh', type: 'roadmap' as const, description: 'Visual skill tree showing exactly what to study in order.' },
+    { name: 'FreeCodeCamp / W3Schools', url: 'https://www.freecodecamp.org', type: 'interactive' as const, description: 'Interactive browser lessons that run on slow connections.' }
+  ];
 
-  const handleTwitterShare = () => {
-    const url = `https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}`;
-    window.open(url, '_blank');
-  };
+  const filteredResources = freeResources.filter(r => {
+    if (resourceFilter === 'video') return r.type === 'youtube';
+    if (resourceFilter === 'website') return r.type !== 'youtube';
+    return true;
+  });
 
-  return (
-    <div id="diagnosis-result-container" className="space-y-8 animate-in fade-in slide-in-from-bottom-3 duration-200">
-      
-      {/* 2-Option Pathway Selector & Priority Indicator */}
-      <div className="bg-[#18201a] text-stone-100 rounded-3xl p-5 sm:p-7 border border-[#263228] shadow-lg">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-          <div>
-            <span className="text-xs font-mono font-medium uppercase tracking-wider text-emerald-300/90">
-              Calibrated Recommendations
-            </span>
-            <h3 className="font-serif-display text-xl sm:text-2xl font-normal text-white mt-0.5">
-              Your Top 2 Matched Career Pathways
-            </h3>
-          </div>
-          <span className="text-xs text-stone-300 font-sans">
-            Click an option below to switch the roadmap and day-one task
-          </span>
-        </div>
+  const levelUpList = LEVEL_UP_DATA[activeNiche.id] || DEFAULT_LEVEL_UP;
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
-          {/* Option 1: Priority #1 */}
+  // --- SUBVIEW 1: LEARN IT FREE (Matching Figma Results_learn_it_free_1x_7be961ea.png) ---
+  if (showLearnFree) {
+    return (
+      <div className="w-full max-w-xl mx-auto space-y-6 animate-in fade-in duration-200">
+        
+        {/* Top Header */}
+        <div className="flex items-center gap-3">
           <button
             type="button"
-            onClick={() => setActiveOption('primary')}
-            className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-              activeOption === 'primary'
-                ? 'bg-[#222c24] border-emerald-600 shadow-sm ring-1 ring-emerald-600/50'
-                : 'bg-[#1c241e] border-[#29352c] hover:border-stone-600 text-stone-300'
+            onClick={() => setShowLearnFree(false)}
+            className="w-11 h-11 rounded-xl border-2 border-black bg-white flex items-center justify-center shadow-neo-sm hover:translate-x-0.5 hover:translate-y-0.5 cursor-pointer"
+            title="Back to result"
+          >
+            <ArrowLeft className="w-5 h-5 text-black" />
+          </button>
+          <h2 className="font-display text-2xl sm:text-3xl font-black text-black">
+            Learn it free
+          </h2>
+        </div>
+
+        {/* Filter Pills */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setResourceFilter('all')}
+            className={`px-4 py-1.5 rounded-full text-xs font-mono font-bold border-2 border-black transition-all cursor-pointer ${
+              resourceFilter === 'all' ? 'bg-black text-white shadow-neo-sm' : 'bg-white text-black hover:bg-stone-50'
             }`}
           >
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-700 text-white text-[11px] font-mono font-medium uppercase tracking-wider">
-                <Sparkles className="w-3 h-3 fill-current" />
-                Priority #1 (Top Match)
-              </span>
-              <span className="text-lg font-bold font-mono text-emerald-300">
-                {matchScore}%
-              </span>
-            </div>
-            <div className="font-serif-display text-lg text-white font-normal">
-              {primaryNiche.title}
-            </div>
-            <p className="text-xs text-stone-300 mt-1 line-clamp-1 font-sans">
-              {primaryNiche.shortTagline}
-            </p>
+            All
           </button>
-
-          {/* Option 2: Alternative Strong Match */}
           <button
             type="button"
-            onClick={() => setActiveOption('secondary')}
-            className={`p-4 rounded-2xl border text-left transition-all cursor-pointer ${
-              activeOption === 'secondary'
-                ? 'bg-[#222c24] border-emerald-600 shadow-sm ring-1 ring-emerald-600/50'
-                : 'bg-[#1c241e] border-[#29352c] hover:border-stone-600 text-stone-300'
+            onClick={() => setResourceFilter('video')}
+            className={`px-4 py-1.5 rounded-full text-xs font-mono font-bold border-2 border-black transition-all cursor-pointer ${
+              resourceFilter === 'video' ? 'bg-black text-white shadow-neo-sm' : 'bg-white text-black hover:bg-stone-50'
             }`}
           >
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-stone-800 text-stone-200 text-[11px] font-mono font-medium uppercase tracking-wider border border-stone-700/60">
-                <Target className="w-3 h-3 text-stone-300" />
-                Alternative Pathway
-              </span>
-              <span className="text-lg font-bold font-mono text-emerald-300">
-                {secondaryMatchScore}%
-              </span>
-            </div>
-            <div className="font-serif-display text-lg text-white font-normal">
-              {secondaryNiche.title}
-            </div>
-            <p className="text-xs text-stone-300 mt-1 line-clamp-1 font-sans">
-              {secondaryNiche.shortTagline}
-            </p>
+            Videos
           </button>
-        </div>
-
-        {/* Priority Verdict Box */}
-        {priorityComparison && (
-          <div className="mt-5 pt-4 border-t border-[#263228] space-y-2.5 text-xs">
-            <div className="flex items-center gap-2 text-emerald-300 font-mono font-medium uppercase tracking-wider text-[11px]">
-              <ShieldCheck className="w-4 h-4" />
-              <span>Priority Verdict: Why {priorityComparison.primaryTitle} is Ranked #1</span>
-            </div>
-            <p className="text-stone-300 leading-relaxed font-sans">
-              <strong className="text-white font-medium">Deciding Factor: </strong>
-              {priorityComparison.edgeReason}
-            </p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-stone-300 text-[11px] pt-1 font-sans">
-              <div className="p-3 rounded-xl bg-[#202821] border border-[#2b372d]">
-                <span className="text-stone-100 font-medium block mb-0.5">Workflow Differentiator:</span>
-                <span>{priorityComparison.practicalDifferentiator}</span>
-              </div>
-              <div className="p-3 rounded-xl bg-[#202821] border border-[#2b372d]">
-                <span className="text-stone-100 font-medium block mb-0.5">Ramp-Up & Velocity:</span>
-                <span>{priorityComparison.learningVelocityNote}</span>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-
-      {/* Top Banner & Match Header */}
-      <div className="bg-white rounded-3xl border border-emerald-200 shadow-sm relative overflow-hidden">
-        {activeNiche.imageUrl && (
-          <div className="relative h-48 sm:h-56 w-full overflow-hidden bg-stone-100">
-            <img 
-              src={activeNiche.imageUrl} 
-              alt={activeNiche.title}
-              referrerPolicy="no-referrer"
-              className="w-full h-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-white via-white/30 to-transparent"></div>
-            <div className="absolute top-4 left-4">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-900/90 text-white text-xs font-bold backdrop-blur-xs shadow-xs">
-                <Sparkles className="w-3.5 h-3.5 text-emerald-300" />
-                <span>
-                  {activeOption === 'primary' ? 'Priority #1 Recommendation' : 'Alternative Calibrated Pathway'}
-                </span>
-              </span>
-            </div>
-          </div>
-        )}
-        <div className="p-6 sm:p-10 pt-4">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-50 rounded-full blur-3xl -z-10 pointer-events-none"></div>
-
-          <div className="flex flex-col md:flex-row md:items-start justify-between gap-6">
-          <div className="space-y-3 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-100/80 text-emerald-900 text-xs font-bold uppercase tracking-wider">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-700" />
-              <span>
-                {activeOption === 'primary' ? 'Priority #1 Recommended Pathway' : 'Alternative Explored Pathway'}
-              </span>
-            </div>
-
-            <h2 className="text-2xl sm:text-4xl font-extrabold text-stone-900 tracking-tight leading-tight">
-              {activeOption === 'primary' ? 'Your Primary Pathway:' : 'Alternative Option:'} <br className="hidden sm:inline" />
-              <span className="text-emerald-700">{activeNiche.title}</span>
-            </h2>
-
-            <p className="text-stone-600 text-sm sm:text-base leading-relaxed">
-              {activeOption === 'primary' ? rationale : activeNiche.description}
-            </p>
-
-            {/* Biodata & Constraint Tags */}
-            <div className="pt-2 flex flex-wrap items-center gap-2 text-xs">
-              <span className="px-2.5 py-1 rounded-lg bg-stone-100 text-stone-700 font-medium border border-stone-200">
-                Setup: {submission.constraints.device === 'phone_only' ? '📱 Smartphone Only' : '💻 Laptop Access'}
-              </span>
-              <span className="px-2.5 py-1 rounded-lg bg-stone-100 text-stone-700 font-medium border border-stone-200">
-                Time: {submission.constraints.timeWeekly.replace(/_/g, ' ')}
-              </span>
-              <span className="px-2.5 py-1 rounded-lg bg-stone-100 text-stone-700 font-medium border border-stone-200">
-                Target Horizon: {activeNiche.earningHorizon}
-              </span>
-              <span className="px-2.5 py-1 rounded-lg bg-stone-100 text-stone-700 font-medium border border-stone-200">
-                Study Time: {activeNiche.timeCommitment}
-              </span>
-            </div>
-
-            {/* User's Compulsory Experience Reflection */}
-            {submission.qualitative.proudAchievement && submission.qualitative.proudAchievement.trim().length > 0 && (
-              <div className="mt-4 p-3.5 rounded-xl bg-amber-50/80 border border-amber-200/80 text-xs text-amber-900 flex items-start gap-2.5">
-                <Sparkles className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-                <div>
-                  <span className="font-bold text-amber-950">Your Real-World Strength: </span>
-                  <span className="italic text-stone-700">"{submission.qualitative.proudAchievement.trim()}"</span>
-                  <p className="mt-1 text-[11px] text-amber-900/80 font-medium">
-                    This practical initiative is a direct transferable asset for succeeding as a {activeNiche.title}.
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Match Score Gauge Card */}
-          <div className="bg-stone-900 text-white p-6 rounded-2xl flex flex-col items-center justify-center text-center shrink-0 border border-stone-800 sm:w-52 shadow-sm space-y-1.5">
-            <span className="text-xs uppercase font-bold tracking-widest text-emerald-400">
-              {activeOption === 'primary' ? 'Priority #1 Fit' : 'Alternative Fit'}
-            </span>
-            <div className="text-4xl sm:text-5xl font-black text-white tracking-tight">
-              {activeScore}<span className="text-emerald-400 text-2xl font-bold">%</span>
-            </div>
-            <span className="text-[11px] text-stone-300 font-medium">Weighted Composite Match</span>
-            <button
-              id="how-calculated-btn"
-              type="button"
-              onClick={() => setShowCalibrationModal(true)}
-              className="mt-1 pt-1.5 border-t border-stone-800 text-[11px] text-emerald-400 hover:text-emerald-300 font-semibold flex items-center gap-1 transition-colors"
-            >
-              <HelpCircle className="w-3.5 h-3.5" />
-              <span>How was this calibrated?</span>
-            </button>
-          </div>
-        </div>
-
-        {/* Constraint Feasibility Bullet Points */}
-        {constraintFeasibilityNotes.length > 0 && (
-          <div className="mt-6 pt-6 border-t border-stone-100 space-y-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-stone-700 flex items-center gap-1.5">
-              <ShieldCheck className="w-4 h-4 text-emerald-600" /> Feasibility & Local Realities:
-            </h4>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs text-stone-600">
-              {constraintFeasibilityNotes.map((note, idx) => (
-                <div key={idx} className="p-2.5 rounded-xl bg-stone-50 border border-stone-200/70 flex items-start gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
-                  <span>{note}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* Transparent Diagnostic Scoring Breakdown */}
-        {scoreBreakdown && (
-          <div className="mt-6 pt-6 border-t border-stone-200 space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-              <div>
-                <h4 className="text-xs font-bold uppercase tracking-wider text-stone-900 flex items-center gap-1.5">
-                  <BarChart3 className="w-4 h-4 text-emerald-600" />
-                  Diagnostic Score Breakdown & Accuracy
-                </h4>
-                <p className="text-xs text-stone-500">
-                  Calculated across 3 realistic pillars to prevent generic vanity scores:
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowCalibrationModal(true)}
-                className="text-xs font-semibold text-emerald-700 hover:text-emerald-900 flex items-center gap-1 transition-colors self-start sm:self-auto"
-              >
-                <Info className="w-3.5 h-3.5" />
-                <span>Why not just 98%? Read Methodology</span>
-              </button>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-              {/* Pillar 1: Aptitude */}
-              <div className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-stone-800 flex items-center gap-1.5">
-                    <Target className="w-3.5 h-3.5 text-emerald-600" />
-                    Cognitive Aptitude
-                  </span>
-                  <span className="font-black text-emerald-700 text-sm">
-                    {scoreBreakdown.aptitudeFit}%
-                  </span>
-                </div>
-                <div className="w-full bg-stone-200 rounded-full h-1.5 overflow-hidden">
-                  <div 
-                    className="bg-emerald-600 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${scoreBreakdown.aptitudeFit}%` }}
-                  ></div>
-                </div>
-                <p className="text-[11px] text-stone-500 leading-tight">
-                  Calculated from 6 cognitive scenarios, practical problem solving, and preferred daily tasks.
-                </p>
-              </div>
-
-              {/* Pillar 2: Feasibility */}
-              <div className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-stone-800 flex items-center gap-1.5">
-                    <Cpu className="w-3.5 h-3.5 text-teal-600" />
-                    Setup Feasibility
-                  </span>
-                  <span className="font-black text-teal-700 text-sm">
-                    {scoreBreakdown.resourceFeasibility}%
-                  </span>
-                </div>
-                <div className="w-full bg-stone-200 rounded-full h-1.5 overflow-hidden">
-                  <div 
-                    className="bg-teal-600 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${scoreBreakdown.resourceFeasibility}%` }}
-                  ></div>
-                </div>
-                <p className="text-[11px] text-stone-500 leading-tight">
-                  Grounded in your {submission.constraints.device === 'phone_only' ? 'smartphone-only setup' : 'laptop access'}, study hours, and power/data constraints.
-                </p>
-              </div>
-
-              {/* Pillar 3: Market Demand */}
-              <div className="p-3.5 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
-                <div className="flex items-center justify-between">
-                  <span className="font-bold text-stone-800 flex items-center gap-1.5">
-                    <TrendingUp className="w-3.5 h-3.5 text-blue-600" />
-                    Market Demand
-                  </span>
-                  <span className="font-black text-blue-700 text-sm">
-                    {scoreBreakdown.marketDemand}%
-                  </span>
-                </div>
-                <div className="w-full bg-stone-200 rounded-full h-1.5 overflow-hidden">
-                  <div 
-                    className="bg-blue-600 h-full rounded-full transition-all duration-500"
-                    style={{ width: `${scoreBreakdown.marketDemand}%` }}
-                  ></div>
-                </div>
-                <p className="text-[11px] text-stone-500 leading-tight">
-                  Reflects junior hiring velocity and freelance contract liquidity in Nigeria and remote markets.
-                </p>
-              </div>
-            </div>
-
-            {/* Honest Caveat: Why Not 100% */}
-            {scoreBreakdown.honestCaveat && (
-              <div className="p-4 rounded-2xl bg-amber-50 border border-amber-200/90 text-amber-950 flex items-start gap-3">
-                <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                <div className="space-y-1">
-                  <div className="font-bold text-xs uppercase tracking-wide text-amber-900">
-                    Honest Diagnostic Caveat (Why not 100%?)
-                  </div>
-                  <p className="text-xs text-amber-900/90 leading-relaxed font-normal">
-                    {scoreBreakdown.honestCaveat}
-                  </p>
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-        </div>
-      </div>
-
-      {/* Interactive Naija AI Mentor Consultation Banner */}
-      {onOpenChatbot && (
-        <div id="ai-mentor-consultation-banner" className="bg-gradient-to-br from-stone-900 via-emerald-950 to-stone-950 text-white rounded-3xl p-6 sm:p-8 border border-emerald-800/80 shadow-md flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
-          <div className="space-y-3 max-w-2xl">
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-800/90 text-emerald-200 text-xs font-bold uppercase tracking-wider border border-emerald-700/80">
-              <Bot className="w-3.5 h-3.5 text-emerald-300" />
-              <span>Naija Tech Chatbot Advisor (Tizzi)</span>
-            </div>
-            <h3 className="text-xl sm:text-2xl font-black text-white tracking-tight">
-              Have questions about {activeNiche.title}? Ask Tizzi!
-            </h3>
-            <p className="text-stone-300 text-xs sm:text-sm leading-relaxed">
-              Wondering how to manage NEPA power cuts, study on 4GB RAM, or land foreign freelance clients from Nigeria in {activeNiche.title}? Ask our culturally grounded AI career mentor right now.
-            </p>
-            <div className="flex flex-wrap gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => onOpenChatbot(`How do I start learning ${activeNiche.title} in Nigeria with my ${submission.constraints.device === 'phone_only' ? 'smartphone' : 'laptop'} and limited mobile data?`, {
-                  matchedNiche: activeNiche.title,
-                  device: submission.constraints.device,
-                  weeklyHours: submission.constraints.timeWeekly,
-                  location: submission.biodata.location || 'Nigeria'
-                })}
-                className="text-[11px] px-3 py-1.5 rounded-full bg-emerald-900/90 hover:bg-emerald-800 text-emerald-100 border border-emerald-700/80 font-medium transition-all"
-              >
-                "How do I start with my setup?"
-              </button>
-              <button
-                type="button"
-                onClick={() => onOpenChatbot(`What are the highest-rated free YouTube channels and free learning resources for ${activeNiche.title}?`, {
-                  matchedNiche: activeNiche.title,
-                  device: submission.constraints.device,
-                  weeklyHours: submission.constraints.timeWeekly
-                })}
-                className="text-[11px] px-3 py-1.5 rounded-full bg-emerald-900/90 hover:bg-emerald-800 text-emerald-100 border border-emerald-700/80 font-medium transition-all"
-              >
-                "Best free learning resources?"
-              </button>
-              <button
-                type="button"
-                onClick={() => onOpenChatbot(`What are realistic freelance or junior salaries in Naira & USD for a ${activeNiche.title} in Nigeria?`, {
-                  matchedNiche: activeNiche.title
-                })}
-                className="text-[11px] px-3 py-1.5 rounded-full bg-emerald-900/90 hover:bg-emerald-800 text-emerald-100 border border-emerald-700/80 font-medium transition-all"
-              >
-                "Realistic income in ₦ & $?"
-              </button>
-            </div>
-          </div>
-
           <button
             type="button"
-            onClick={() => onOpenChatbot(`I was diagnosed with ${activeNiche.title} (${activeScore}% match). Can you give me a personalized breakdown of what my first 30 days should look like?`, {
-              matchedNiche: activeNiche.title,
-              device: submission.constraints.device,
-              weeklyHours: submission.constraints.timeWeekly,
-              location: submission.biodata.location || 'Nigeria',
-              proudAchievement: submission.qualitative.proudAchievement
-            })}
-            className="inline-flex items-center gap-2.5 px-5 py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-stone-950 font-bold text-sm shadow-md transition-all shrink-0 active:scale-98"
+            onClick={() => setResourceFilter('website')}
+            className={`px-4 py-1.5 rounded-full text-xs font-mono font-bold border-2 border-black transition-all cursor-pointer ${
+              resourceFilter === 'website' ? 'bg-black text-white shadow-neo-sm' : 'bg-white text-black hover:bg-stone-50'
+            }`}
           >
-            <Bot className="w-5 h-5 text-stone-950" />
-            <span>Chat with Tizzi AI</span>
-            <ArrowRight className="w-4 h-4 text-stone-950" />
-          </button>
-        </div>
-      )}
-
-      {/* Profiles Matching What You Inputted (Cohort Intelligence) */}
-      <div id="cohort-matching-card" className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-50 text-emerald-800 text-xs font-bold uppercase tracking-wider mb-2 border border-emerald-200/60">
-              <Users className="w-3.5 h-3.5 text-emerald-700" />
-              <span>Profiles Matching What You Inputted</span>
-            </div>
-            <h3 className="text-xl sm:text-2xl font-extrabold text-stone-900 tracking-tight flex flex-wrap items-center gap-2">
-              <span>{profileMatches.matchingCount.toLocaleString()} Matching Learner Profiles</span>
-              <span className="text-xs font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
-                {profileMatches.matchPercentage}% Alignment
-              </span>
-            </h3>
-            <p className="text-stone-600 text-xs sm:text-sm mt-1">
-              Out of {profileMatches.totalProfilesScanned.toLocaleString()}+ surveyed Nigerian youth and recorded assessments, here is how many share your exact input realities:
-            </p>
-          </div>
-
-          <button
-            id="view-matching-peers-btn"
-            type="button"
-            onClick={() => setShowPeerModal(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-stone-900 hover:bg-black text-white text-xs font-bold transition-all shrink-0 shadow-xs active:scale-[0.99]"
-          >
-            <Users className="w-4 h-4 text-emerald-400" />
-            <span>Explore Matching Profiles</span>
-            <ArrowRight className="w-3.5 h-3.5" />
+            Websites
           </button>
         </div>
 
-        {/* 4 Core Breakdown Pillars */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80">
-            <div className="flex items-center gap-1.5 text-xs text-stone-500 font-semibold mb-1">
-              {submission.constraints.device === 'phone_only' ? (
-                <Smartphone className="w-3.5 h-3.5 text-emerald-600" />
-              ) : (
-                <Laptop className="w-3.5 h-3.5 text-emerald-600" />
-              )}
-              <span>Same Hardware Setup</span>
-            </div>
-            <div className="text-xl sm:text-2xl font-black text-stone-900">
-              {profileMatches.exactHardwareCount.toLocaleString()}
-            </div>
-            <div className="text-[11px] text-stone-500 mt-0.5">
-              Starting with {submission.constraints.device === 'phone_only' ? 'Smartphone Only' : 'Laptop'}
-            </div>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80">
-            <div className="flex items-center gap-1.5 text-xs text-stone-500 font-semibold mb-1">
-              <Clock className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Same Study Hours</span>
-            </div>
-            <div className="text-xl sm:text-2xl font-black text-stone-900">
-              {profileMatches.exactTimeCommitmentCount.toLocaleString()}
-            </div>
-            <div className="text-[11px] text-stone-500 mt-0.5">
-              Available {submission.constraints.timeWeekly.replace(/_/g, ' ')}
-            </div>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80">
-            <div className="flex items-center gap-1.5 text-xs text-stone-500 font-semibold mb-1">
-              <MapPin className="w-3.5 h-3.5 text-emerald-600" />
-              <span>In Your Region</span>
-            </div>
-            <div className="text-xl sm:text-2xl font-black text-stone-900">
-              {profileMatches.regionCount.toLocaleString()}
-            </div>
-            <div className="text-[11px] text-stone-500 mt-0.5 capitalize">
-              Studying in {submission.biodata.location.replace(/_/g, ' ')}
-            </div>
-          </div>
-
-          <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200/80">
-            <div className="flex items-center gap-1.5 text-xs text-stone-500 font-semibold mb-1">
-              <Sparkles className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Same Career Match</span>
-            </div>
-            <div className="text-xl sm:text-2xl font-black text-emerald-800">
-              {profileMatches.pathwayCohortCount.toLocaleString()}
-            </div>
-            <div className="text-[11px] text-stone-500 mt-0.5 truncate">
-              Matched to {primaryNiche.title}
-            </div>
-          </div>
-        </div>
-
-        {/* Peer Profiles Sneak Peek */}
-        <div className="space-y-3 pt-1 border-t border-stone-100">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold uppercase tracking-wider text-stone-700">
-              Peer Profiles Sharing Your Reality:
-            </span>
-            <button
-              type="button"
-              onClick={() => setShowPeerModal(true)}
-              className="text-xs font-bold text-emerald-700 hover:text-emerald-800 transition-colors inline-flex items-center gap-1"
-            >
-              <span>View All {profileMatches.topMatchingProfiles.length} Top Matches</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-            {profileMatches.topMatchingProfiles.slice(0, 3).map((peer) => (
-              <div 
-                key={peer.id}
-                className="p-3.5 rounded-2xl bg-stone-50/80 border border-stone-200 hover:border-emerald-400 hover:bg-emerald-50/20 transition-all text-xs space-y-2 flex flex-col justify-between"
-              >
-                <div className="space-y-1.5">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="w-7 h-7 rounded-full bg-emerald-100 text-emerald-900 font-bold flex items-center justify-center text-xs">
-                        {peer.name.charAt(0)}
-                      </div>
-                      <div>
-                        <span className="font-bold text-stone-900">{peer.name}</span>
-                        <span className="text-[10px] text-stone-400 block capitalize">{peer.location.replace(/_/g, ' ')}</span>
-                      </div>
-                    </div>
-                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-bold text-[10px]">
-                      {peer.similarityScore}% match
-                    </span>
-                  </div>
-
-                  <p className="text-stone-600 italic text-[11px] line-clamp-2">
-                    "{peer.achievementSnippet}"
-                  </p>
-                </div>
-
-                <div className="pt-2 border-t border-stone-200/60 flex items-center justify-between text-[10px] text-stone-500">
-                  <span className="font-semibold text-emerald-900 truncate max-w-[120px]">
-                    {peer.matchedNicheTitle}
-                  </span>
-                  <span className="font-medium px-1.5 py-0.5 rounded bg-stone-200/70 text-stone-700">
-                    {peer.device === 'phone_only' ? '📱 Phone' : '💻 Laptop'}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* The Crucial Day-One Mission (Centerpiece) */}
-      <div id="day-one-mission-card" className="bg-emerald-900 text-white rounded-3xl p-6 sm:p-8 shadow-sm relative overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-4">
-          <div className="flex items-center gap-2 text-emerald-300 text-xs font-bold uppercase tracking-widest">
-            <Flame className="w-4 h-4 text-amber-400 fill-amber-400" />
-            <span>Your Immediate Action for {activeNiche.title}</span>
-          </div>
-          <div className="inline-flex items-center gap-1 text-xs font-medium text-emerald-200 bg-emerald-800/80 px-3 py-1 rounded-full border border-emerald-700">
-            <Clock className="w-3.5 h-3.5 text-emerald-300" />
-            <span>Estimated time: ~{activeNiche.dayOneEstimatedMins} minutes</span>
-          </div>
-        </div>
-
-        <h3 className="text-xl sm:text-2xl font-bold tracking-tight text-white mb-3">
-          "{activeNiche.dayOneAction}"
-        </h3>
-
-        <p className="text-xs sm:text-sm text-emerald-100/90 leading-relaxed mb-6">
-          Do not buy any course or watch 10 hours of video today. Simply execute this single action. When you finish it, you will experience the exact problem-solving feeling of this profession.
+        {/* Subtitle / Tip */}
+        <p className="text-stone-600 font-sans text-xs sm:text-sm font-medium">
+          For {activeNiche.title}. <span className="font-bold text-black">Tip:</span> watch at 360p to save data.
         </p>
 
-        <div className="flex flex-wrap items-center gap-3">
-          <button
-            id="mark-day-one-done-btn"
-            type="button"
-            onClick={() => setDayOneCompleted(!dayOneCompleted)}
-            className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all shadow-sm active:scale-[0.99] ${
-              dayOneCompleted
-                ? 'bg-emerald-400 text-emerald-950 ring-2 ring-white'
-                : 'bg-white text-emerald-950 hover:bg-emerald-50'
-            }`}
-          >
-            <Check className="w-4 h-4" />
-            <span>{dayOneCompleted ? 'Mission Completed! 🎉' : 'Mark as Completed'}</span>
-          </button>
-
-          {dayOneCompleted && (
-            <span className="text-xs text-emerald-200 animate-in fade-in duration-200">
-              Great work! You took your first real step. Proceed to your Week 1 roadmap below.
-            </span>
-          )}
-        </div>
-      </div>
-
-      {/* 3-Month Ordered Roadmap */}
-      <div className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">Clear Step-by-Step Path</span>
-            <h3 className="text-xl font-bold text-stone-900 mt-1">
-              3-Month Progression Roadmap for {activeNiche.title}
-            </h3>
-          </div>
-          <Calendar className="w-6 h-6 text-stone-400 hidden sm:block" />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 relative">
-          {activeNiche.milestones.map((step, idx) => (
-            <div 
-              key={idx} 
-              id={`roadmap-step-${idx}`}
-              className="p-5 rounded-2xl bg-stone-50 border border-stone-200/80 flex flex-col justify-between"
-            >
-              <div>
-                <div className="flex items-center justify-between mb-2">
-                  <span className="text-xs font-bold uppercase tracking-wider px-2 py-0.5 rounded bg-emerald-100 text-emerald-800">
-                    {step.period}
+        {/* Resource Cards List */}
+        <div className="space-y-3.5">
+          {filteredResources.map((res, idx) => {
+            const isVideo = res.type === 'youtube';
+            return (
+              <a
+                key={idx}
+                href={res.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block bg-white rounded-2xl border-2 border-black p-4.5 shadow-neo hover:translate-x-0.5 hover:translate-y-0.5 transition-all group"
+              >
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className={`px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold border border-black ${
+                    isVideo ? 'bg-[#FF6A55] text-white' : 'bg-[#60C6F8] text-black'
+                  }`}>
+                    {isVideo ? 'YOUTUBE' : 'WEBSITE'}
                   </span>
-                  <span className="text-xs text-stone-400 font-semibold">Stage {idx + 1}</span>
+                  <span className="text-xs font-mono text-stone-500 font-semibold">
+                    {isVideo ? 'Video' : 'Free'}
+                  </span>
                 </div>
 
-                <h4 className="text-base font-bold text-stone-900 mb-3">
-                  {step.goal}
+                <h4 className="font-display text-lg font-bold text-black group-hover:underline flex items-center justify-between">
+                  <span>{res.name}</span>
+                  <ExternalLink className="w-4 h-4 text-stone-400 group-hover:text-black transition-colors" />
                 </h4>
 
-                <ul className="space-y-2 text-xs text-stone-600">
-                  {step.tasks.map((task, tIdx) => (
-                    <li key={tIdx} className="flex items-start gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-600 shrink-0 mt-1.5"></span>
-                      <span className="leading-relaxed">{task}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              <div className="mt-5 pt-3 border-t border-stone-200 text-[11px] text-stone-500 font-medium">
-                Deliverable milestone achieved
-              </div>
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Free Resources & Nigerian Communities */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
-        {/* Curated Resources */}
-        <div className="lg:col-span-2 bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm">
-          <div className="mb-5">
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-200 inline-block mb-1.5">
-              Free Resources (No Dime Needed)
-            </span>
-            <h3 className="text-lg sm:text-xl font-bold text-stone-900 mt-1">
-              Free Resources & Direct Links for {activeNiche.title}
-            </h3>
-            <p className="text-xs text-stone-600 mt-1 leading-relaxed">
-              All materials here are completely free with no payment or subscription needed, and tested to consume minimal internet data. Click any card to open the resource directly.
-            </p>
-          </div>
-
-          <div className="space-y-3">
-            {activeNiche.resources.map((res, i) => (
-              <a
-                key={i}
-                href={res.url || '#'}
-                target={res.url ? '_blank' : undefined}
-                rel={res.url ? 'noopener noreferrer' : undefined}
-                data-track-category="Free Resource Link"
-                data-track-label={`Resource: ${res.name}`}
-                className="group block p-4 rounded-2xl bg-stone-50 border border-stone-200 hover:border-emerald-500 hover:bg-emerald-50/50 hover:shadow-sm transition-all text-left"
-              >
-                <div className="flex items-start justify-between gap-3 mb-1.5">
-                  <div className="flex items-center gap-2.5">
-                    <div className="w-8 h-8 rounded-xl bg-emerald-100 text-emerald-800 flex items-center justify-center shrink-0 group-hover:bg-emerald-600 group-hover:text-white transition-colors">
-                      <BookOpen className="w-4 h-4" />
-                    </div>
-                    <h4 className="text-sm font-bold text-stone-900 group-hover:text-emerald-950 transition-colors flex items-center gap-1.5">
-                      {res.name}
-                      {res.url && (
-                        <ExternalLink className="w-3.5 h-3.5 text-stone-400 group-hover:text-emerald-700 transition-colors shrink-0" />
-                      )}
-                    </h4>
-                  </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    {res.lowDataFriendly && (
-                      <span className="text-[10px] font-bold text-emerald-800 bg-emerald-100/90 border border-emerald-200 px-2 py-0.5 rounded-full">
-                        Low Data Friendly
-                      </span>
-                    )}
-                    {res.url && (
-                      <span className="hidden sm:inline-flex items-center text-[11px] font-bold text-emerald-700 group-hover:text-emerald-900 group-hover:underline">
-                        Go straight to resource ↗
-                      </span>
-                    )}
-                  </div>
-                </div>
-                <p className="text-xs text-stone-600 leading-relaxed pl-10.5 group-hover:text-stone-800">
+                <p className="text-stone-600 text-xs sm:text-sm font-sans mt-1 leading-relaxed font-medium">
                   {res.description}
                 </p>
-                {res.url && (
-                  <div className="sm:hidden mt-2.5 pl-10.5 flex items-center text-[11px] font-bold text-emerald-700">
-                    <span>Go straight to resource ↗</span>
-                  </div>
-                )}
               </a>
-            ))}
-          </div>
+            );
+          })}
         </div>
 
-        {/* Local Communities & Support */}
-        <div className="bg-white rounded-3xl p-6 sm:p-8 border border-stone-200 shadow-sm flex flex-col justify-between">
-          <div>
-            <span className="text-xs font-bold uppercase tracking-wider text-emerald-700">Never Learn Alone</span>
-            <h3 className="text-lg font-bold text-stone-900 mt-0.5">
-              Nigerian Communities
-            </h3>
-            <p className="text-xs text-stone-500 mt-1 mb-4">
-              Connect with peers who share job leads and answers to everyday blockers.
-            </p>
-
-            <ul className="space-y-2.5">
-              {activeNiche.relevantCommunities.map((comm, idx) => (
-                <li key={idx} className="p-3 rounded-xl bg-stone-50 border border-stone-200 text-xs font-semibold text-stone-800 flex items-center gap-2">
-                  <Users className="w-4 h-4 text-emerald-700" />
-                  <span>{comm}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="mt-6 pt-4 border-t border-stone-100 text-xs text-stone-500">
-            Search for these on Twitter / LinkedIn to join their WhatsApp and Discord groups.
-          </div>
-        </div>
+        {/* Back Button */}
+        <button
+          type="button"
+          onClick={() => setShowLearnFree(false)}
+          className="w-full py-4 rounded-2xl bg-[#13141F] text-white font-display font-bold text-base sm:text-lg border-2 border-black shadow-neo-purple hover:translate-x-0.5 active:translate-x-1 transition-all cursor-pointer"
+        >
+          Back to my result
+        </button>
 
       </div>
+    );
+  }
 
-      {/* Alternative Pathway Switcher / Explorer */}
-      {secondaryNiche && secondaryNiche.id !== primaryNiche.id && (
-        <div className="p-6 rounded-3xl bg-stone-100 border border-stone-200 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <div className="text-xs font-bold uppercase tracking-wider text-stone-600 mb-1">
-              {activeOption === 'primary'
-                ? `Alternative Matched Pathway (${secondaryMatchScore}% Fit)`
-                : `Return to Priority #1 (${matchScore}% Fit)`}
-            </div>
-            <h4 className="text-base font-bold text-stone-900">
-              {activeOption === 'primary' ? secondaryNiche.title : primaryNiche.title}
-            </h4>
-            <p className="text-xs text-stone-600 mt-1 max-w-xl">
-              {activeOption === 'primary' ? secondaryNiche.shortTagline : primaryNiche.shortTagline}
-            </p>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
-            <button
-              type="button"
-              onClick={() => setActiveOption(activeOption === 'primary' ? 'secondary' : 'primary')}
-              className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-emerald-800 text-white text-xs font-bold hover:bg-emerald-700 transition-colors shadow-xs"
-            >
-              <span>{activeOption === 'primary' ? `Switch View to ${secondaryNiche.title}` : `Back to Priority #1 (${primaryNiche.title})`}</span>
-              <ChevronRight className="w-3.5 h-3.5" />
-            </button>
-            <button
-              type="button"
-              onClick={() => onExploreOther(activeOption === 'primary' ? secondaryNiche.id : primaryNiche.id)}
-              className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-white border border-stone-300 text-stone-800 text-xs font-semibold hover:bg-stone-50 transition-colors"
-            >
-              <span>Deep-Dive</span>
-              <ExternalLink className="w-3 h-3" />
-            </button>
-          </div>
+  // --- SUBVIEW 2: LEVEL UP (Matching Figma Results_level_up_1x_8546fe49.png) ---
+  if (showLevelUp) {
+    return (
+      <div className="w-full max-w-xl mx-auto space-y-6 animate-in fade-in duration-200">
+        
+        {/* Top Header */}
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => setShowLevelUp(false)}
+            className="w-11 h-11 rounded-xl border-2 border-black bg-white flex items-center justify-center shadow-neo-sm hover:translate-x-0.5 hover:translate-y-0.5 cursor-pointer"
+            title="Back to result"
+          >
+            <ArrowLeft className="w-5 h-5 text-black" />
+          </button>
+          <h2 className="font-display text-2xl sm:text-3xl font-black text-black">
+            Level up
+          </h2>
         </div>
-      )}
 
-      {/* Social Share & Retake Controls */}
-      <div className="pt-4 border-t border-stone-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="text-xs font-bold text-stone-700">Share your match:</span>
+        {/* Yellow Notice Banner */}
+        <div className="bg-[#FED74C] rounded-2xl border-2 border-black p-4.5 shadow-neo">
+          <p className="font-display font-bold text-black text-sm sm:text-base leading-snug">
+            Free first. Pay only after your Day-One mission.
+          </p>
+        </div>
+
+        {/* Paid Courses List */}
+        <div className="space-y-3.5">
+          {levelUpList.map((item, idx) => (
+            <a
+              key={idx}
+              href={item.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block bg-white rounded-2xl border-2 border-black p-4.5 shadow-neo hover:translate-x-0.5 hover:translate-y-0.5 transition-all group"
+            >
+              <div className="flex items-center justify-between mb-1.5">
+                <span className="bg-[#FED74C] text-black px-2.5 py-0.5 rounded-full text-[11px] font-mono font-bold border border-black">
+                  {item.type}
+                </span>
+                <span className="text-xs font-mono text-stone-500 font-semibold">
+                  Paid
+                </span>
+              </div>
+
+              <h4 className="font-display text-lg font-bold text-black group-hover:underline flex items-center justify-between">
+                <span>{item.title}</span>
+                <ExternalLink className="w-4 h-4 text-stone-400 group-hover:text-black transition-colors" />
+              </h4>
+
+              <p className="text-stone-600 text-xs sm:text-sm font-sans mt-1 leading-relaxed font-medium">
+                {item.desc}
+              </p>
+            </a>
+          ))}
+        </div>
+
+        {/* Footnote */}
+        <p className="text-xs font-mono text-stone-500 text-center">
+          Links and prices change, so check before you pay.
+        </p>
+
+        {/* Back Button */}
+        <button
+          type="button"
+          onClick={() => setShowLevelUp(false)}
+          className="w-full py-4 rounded-2xl bg-[#13141F] text-white font-display font-bold text-base sm:text-lg border-2 border-black shadow-neo-purple hover:translate-x-0.5 active:translate-x-1 transition-all cursor-pointer"
+        >
+          Back to my result
+        </button>
+
+      </div>
+    );
+  }
+
+  // --- MAIN RESULT VIEW (Matching Figma Results_your_path_1x_3a45c1ec.png) ---
+  return (
+    <div className="w-full max-w-xl mx-auto space-y-6">
+      
+      {/* Top Brand Marker from Mockup */}
+      <div className="flex items-center justify-between px-1">
+        <TechNavLogo size="sm" variant="default" />
+        <span className="text-xs font-mono font-bold tracking-widest uppercase text-stone-500">
+          YOUR RESULT
+        </span>
+      </div>
+
+      {/* Main Purple Result Card */}
+      <div className="bg-[#5D45FD] text-white rounded-3xl border-2 border-black shadow-neo-xl p-6 sm:p-7 relative overflow-hidden">
+        
+        {/* Eyebrow Pill */}
+        <div className="inline-block bg-[#D4F938] text-black px-3.5 py-1 rounded-full text-xs font-mono font-bold border-2 border-black shadow-neo-sm mb-4">
+          YOUR CLEAR PATH IS
+        </div>
+
+        {/* Main Pathway Title */}
+        <h2 className="font-display text-3xl sm:text-4xl font-black leading-tight tracking-tight mb-6">
+          {activeNiche.title}
+        </h2>
+
+        {/* Match Score Gauge + 3 Horizontal Bars */}
+        <div className="flex items-center gap-5 sm:gap-6 mb-7">
           
+          {/* Circular Gauge */}
+          <div className="w-22 h-22 sm:w-24 sm:h-24 rounded-full bg-[#D4F938] border-2 border-black flex items-center justify-center text-black shrink-0 shadow-neo-sm">
+            <span className="font-display text-3xl sm:text-4xl font-black leading-none">
+              {activeScore}%
+            </span>
+          </div>
+
+          {/* 3 Metric Bars */}
+          <div className="flex-1 space-y-2.5">
+            <div>
+              <div className="flex justify-between text-xs font-mono font-bold text-white/95 mb-0.5">
+                <span>Aptitude</span>
+                <span>{Math.min(98, activeScore + 2)}%</span>
+              </div>
+              <div className="w-full bg-black/25 h-2 rounded-full overflow-hidden border border-black/30">
+                <div className="bg-[#FED74C] h-full rounded-full" style={{ width: `${Math.min(98, activeScore + 2)}%` }}></div>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between text-xs font-mono font-bold text-white/95 mb-0.5">
+                <span>Your resources</span>
+                <span>{Math.min(95, activeScore - 3)}%</span>
+              </div>
+              <div className="w-full bg-black/25 h-2 rounded-full overflow-hidden border border-black/30">
+                <div className="bg-[#60C6F8] h-full rounded-full" style={{ width: `${Math.min(95, activeScore - 3)}%` }}></div>
+              </div>
+            </div>
+
+            <div>
+              <div className="flex justify-between text-xs font-mono font-bold text-white/95 mb-0.5">
+                <span>Market demand</span>
+                <span>{Math.min(96, activeScore)}%</span>
+              </div>
+              <div className="w-full bg-black/25 h-2 rounded-full overflow-hidden border border-black/30">
+                <div className="bg-[#FF6A55] h-full rounded-full" style={{ width: `${Math.min(96, activeScore)}%` }}></div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+
+        {/* 2 Primary CTAs inside card */}
+        <div className="space-y-3">
+          <button
+            type="button"
+            onClick={() => {
+              const el = document.getElementById('day-one-mission-card');
+              el?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="w-full py-3.5 rounded-xl bg-[#D4F938] text-black font-display font-bold text-base sm:text-lg border-2 border-black shadow-neo hover:translate-x-0.5 hover:translate-y-0.5 active:translate-x-1 active:translate-y-1 transition-all cursor-pointer flex items-center justify-center gap-2"
+          >
+            <span>Start my Day-One mission</span>
+            <ArrowRight className="w-5 h-5 text-black" />
+          </button>
+
           <button
             type="button"
             onClick={handleWhatsAppShare}
-            className="px-3 py-1.5 rounded-lg bg-emerald-600 text-white text-xs font-semibold hover:bg-emerald-700 transition-colors"
+            className="w-full py-3.5 rounded-xl bg-white text-black font-display font-bold text-base border-2 border-black shadow-neo hover:bg-stone-50 active:translate-x-0.5 active:translate-y-0.5 transition-all cursor-pointer flex items-center justify-center gap-2"
           >
-            WhatsApp
-          </button>
-
-          <button
-            type="button"
-            onClick={handleTwitterShare}
-            className="px-3 py-1.5 rounded-lg bg-stone-900 text-white text-xs font-semibold hover:bg-black transition-colors"
-          >
-            X (Twitter)
-          </button>
-
-          <button
-            type="button"
-            onClick={handleCopyShare}
-            className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-stone-200 text-stone-800 text-xs font-semibold hover:bg-stone-300 transition-colors"
-          >
-            {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-700" /> : <Copy className="w-3.5 h-3.5" />}
-            <span>{copiedLink ? 'Copied!' : 'Copy Summary'}</span>
+            <span>Share on WhatsApp status</span>
           </button>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+      </div>
+
+
+      {/* SECTION: "Your top 2 tracks" (Matching Figma Results_your_path_1x_3a45c1ec.png) */}
+      <div className="space-y-3">
+        <h3 className="font-display text-xl sm:text-2xl font-black text-black">
+          Your top 2 tracks
+        </h3>
+
+        <div className="grid grid-cols-2 gap-3.5">
+          
+          {/* Priority #1 Card (Lime #D4F938) */}
           <button
-            id="result-back-to-top-btn"
             type="button"
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-300 bg-white text-stone-700 text-xs font-bold hover:bg-stone-50 hover:text-emerald-700 transition-colors shadow-2xs"
-            title="Scroll back to top of assessment results"
+            onClick={() => setActiveTrack('primary')}
+            className={`rounded-2xl border-2 border-black p-4 text-left transition-all cursor-pointer ${
+              activeTrack === 'primary'
+                ? 'bg-[#D4F938] shadow-neo-lg scale-[1.01]'
+                : 'bg-white shadow-neo hover:bg-stone-50'
+            }`}
           >
-            <ArrowUp className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Back to Top</span>
+            <div className="text-[11px] font-mono font-bold uppercase text-stone-700 mb-1">
+              PRIORITY #1
+            </div>
+            <div className="font-display font-black text-base sm:text-lg text-black leading-tight line-clamp-2 min-h-12">
+              {primaryNiche.title}
+            </div>
+            <div className="font-display font-black text-2xl sm:text-3xl text-black mt-3">
+              {matchScore}%
+            </div>
           </button>
 
-          {onReturnHome && (
-            <button
-              id="result-return-home-btn"
-              type="button"
-              onClick={onReturnHome}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-stone-300 text-stone-700 text-xs font-bold hover:bg-stone-50 transition-colors"
-            >
-              <span>← Return to Guide & All Niches</span>
-            </button>
-          )}
-
+          {/* Alternative Card (White) */}
           <button
-            id="retake-assessment-btn"
             type="button"
-            onClick={onRetake}
-            className="inline-flex items-center gap-1.5 text-xs font-bold text-stone-600 hover:text-stone-900 transition-colors"
+            onClick={() => setActiveTrack('secondary')}
+            className={`rounded-2xl border-2 border-black p-4 text-left transition-all cursor-pointer ${
+              activeTrack === 'secondary'
+                ? 'bg-[#D4F938] shadow-neo-lg scale-[1.01]'
+                : 'bg-white shadow-neo hover:bg-stone-50'
+            }`}
           >
-            <RotateCcw className="w-3.5 h-3.5" />
-            <span>Retake Assessment</span>
+            <div className="text-[11px] font-mono font-bold uppercase text-stone-500 mb-1">
+              ALTERNATIVE
+            </div>
+            <div className="font-display font-black text-base sm:text-lg text-black leading-tight line-clamp-2 min-h-12">
+              {secondaryNiche.title}
+            </div>
+            <div className="font-display font-black text-2xl sm:text-3xl text-black mt-3">
+              {secondaryMatchScore}%
+            </div>
+          </button>
+
+        </div>
+      </div>
+
+
+      {/* SECTION: Accordion "Why [Role] ranked #1" */}
+      <div className="bg-white rounded-2xl border-2 border-black shadow-neo overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setIsAccordionOpen(!isAccordionOpen)}
+          className="w-full p-4 sm:p-5 flex items-center justify-between text-left font-display font-black text-base sm:text-lg text-black cursor-pointer hover:bg-stone-50 transition-colors"
+        >
+          <span>Why {activeNiche.title} ranked #{activeTrack === 'primary' ? '1' : '2'}</span>
+          <span className="w-8 h-8 rounded-full border-2 border-black flex items-center justify-center font-bold text-lg shrink-0">
+            {isAccordionOpen ? '−' : '+'}
+          </span>
+        </button>
+
+        {isAccordionOpen && (
+          <div className="px-5 pb-5 pt-1 border-t border-stone-200 text-stone-700 space-y-3 text-sm font-sans font-medium">
+            <p className="leading-relaxed">
+              {rationale || `${activeNiche.title} matches your problem-solving rhythm, weekly time, and current hardware setup without requiring upfront financial risk.`}
+            </p>
+            {constraintFeasibilityNotes && (
+              <div className="bg-[#F1F0FF] rounded-xl border border-black/20 p-3 text-xs font-mono text-black">
+                <strong>Hardware &amp; Setup Check:</strong> {constraintFeasibilityNotes}
+              </div>
+            )}
+            <div className="flex flex-wrap gap-2 pt-1 text-xs font-mono font-bold">
+              <span className="bg-stone-100 px-2.5 py-1 rounded-md border border-stone-300">
+                {activeNiche.deviceRequirement === 'phone_only_possible' ? '📱 100% Phone Friendly' : '💻 Computer Recommended'}
+              </span>
+              <span className="bg-stone-100 px-2.5 py-1 rounded-md border border-stone-300">
+                ⏱ {activeNiche.timeCommitment}
+              </span>
+            </div>
+          </div>
+        )}
+      </div>
+
+
+      {/* SECTION: "Your Day-One mission" (Yellow Card #FED74C) */}
+      <div id="day-one-mission-card" className="bg-[#FED74C] text-black rounded-2xl border-2 border-black shadow-neo-lg p-5 sm:p-6 space-y-3">
+        <div className="flex items-center justify-between">
+          <h3 className="font-display text-xl sm:text-2xl font-black">
+            Your Day-One mission
+          </h3>
+          <span className="bg-black text-white px-3 py-1 rounded-full text-xs font-mono font-bold border border-black">
+            {activeNiche.dayOneEstimatedMins || 25} MINS
+          </span>
+        </div>
+
+        <p className="text-black/90 font-sans text-sm sm:text-base font-medium leading-relaxed">
+          {activeNiche.dayOneAction}
+        </p>
+
+        {/* Interactive completion toggle */}
+        <div className="pt-2">
+          <button
+            type="button"
+            onClick={() => setDayOneCompleted(!dayOneCompleted)}
+            className={`w-full py-2.5 px-4 rounded-xl border-2 border-black font-display font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer ${
+              dayOneCompleted
+                ? 'bg-black text-[#D4F938] shadow-neo-sm'
+                : 'bg-white text-black hover:bg-stone-50 shadow-neo-sm'
+            }`}
+          >
+            {dayOneCompleted ? (
+              <>
+                <Check className="w-4 h-4 stroke-[3]" />
+                <span>Mission Completed! Great Job!</span>
+              </>
+            ) : (
+              <span>Mark mission as completed</span>
+            )}
           </button>
         </div>
       </div>
 
-      {/* Peer Profiles Community Cohort Modal */}
-      {showPeerModal && (
-        <div className="fixed inset-0 z-50 bg-black/70 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl border border-stone-200 text-stone-900 max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl animate-in fade-in zoom-in-95 duration-200">
-            {/* Modal Header */}
-            <div className="p-6 border-b border-stone-200 flex items-center justify-between shrink-0">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-emerald-100 text-emerald-800 flex items-center justify-center">
-                  <Users className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="text-lg sm:text-xl font-extrabold text-stone-900">
-                    Profiles Matching What You Inputted
-                  </h3>
-                  <p className="text-xs text-stone-500">
-                    {profileMatches.matchingCount.toLocaleString()} total Nigerian learner profiles share your constraints & pathway
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowPeerModal(false)}
-                className="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-500 hover:text-stone-900 flex items-center justify-center transition-colors"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
 
-            {/* Filter Tabs */}
-            <div className="px-6 py-3 bg-stone-50 border-b border-stone-200 flex items-center gap-2 overflow-x-auto shrink-0">
-              <span className="text-xs font-bold text-stone-500 shrink-0 mr-1 flex items-center gap-1">
-                <Filter className="w-3.5 h-3.5" /> Filter:
-              </span>
-              <button
-                type="button"
-                onClick={() => setPeerFilter('all')}
-                className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 transition-colors ${
-                  peerFilter === 'all'
-                    ? 'bg-emerald-800 text-white'
-                    : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-100'
-                }`}
-              >
-                All Matches ({profileMatches.topMatchingProfiles.length})
-              </button>
-              <button
-                type="button"
-                onClick={() => setPeerFilter('device')}
-                className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 transition-colors ${
-                  peerFilter === 'device'
-                    ? 'bg-emerald-800 text-white'
-                    : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-100'
-                }`}
-              >
-                Same Device ({submission.constraints.device === 'phone_only' ? 'Smartphone' : 'Laptop'})
-              </button>
-              <button
-                type="button"
-                onClick={() => setPeerFilter('pathway')}
-                className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 transition-colors ${
-                  peerFilter === 'pathway'
-                    ? 'bg-emerald-800 text-white'
-                    : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-100'
-                }`}
-              >
-                Same Pathway ({primaryNiche.title.split(' ')[0]})
-              </button>
-              <button
-                type="button"
-                onClick={() => setPeerFilter('region')}
-                className={`px-3 py-1 rounded-full text-xs font-semibold shrink-0 transition-colors capitalize ${
-                  peerFilter === 'region'
-                    ? 'bg-emerald-800 text-white'
-                    : 'bg-white border border-stone-200 text-stone-700 hover:bg-stone-100'
-                }`}
-              >
-                In {submission.biodata.location.replace(/_/g, ' ')}
-              </button>
-            </div>
-
-            {/* Scrollable Profiles List */}
-            <div className="p-6 overflow-y-auto space-y-3.5 divide-y divide-stone-100">
-              {filteredPeers.length === 0 ? (
-                <div className="text-center py-8 text-stone-500 text-xs">
-                  No filtered profiles in this specific sub-view. Switch to "All Matches" to see your cohort.
-                </div>
-              ) : (
-                filteredPeers.map((peer) => (
-                  <div key={peer.id} className="pt-3.5 first:pt-0 space-y-2.5">
-                    <div className="flex items-start justify-between gap-3">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-900 font-extrabold flex items-center justify-center text-sm">
-                          {peer.name.charAt(0)}
-                        </div>
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-stone-900 text-sm">{peer.name}</span>
-                            <span className="text-[10px] px-2 py-0.5 rounded-full bg-stone-100 text-stone-600 font-medium capitalize">
-                              {peer.status.replace(/_/g, ' ')}
-                            </span>
-                          </div>
-                          <span className="text-xs text-stone-500 capitalize flex items-center gap-1">
-                            <MapPin className="w-3 h-3 text-stone-400" />
-                            {peer.location.replace(/_/g, ' ')}, Nigeria
-                          </span>
-                        </div>
-                      </div>
-
-                      <div className="text-right">
-                        <span className="inline-block px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-800 text-xs font-bold">
-                          {peer.similarityScore}% Fit
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Shared Traits Badges */}
-                    <div className="flex flex-wrap gap-1.5 text-[11px]">
-                      {peer.sharedTraits.map((trait, tIdx) => (
-                        <span
-                          key={tIdx}
-                          className="px-2 py-0.5 rounded-md bg-stone-100 text-stone-700 font-medium border border-stone-200/80"
-                        >
-                          ✓ {trait}
-                        </span>
-                      ))}
-                    </div>
-
-                    {/* Background Initiative / Proud Achievement */}
-                    <div className="p-3 rounded-xl bg-stone-50 border border-stone-200/70 text-xs">
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-stone-400 block mb-0.5">
-                        Real-World Project / Initiative:
-                      </span>
-                      <p className="text-stone-700 italic">
-                        "{peer.achievementSnippet}"
-                      </p>
-                    </div>
-
-                    {/* Current Milestone */}
-                    <div className="flex items-center justify-between text-xs text-stone-600">
-                      <span className="font-semibold text-emerald-800 flex items-center gap-1">
-                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
-                        <span>Current Focus: {peer.currentMilestone}</span>
-                      </span>
-                      <span className="text-[11px] text-stone-500 font-medium">
-                        Target: {peer.matchedNicheTitle}
-                      </span>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            {/* Modal Footer Key Insight */}
-            <div className="p-5 bg-stone-900 text-stone-200 border-t border-stone-800 rounded-b-3xl text-xs flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
-              <div className="space-y-0.5">
-                <span className="text-emerald-400 font-bold block">Community Key Insight:</span>
-                <p className="text-stone-400 text-[11px]">
-                  Over 78% of learners with your hardware and time profile broke through within 90 days by focusing strictly on their single Day-One mission and not getting overwhelmed.
-                </p>
-              </div>
-              <button
-                type="button"
-                onClick={() => setShowPeerModal(false)}
-                className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs shrink-0 transition-colors"
-              >
-                Back to My Action Plan
-              </button>
-            </div>
-          </div>
+      {/* SECTION: "Learn it free" (Lime Card #D4F938) */}
+      <button
+        type="button"
+        onClick={() => setShowLearnFree(true)}
+        className="w-full bg-[#D4F938] text-black rounded-2xl border-2 border-black shadow-neo-lg p-5 hover:translate-x-0.5 hover:translate-y-0.5 active:translate-x-1 active:translate-y-1 transition-all cursor-pointer flex items-center justify-between text-left group"
+      >
+        <div>
+          <h3 className="font-display text-xl sm:text-2xl font-black">
+            Learn it free
+          </h3>
+          <p className="text-black/80 font-sans text-xs sm:text-sm font-medium mt-0.5">
+            {freeResources.length} curated picks. Videos and websites.
+          </p>
         </div>
-      )}
 
-      {/* Modal 2: Calibration & Grounding Data Modal */}
-      {showCalibrationModal && (
-        <div 
-          id="calibration-modal-backdrop" 
-          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 animate-in fade-in duration-200"
+        <div className="flex items-center gap-3">
+          <span className="bg-white text-black px-3 py-1 rounded-full text-xs font-mono font-bold border-2 border-black">
+            ₦0
+          </span>
+          <span className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center group-hover:translate-x-1 transition-transform">
+            <ArrowRight className="w-5 h-5" />
+          </span>
+        </div>
+      </button>
+
+
+      {/* SECTION: "Level up" (Yellow Card #FED74C) */}
+      <button
+        type="button"
+        onClick={() => setShowLevelUp(true)}
+        className="w-full bg-[#FED74C] text-black rounded-2xl border-2 border-black shadow-neo-lg p-5 hover:translate-x-0.5 hover:translate-y-0.5 active:translate-x-1 active:translate-y-1 transition-all cursor-pointer flex items-center justify-between text-left group"
+      >
+        <div>
+          <h3 className="font-display text-xl sm:text-2xl font-black">
+            Level up
+          </h3>
+          <p className="text-black/80 font-sans text-xs sm:text-sm font-medium mt-0.5">
+            Paid courses &amp; certificates, if you want more.
+          </p>
+        </div>
+
+        <span className="w-10 h-10 rounded-xl bg-black text-white flex items-center justify-center group-hover:translate-x-1 transition-transform">
+          <ArrowRight className="w-5 h-5" />
+        </span>
+      </button>
+
+
+      {/* Footnote */}
+      <p className="text-xs font-mono text-stone-500 text-center">
+        Links and prices change, so check before you pay.
+      </p>
+
+
+      {/* Bottom Actions Row */}
+      <div className="pt-4 border-t-2 border-black/10 flex flex-wrap items-center justify-between gap-3">
+        <button
+          type="button"
+          onClick={onRetake}
+          className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-black bg-white text-black font-display font-bold text-xs sm:text-sm shadow-neo-sm hover:bg-stone-50 cursor-pointer"
         >
-          <div className="bg-white rounded-3xl max-w-2xl w-full max-h-[90vh] flex flex-col shadow-2xl border border-stone-200 overflow-hidden animate-in zoom-in-95 duration-200">
-            {/* Modal Header */}
-            <div className="p-6 border-b border-stone-200 flex items-start justify-between gap-4 bg-stone-50/70 shrink-0">
-              <div className="space-y-1">
-                <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-900 text-xs font-bold uppercase tracking-wider">
-                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-700" />
-                  <span>Transparent Assessment Calibration</span>
-                </div>
-                <h3 className="text-lg sm:text-xl font-extrabold text-stone-900">
-                  What Data Calibrates This Assessment?
-                </h3>
-                <p className="text-xs text-stone-500">
-                  Understanding why your score is realistic, differentiated, and grounded in Nigerian tech realities.
-                </p>
-              </div>
-              <button
-                id="close-calibration-modal-btn"
-                type="button"
-                onClick={() => setShowCalibrationModal(false)}
-                className="w-8 h-8 rounded-full bg-white border border-stone-200 text-stone-500 hover:text-stone-900 flex items-center justify-center transition-colors shrink-0 shadow-xs"
-              >
-                <X className="w-4 h-4" />
-              </button>
-            </div>
+          <RotateCcw className="w-4 h-4" />
+          <span>Retake Quiz</span>
+        </button>
 
-            {/* Modal Scrollable Body */}
-            <div className="p-6 overflow-y-auto space-y-5 text-xs sm:text-sm text-stone-700">
-              {/* Section 1 */}
-              <div className="p-4 rounded-2xl bg-emerald-50/50 border border-emerald-200/80 space-y-2">
-                <div className="flex items-center gap-2 text-emerald-900 font-bold text-sm">
-                  <Users className="w-4 h-4 text-emerald-700" />
-                  <span>1. Empirical Nigerian Cohort Baseline (1,200+ Learners)</span>
-                </div>
-                <p className="text-xs text-emerald-950/80 leading-relaxed">
-                  Unlike foreign career tests built for high-speed Wi-Fi and high-end MacBooks, our diagnostic model was calibrated using data from 1,200+ Nigerian learners across Lagos, Ibadan, Abuja, Enugu, and Port Harcourt. It directly accounts for hardware availability (smartphone vs. PC), power stability (NEPA vs. powerbanks), and mobile data tariffs.
-                </p>
-              </div>
+        {onOpenChatbot && (
+          <button
+            type="button"
+            onClick={() => onOpenChatbot(`I just completed the assessment and was matched with ${activeNiche.title}. Can you give me specific tips for a Nigerian beginner?`, { niche: activeNiche })}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border-2 border-black bg-white text-black font-display font-bold text-xs sm:text-sm shadow-neo-sm hover:bg-stone-50 cursor-pointer"
+          >
+            <Bot className="w-4 h-4" />
+            <span>Ask Mentor Tizzi</span>
+          </button>
+        )}
 
-              {/* Section 2 */}
-              <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
-                <div className="flex items-center gap-2 text-stone-900 font-bold text-sm">
-                  <Layers className="w-4 h-4 text-emerald-600" />
-                  <span>2. Multi-Vector Cognitive Matrix (6 Cognitive Scenarios)</span>
-                </div>
-                <p className="text-xs text-stone-600 leading-relaxed">
-                  We don't rely on simplistic quiz questions. We evaluate 6 situational problem-solving dimensions: Visual Discernment, Logical Architecture, Human Communication, Financial/Analytical Rigor, Operations Coordination, and Investigative Security. Your declared daily focus activity is directly factored in to prevent recommending paths you wouldn't enjoy day-to-day.
-                </p>
-              </div>
-
-              {/* Section 3 */}
-              <div className="p-4 rounded-2xl bg-stone-50 border border-stone-200 space-y-2">
-                <div className="flex items-center gap-2 text-stone-900 font-bold text-sm">
-                  <Cpu className="w-4 h-4 text-teal-600" />
-                  <span>3. Semantic Transferable Skill Extraction</span>
-                </div>
-                <p className="text-xs text-stone-600 leading-relaxed">
-                  Your compulsory real-world reflection is parsed for practical latent skills (such as budget reconciliation, graphic design in Canva, organizing WhatsApp vendor logistics, or troubleshooting phone settings). Real previous experience provides authentic diagnostic lift.
-                </p>
-              </div>
-
-              {/* Section 4 */}
-              <div className="p-4 rounded-2xl bg-amber-50/70 border border-amber-200 space-y-2">
-                <div className="flex items-center gap-2 text-amber-950 font-bold text-sm">
-                  <AlertTriangle className="w-4 h-4 text-amber-700" />
-                  <span>4. Anti-Inflation Calibration: Why Not Just 98%?</span>
-                </div>
-                <p className="text-xs text-amber-900/90 leading-relaxed">
-                  Generic websites give everyone an inflated 98% or 99% score to make them feel good. In reality, pursuing the wrong tech path wastes 6 to 12 months. Our composite formula <span className="font-bold">(50% Aptitude + 30% Feasibility + 20% Job Demand)</span> naturally anchors honest strong matches between <span className="font-bold">75% and 89%</span>. We also provide an explicit growth hurdle ("Why not 100%?") so you know what realistic obstacles to plan for.
-                </p>
-              </div>
-            </div>
-
-            {/* Modal Footer */}
-            <div className="p-4 sm:p-5 bg-stone-50 border-t border-stone-200 flex items-center justify-between shrink-0">
-              <span className="text-xs text-stone-500 font-medium">
-                Methodology updated to current 2025/2026 tech employment benchmarks.
-              </span>
-              <button
-                type="button"
-                onClick={() => setShowCalibrationModal(false)}
-                className="px-5 py-2.5 rounded-xl bg-stone-900 hover:bg-black text-white font-bold text-xs transition-colors"
-              >
-                Understood, Return
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+        {onReturnHome && (
+          <button
+            type="button"
+            onClick={onReturnHome}
+            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-black text-white font-display font-bold text-xs sm:text-sm shadow-neo-sm hover:bg-stone-900 cursor-pointer"
+          >
+            <span>Return to Home</span>
+          </button>
+        )}
+      </div>
 
     </div>
   );

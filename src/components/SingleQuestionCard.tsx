@@ -6,7 +6,9 @@ export interface CardOption {
   value: string | number;
   label: string;
   sublabel?: string;
-  icon?: React.ReactNode;
+  icon?: React.ReactNode | string;
+  badgeSymbol?: string;
+  paletteColors?: string[];
 }
 
 interface SingleQuestionCardProps {
@@ -17,6 +19,7 @@ interface SingleQuestionCardProps {
   categoryBadge?: string;
   title: string;
   subtitle?: string;
+  mentorTip?: string;
   options: CardOption[];
   selectedValue?: string | number;
   onSelectOption: (val: string | number) => void;
@@ -29,9 +32,14 @@ interface SingleQuestionCardProps {
   answeredIndices: boolean[];
   onJumpToQuestion: (index: number) => void;
   autoAdvanceOnSelect?: boolean;
+  hideInternalProgressBar?: boolean;
+  customTopSlot?: React.ReactNode;
+  customBottomSlot?: React.ReactNode;
+  columns?: 1 | 2 | 3;
 }
 
 const OPTION_KEYS = ['A', 'B', 'C', 'D', 'E', 'F'];
+const BADGE_BG_COLORS = ['bg-[#FED74C]', 'bg-[#D4F938]', 'bg-[#60C6F8]', 'bg-[#FF6A55]', 'bg-[#C084FC]', 'bg-[#F472B6]'];
 
 export const SingleQuestionCard: React.FC<SingleQuestionCardProps> = ({
   questionNumber,
@@ -41,6 +49,7 @@ export const SingleQuestionCard: React.FC<SingleQuestionCardProps> = ({
   categoryBadge,
   title,
   subtitle,
+  mentorTip,
   options,
   selectedValue,
   onSelectOption,
@@ -48,13 +57,17 @@ export const SingleQuestionCard: React.FC<SingleQuestionCardProps> = ({
   onPrev,
   isFirst,
   isLast,
-  nextButtonLabel,
-  prevButtonLabel,
+  nextButtonLabel = 'Continue →',
   answeredIndices,
   onJumpToQuestion,
-  autoAdvanceOnSelect = true
+  autoAdvanceOnSelect = false,
+  hideInternalProgressBar = false,
+  customTopSlot,
+  customBottomSlot,
+  columns
 }) => {
   const [direction, setDirection] = useState<number>(1);
+  const [animatingSelection, setAnimatingSelection] = useState<string | number | null>(null);
   const touchStartX = useRef<number | null>(null);
   const touchStartY = useRef<number | null>(null);
 
@@ -70,46 +83,46 @@ export const SingleQuestionCard: React.FC<SingleQuestionCardProps> = ({
 
   const handleSelect = (val: string | number) => {
     onSelectOption(val);
+    setAnimatingSelection(val);
+
     if (autoAdvanceOnSelect && !isLast) {
       setTimeout(() => {
-        setDirection(1);
-        onNext();
-      }, 300);
+        handleNextWithDirection();
+        setAnimatingSelection(null);
+      }, 260);
+    } else {
+      setTimeout(() => {
+        setAnimatingSelection(null);
+      }, 150);
     }
   };
 
-  // Keyboard shortcut listener (A, B, C, D, E or 1, 2, 3, 4, 5, Enter)
+  // Keyboard navigation: 1-6 or A-F, Enter to continue
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Don't trigger if user is typing in an input or textarea
-      if (
-        document.activeElement?.tagName === 'INPUT' ||
-        document.activeElement?.tagName === 'TEXTAREA' ||
-        document.activeElement?.tagName === 'SELECT'
-      ) {
+      if (['input', 'textarea'].includes((e.target as HTMLElement)?.tagName?.toLowerCase())) {
         return;
       }
 
-      const key = e.key.toUpperCase();
-      
-      // Check for A, B, C, D, E
-      const keyIndex = OPTION_KEYS.indexOf(key);
-      if (keyIndex !== -1 && keyIndex < options.length) {
+      if (e.key >= '1' && e.key <= String(Math.min(options.length, 6))) {
+        const idx = parseInt(e.key, 10) - 1;
+        if (options[idx]) {
+          handleSelect(options[idx].value);
+        }
+      } else if (['a', 'b', 'c', 'd', 'e', 'f'].includes(e.key.toLowerCase())) {
+        const idx = e.key.toLowerCase().charCodeAt(0) - 97;
+        if (options[idx]) {
+          handleSelect(options[idx].value);
+        }
+      } else if (e.key === 'Enter') {
+        if (selectedValue !== undefined) {
+          e.preventDefault();
+          handleNextWithDirection();
+        }
+      } else if (e.key === 'ArrowLeft' && !isFirst) {
         e.preventDefault();
-        handleSelect(options[keyIndex].value);
-        return;
-      }
-
-      // Check for 1, 2, 3, 4, 5
-      const num = parseInt(e.key, 10);
-      if (!isNaN(num) && num >= 1 && num <= options.length) {
-        e.preventDefault();
-        handleSelect(options[num - 1].value);
-        return;
-      }
-
-      // Enter to advance if answered
-      if (e.key === 'Enter' && selectedValue !== undefined && selectedValue !== '') {
+        handlePrevWithDirection();
+      } else if (e.key === 'ArrowRight' && selectedValue !== undefined && !isLast) {
         e.preventDefault();
         handleNextWithDirection();
       }
@@ -117,202 +130,218 @@ export const SingleQuestionCard: React.FC<SingleQuestionCardProps> = ({
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [options, selectedValue, isLast]);
+  }, [options, selectedValue, isFirst, isLast]);
 
-  // Touch swipe handling for mobile
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0].clientX;
-    touchStartY.current = e.touches[0].clientY;
+  const slideVariants = {
+    enter: (dir: number) => ({
+      x: dir > 0 ? 50 : -50,
+      opacity: 0,
+      scale: 0.99,
+    }),
+    center: {
+      x: 0,
+      opacity: 1,
+      scale: 1,
+      transition: {
+        x: { type: 'spring' as const, stiffness: 350, damping: 32 },
+        opacity: { duration: 0.2 },
+        scale: { duration: 0.18 },
+      },
+    },
+    exit: (dir: number) => ({
+      x: dir > 0 ? -50 : 50,
+      opacity: 0,
+      scale: 0.99,
+      transition: {
+        x: { type: 'spring' as const, stiffness: 350, damping: 32 },
+        opacity: { duration: 0.15 },
+      },
+    }),
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null || touchStartY.current === null) return;
-    const diffX = touchStartX.current - e.changedTouches[0].clientX;
-    const diffY = touchStartY.current - e.changedTouches[0].clientY;
-
-    if (Math.abs(diffX) > 50 && Math.abs(diffX) > Math.abs(diffY)) {
-      if (diffX > 0 && selectedValue !== undefined) {
-        // Swiped left -> Next
-        handleNextWithDirection();
-      } else if (diffX < 0) {
-        // Swiped right -> Prev
-        handlePrevWithDirection();
-      }
-    }
-    touchStartX.current = null;
-    touchStartY.current = null;
-  };
-
-  const percentComplete = Math.round((questionNumber / totalQuestions) * 100);
+  const isGrid = columns === 2 || (options.length >= 4 && options.length <= 6 && !options.some(o => o.sublabel && o.sublabel.length > 50));
 
   return (
-    <div 
-      className="w-full max-w-2xl mx-auto select-none"
-      onTouchStart={handleTouchStart}
-      onTouchEnd={handleTouchEnd}
-    >
-      {/* Top Header: Understated, Editorial Metadata */}
-      <div className="mb-6">
-        <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono font-semibold tracking-wider uppercase bg-emerald-50 text-emerald-900 border border-emerald-200/80">
-              Section 0{stepNumber}
-            </span>
-            <span className="text-xs font-medium text-stone-700">
-              {stepName}
-            </span>
-            {categoryBadge && (
-              <span className="hidden sm:inline-flex items-center text-xs text-stone-400">
-                · {categoryBadge}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-1.5 text-xs text-stone-500 font-mono">
-            <span className="text-stone-400">Question</span>
-            <span className="font-semibold text-stone-900">{questionNumber}</span>
-            <span className="text-stone-400">of</span>
-            <span className="text-stone-600">{totalQuestions}</span>
+    <div className="w-full max-w-2xl mx-auto select-none">
+      
+      {/* Top Header: Back Arrow + Segmented Progress Bars (Matching Figma Assessment__step_1_1x_fb2979bc.png) */}
+      {!hideInternalProgressBar && (
+        <div className="mb-6 flex items-center gap-3 sm:gap-4">
+          <button
+            type="button"
+            onClick={handlePrevWithDirection}
+            disabled={isFirst}
+            className={`w-11 h-11 rounded-xl border-2 border-black flex items-center justify-center transition-all shrink-0 cursor-pointer ${
+              isFirst
+                ? 'opacity-40 cursor-not-allowed bg-white/60'
+                : 'bg-white shadow-neo-sm hover:translate-x-0.5 hover:translate-y-0.5 active:translate-x-1 active:translate-y-1'
+            }`}
+            title="Go to previous question"
+          >
+            <ArrowLeft className="w-5 h-5 text-black" />
+          </button>
+
+          {/* Segmented Progress Capsules */}
+          <div className="flex-1 flex gap-1.5 sm:gap-2">
+            {answeredIndices.map((isAnswered, idx) => {
+              const isCurrent = idx === questionNumber - 1;
+              const isFilled = isAnswered || idx < questionNumber - 1;
+
+              return (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => {
+                    setDirection(idx > questionNumber - 1 ? 1 : -1);
+                    onJumpToQuestion(idx);
+                  }}
+                  className={`flex-1 h-3 rounded-full border border-black transition-all cursor-pointer ${
+                    isCurrent
+                      ? 'bg-[#5D45FD] shadow-neo-sm scale-y-110'
+                      : isFilled
+                      ? 'bg-[#5D45FD]'
+                      : 'bg-white/80 hover:bg-white'
+                  }`}
+                  title={`Question ${idx + 1}`}
+                />
+              );
+            })}
           </div>
         </div>
+      )}
 
-        {/* Minimal High-Craft Progress Track */}
-        <div className="w-full bg-stone-200/70 h-1.5 rounded-full overflow-hidden flex">
-          {answeredIndices.map((isAnswered, idx) => {
-            const isCurrent = idx === questionNumber - 1;
-            return (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => {
-                  setDirection(idx > questionNumber - 1 ? 1 : -1);
-                  onJumpToQuestion(idx);
-                }}
-                className={`flex-1 h-full transition-all border-r border-white/50 last:border-r-0 ${
-                  isCurrent
-                    ? 'bg-emerald-700'
-                    : isAnswered
-                    ? 'bg-emerald-500/80 hover:bg-emerald-600 cursor-pointer'
-                    : 'bg-transparent hover:bg-stone-300'
-                }`}
-                title={`Question ${idx + 1}${isAnswered ? ' (Answered)' : ''}`}
-                aria-label={`Jump to Question ${idx + 1}`}
-              />
-            );
-          })}
-        </div>
-      </div>
-
-      {/* Main Card View with Slide Animation */}
+      {/* Main Content Card Area */}
       <div className="relative">
-        <AnimatePresence mode="wait" initial={false}>
+        <AnimatePresence mode="wait" custom={direction}>
           <motion.div
             key={questionNumber}
-            initial={{ opacity: 0, y: direction * 12 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -direction * 12 }}
-            transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="bg-white rounded-2xl border border-stone-200/90 p-6 sm:p-9 shadow-[0_4px_24px_-6px_rgba(0,0,0,0.05)]"
+            custom={direction}
+            variants={slideVariants}
+            initial="enter"
+            animate="center"
+            exit="exit"
+            className="space-y-6"
           >
-            {/* Question Title & Subtitle */}
-            <div className="mb-7">
-              <h2 className="font-serif-display text-2xl sm:text-3xl text-stone-900 font-normal leading-[1.25] tracking-tight">
+            {/* Eyebrow Pill from Mockup (e.g. PHASE 1 / YOUR BACKGROUND) */}
+            <div className="flex items-center gap-2">
+              <span className="inline-block bg-[#FED74C] text-black px-3.5 py-1 rounded-full text-xs font-mono font-bold border-2 border-black shadow-neo-sm uppercase">
+                PHASE {stepNumber} / {stepName}
+              </span>
+              {categoryBadge && (
+                <span className="text-xs font-mono font-bold text-stone-500">
+                  {categoryBadge}
+                </span>
+              )}
+            </div>
+
+            {/* Avatar 'T' + Speech Bubble from Mockup */}
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-[#D4F938] border-2 border-black flex items-center justify-center font-display font-black text-black text-sm shadow-neo-sm shrink-0">
+                T
+              </div>
+              <div className="border-2 border-black bg-white px-3.5 py-1.5 rounded-full text-xs font-bold text-black shadow-neo-sm">
+                {mentorTip || "No stress. No wrong answers."}
+              </div>
+            </div>
+
+            {/* Headline */}
+            <div>
+              <h2 className="font-display text-2xl sm:text-4xl font-black text-black leading-tight tracking-tight">
                 {title}
               </h2>
               {subtitle && (
-                <p className="text-sm sm:text-base text-stone-600 mt-2.5 leading-relaxed font-sans">
+                <p className="text-stone-600 font-sans text-sm sm:text-base mt-2 font-medium">
                   {subtitle}
                 </p>
               )}
             </div>
 
-            {/* Options List */}
-            <div className="space-y-3">
+            {customTopSlot && <div>{customTopSlot}</div>}
+
+            {/* Options List / Grid (Matching Figma Mockup) */}
+            <div className={`grid gap-3.5 ${isGrid ? 'grid-cols-1 sm:grid-cols-2' : 'grid-cols-1'}`}>
               {options.map((opt, optIdx) => {
                 const isSelected = selectedValue === opt.value;
-                const hotkey = OPTION_KEYS[optIdx] || String(optIdx + 1);
+                const letterKey = OPTION_KEYS[optIdx] || String(optIdx + 1);
+                const badgeBg = BADGE_BG_COLORS[optIdx % BADGE_BG_COLORS.length];
+                const symbol = opt.badgeSymbol || letterKey;
 
                 return (
                   <button
                     key={optIdx}
                     type="button"
                     onClick={() => handleSelect(opt.value)}
-                    className={`w-full p-4 sm:p-4.5 rounded-xl border text-left transition-all duration-150 flex items-start gap-3.5 group cursor-pointer ${
+                    className={`p-4 sm:p-5 rounded-2xl border-2 border-black text-left transition-all duration-150 flex items-center justify-between gap-4 cursor-pointer relative ${
                       isSelected
-                        ? 'border-emerald-800 bg-emerald-50/75 text-emerald-950 ring-1 ring-emerald-800/40 shadow-xs'
-                        : 'border-stone-200/80 bg-white hover:border-stone-400/80 hover:bg-stone-50/50 text-stone-800'
+                        ? 'bg-[#D4F938] text-black shadow-neo-lg scale-[1.01]'
+                        : 'bg-white text-black shadow-neo hover:translate-x-0.5 hover:translate-y-0.5'
                     }`}
                   >
-                    {/* Hotkey Letter Keycap */}
-                    <div className={`w-6 h-6 rounded-md border text-[11px] font-mono font-semibold flex items-center justify-center shrink-0 mt-0.5 transition-all ${
-                      isSelected 
-                        ? 'border-emerald-800 bg-emerald-800 text-white shadow-2xs' 
-                        : 'border-stone-300/80 bg-stone-100/80 text-stone-600 group-hover:border-stone-400 group-hover:bg-stone-200/70'
-                    }`}>
-                      {isSelected ? <Check className="w-3.5 h-3.5 stroke-[2.5]" /> : hotkey}
+                    <div className="flex items-center gap-3.5 sm:gap-4 min-w-0">
+                      
+                      {/* Left Badge: Rounded Square with Black Border */}
+                      <div
+                        className={`w-10 h-10 rounded-xl border-2 border-black flex items-center justify-center font-display font-black text-base shrink-0 ${
+                          isSelected ? 'bg-black text-white' : `${badgeBg} text-black`
+                        }`}
+                      >
+                        {symbol}
+                      </div>
+
+                      {/* Title & Subtitle */}
+                      <div className="min-w-0">
+                        <div className="font-display text-base sm:text-lg font-bold leading-snug">
+                          {opt.label}
+                        </div>
+                        {opt.sublabel && (
+                          <p className="text-xs sm:text-sm text-stone-700 font-sans mt-0.5 leading-relaxed font-medium">
+                            {opt.sublabel}
+                          </p>
+                        )}
+                      </div>
                     </div>
 
-                    {/* Optional Icon */}
-                    {opt.icon && (
-                      <div className={`shrink-0 mt-0.5 ${isSelected ? 'text-emerald-800' : 'text-stone-500 group-hover:text-stone-700'}`}>
-                        {opt.icon}
+                    {/* Right Checkmark when selected */}
+                    {isSelected && (
+                      <div className="w-6 h-6 rounded-full bg-black text-[#D4F938] flex items-center justify-center shrink-0">
+                        <Check className="w-4 h-4 stroke-[3]" />
                       </div>
                     )}
-
-                    {/* Option Text */}
-                    <div className="flex-1 min-w-0">
-                      <div className={`text-sm sm:text-base leading-snug font-medium ${
-                        isSelected ? 'text-emerald-950 font-semibold' : 'text-stone-900'
-                      }`}>
-                        {opt.label}
-                      </div>
-                      {opt.sublabel && (
-                        <div className="text-xs sm:text-sm text-stone-500 font-normal mt-1 leading-relaxed">
-                          {opt.sublabel}
-                        </div>
-                      )}
-                    </div>
                   </button>
                 );
               })}
             </div>
 
-            {/* In-Card Step Controls */}
-            <div className="mt-8 pt-6 border-t border-stone-100 flex items-center justify-between gap-3">
-              <button
-                type="button"
-                onClick={handlePrevWithDirection}
-                className="inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl border border-stone-200 bg-white text-stone-600 text-xs sm:text-sm font-medium hover:bg-stone-50 hover:text-stone-900 transition-colors"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>{prevButtonLabel || (isFirst ? 'Previous' : 'Back')}</span>
-              </button>
-
-              <div className="text-[11px] text-stone-400 hidden sm:inline-flex items-center gap-1.5 font-mono">
-                <span>Press</span>
-                <kbd className="px-1.5 py-0.5 bg-stone-100 border border-stone-300/70 rounded text-[10px] text-stone-600">A</kbd>
-                <span>to</span>
-                <kbd className="px-1.5 py-0.5 bg-stone-100 border border-stone-300/70 rounded text-[10px] text-stone-600">{OPTION_KEYS[options.length - 1] || 'E'}</kbd>
-                <span>or</span>
-                <kbd className="px-1.5 py-0.5 bg-stone-100 border border-stone-300/70 rounded text-[10px] text-stone-600">Enter ↵</kbd>
-              </div>
-
-              <button
-                type="button"
-                onClick={handleNextWithDirection}
-                disabled={selectedValue === undefined || selectedValue === ''}
-                className={`inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs sm:text-sm font-semibold transition-all ${
-                  selectedValue !== undefined && selectedValue !== ''
-                    ? 'bg-emerald-800 text-white hover:bg-emerald-900 shadow-sm active:scale-[0.99] cursor-pointer'
-                    : 'bg-stone-100 text-stone-400 cursor-not-allowed border border-stone-200/80'
-                }`}
-              >
-                <span>{nextButtonLabel || (isLast ? 'Continue' : 'Next')}</span>
-                <ArrowRight className="w-4 h-4" />
-              </button>
+            {/* Helper note: Monospace helper from Mockup cd340ef9 */}
+            <div className="text-center pt-2">
+              <span className="text-xs font-mono font-medium text-stone-500">
+                Tap one to jump to the next question
+              </span>
             </div>
+
+            {customBottomSlot && <div>{customBottomSlot}</div>}
+
           </motion.div>
         </AnimatePresence>
       </div>
+
+      {/* Sticky Bottom Navigation Bar (Matching Figma Mockup) */}
+      <div className="sticky bottom-4 pt-6 z-20">
+        <button
+          type="button"
+          onClick={handleNextWithDirection}
+          disabled={selectedValue === undefined}
+          className={`w-full py-4 rounded-2xl font-display font-bold text-lg border-2 border-black transition-all flex items-center justify-center gap-2 cursor-pointer ${
+            selectedValue !== undefined
+              ? 'bg-[#13141F] text-white shadow-neo-purple hover:translate-x-0.5 hover:translate-y-0.5 active:translate-x-1 active:translate-y-1'
+              : 'bg-stone-300 text-stone-500 border-stone-400 cursor-not-allowed opacity-70'
+          }`}
+        >
+          <span>{nextButtonLabel}</span>
+          <ArrowRight className="w-5 h-5" />
+        </button>
+      </div>
+
     </div>
   );
 };

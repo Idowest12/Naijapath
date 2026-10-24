@@ -1,6 +1,7 @@
 import React from 'react';
-import { Compass, ShieldCheck, Zap, ArrowUp } from 'lucide-react';
+import { ArrowUp } from 'lucide-react';
 import { trackClick } from '../utils/analytics';
+import { TechNavLogo } from './TechNavLogo';
 
 interface FooterProps {
   onOpenAdmin?: () => void;
@@ -10,47 +11,37 @@ interface FooterProps {
 
 export const Footer: React.FC<FooterProps> = ({ onSelectNiche, onSelectStrategy }) => {
   return (
-    <footer id="site-footer" className="bg-[#181a18] text-stone-300 border-t border-[#272b27]">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 sm:pt-18 pb-12">
+    <footer id="site-footer" className="bg-[#5D45FD] text-white border-t-2 border-black selection:bg-[#D4F938] selection:text-black">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-14 sm:pt-16 pb-12">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 lg:gap-12">
           
           {/* Brand Col */}
           <div className="lg:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-xl bg-emerald-900/60 border border-emerald-800/70 text-emerald-200 flex items-center justify-center">
-                <Compass className="w-5 h-5" />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-serif-display text-2xl text-white font-normal tracking-tight">
-                  Naija Tech Guide
-                </span>
-                <span className="text-[11px] text-stone-400 font-sans">
-                  Honest African tech pathways
-                </span>
-              </div>
+              <TechNavLogo size="lg" variant="footer" />
             </div>
-            <p className="text-sm text-stone-400 leading-relaxed max-w-sm font-sans">
-              Demystifying tech pathways for young Nigerians. We provide realistic, constraint-aware roadmaps tailored to your actual device, weekly hours, and budget.
+            <p className="text-base text-white/90 leading-relaxed max-w-sm font-sans font-medium">
+              Realistic tech paths for young Nigerians. Built around your device, your hours and your budget.
             </p>
-            <div className="pt-1 flex flex-wrap gap-2 text-xs font-mono">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-800/80 text-stone-300 border border-stone-700/60">
-                <Zap className="w-3.5 h-3.5 text-emerald-400" /> Low-Data Friendly
+            <div className="pt-2 flex flex-wrap gap-2 text-xs font-mono font-bold">
+              <span className="inline-flex items-center px-3.5 py-1.5 rounded-full bg-black text-white border-2 border-black shadow-neo-sm">
+                Low-data friendly
               </span>
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-stone-800/80 text-stone-300 border border-stone-700/60">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" /> 100% Free Resources
+              <span className="inline-flex items-center px-3.5 py-1.5 rounded-full bg-black text-white border-2 border-black shadow-neo-sm">
+                100% free
               </span>
             </div>
           </div>
 
-          {/* Column 1: Non-Technical Pathways */}
-          <div className="space-y-3.5">
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/80"></span>
-              <h3 className="text-xs font-mono font-medium uppercase tracking-wider text-stone-200">
-                Non-Coding Niches
+          {/* Column 1: Non-Coding Niches */}
+          <div className="space-y-3">
+            <div>
+              <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                NON-CODING NICHES
               </h3>
+              <div className="h-1 w-14 bg-[#D4F938] rounded-full mt-1.5"></div>
             </div>
-            <ul className="space-y-2 text-sm font-sans">
+            <ul className="space-y-2.5 text-sm font-sans font-semibold">
               <li>
                 <button
                   id="footer-link-uiux"
@@ -59,9 +50,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectNiche, onSelectStrategy 
                     trackClick('footer_link_uiux', 'UI/UX & Product Design', 'Footer Navigation');
                     onSelectNiche?.('niche-uiux');
                   }}
-                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                  className="text-white/90 hover:text-[#D4F938] transition-colors text-left cursor-pointer hover:underline underline-offset-4"
                 >
-                  <span>UI/UX & Product Design</span>
+                  UI/UX & Product Design
                 </button>
               </li>
               <li>
@@ -72,9 +63,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectNiche, onSelectStrategy 
                     trackClick('footer_link_va', 'Virtual Assistance & Tech VA', 'Footer Navigation');
                     onSelectNiche?.('niche-va');
                   }}
-                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                  className="text-white/90 hover:text-[#D4F938] transition-colors text-left cursor-pointer hover:underline underline-offset-4"
                 >
-                  <span>Virtual Assistance & Tech VA</span>
+                  Virtual Assistance & Tech VA
                 </button>
               </li>
               <li>
@@ -85,9 +76,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectNiche, onSelectStrategy 
                     trackClick('footer_link_smm', 'Social Media & Community', 'Footer Navigation');
                     onSelectNiche?.('niche-smm');
                   }}
-                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                  className="text-white/90 hover:text-[#D4F938] transition-colors text-left cursor-pointer hover:underline underline-offset-4"
                 >
-                  <span>Social Media & Community</span>
+                  Social Media & Community
                 </button>
               </li>
               <li>
@@ -98,9 +89,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectNiche, onSelectStrategy 
                     trackClick('footer_link_tech_writing', 'Technical Content Writing', 'Footer Navigation');
                     onSelectNiche?.('niche-tech-writing');
                   }}
-                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                  className="text-white/90 hover:text-[#D4F938] transition-colors text-left cursor-pointer hover:underline underline-offset-4"
                 >
-                  <span>Technical Content Writing</span>
+                  Technical Content Writing
                 </button>
               </li>
               <li>
@@ -111,23 +102,23 @@ export const Footer: React.FC<FooterProps> = ({ onSelectNiche, onSelectStrategy 
                     trackClick('footer_link_pm', 'Product Management', 'Footer Navigation');
                     onSelectNiche?.('niche-pm');
                   }}
-                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                  className="text-white/90 hover:text-[#D4F938] transition-colors text-left cursor-pointer hover:underline underline-offset-4"
                 >
-                  <span>Product Management</span>
+                  Product Management
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Column 2: Technical Pathways */}
-          <div className="space-y-3.5">
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/80"></span>
-              <h3 className="text-xs font-mono font-medium uppercase tracking-wider text-stone-200">
-                Technical Niches
+          {/* Column 2: Technical Niches */}
+          <div className="space-y-3">
+            <div>
+              <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                TECHNICAL NICHES
               </h3>
+              <div className="h-1 w-14 bg-[#FED74C] rounded-full mt-1.5"></div>
             </div>
-            <ul className="space-y-2 text-sm font-sans">
+            <ul className="space-y-2.5 text-sm font-sans font-semibold">
               <li>
                 <button
                   id="footer-link-frontend"
@@ -136,9 +127,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectNiche, onSelectStrategy 
                     trackClick('footer_link_frontend', 'Frontend Web Development', 'Footer Navigation');
                     onSelectNiche?.('niche-frontend');
                   }}
-                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                  className="text-white/90 hover:text-[#FED74C] transition-colors text-left cursor-pointer hover:underline underline-offset-4"
                 >
-                  <span>Frontend Web Development</span>
+                  Frontend Web Development
                 </button>
               </li>
               <li>
@@ -149,9 +140,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectNiche, onSelectStrategy 
                     trackClick('footer_link_data', 'Data Analysis & BI', 'Footer Navigation');
                     onSelectNiche?.('niche-data');
                   }}
-                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                  className="text-white/90 hover:text-[#FED74C] transition-colors text-left cursor-pointer hover:underline underline-offset-4"
                 >
-                  <span>Data Analysis & BI</span>
+                  Data Analysis & BI
                 </button>
               </li>
               <li>
@@ -162,9 +153,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectNiche, onSelectStrategy 
                     trackClick('footer_link_cyber', 'Cybersecurity Fundamentals', 'Footer Navigation');
                     onSelectNiche?.('niche-cyber');
                   }}
-                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                  className="text-white/90 hover:text-[#FED74C] transition-colors text-left cursor-pointer hover:underline underline-offset-4"
                 >
-                  <span>Cybersecurity Fundamentals</span>
+                  Cybersecurity Fundamentals
                 </button>
               </li>
               <li>
@@ -175,9 +166,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectNiche, onSelectStrategy 
                     trackClick('footer_link_backend', 'Backend API Engineering', 'Footer Navigation');
                     onSelectNiche?.('niche-backend');
                   }}
-                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                  className="text-white/90 hover:text-[#FED74C] transition-colors text-left cursor-pointer hover:underline underline-offset-4"
                 >
-                  <span>Backend API Engineering</span>
+                  Backend API Engineering
                 </button>
               </li>
               <li>
@@ -188,23 +179,23 @@ export const Footer: React.FC<FooterProps> = ({ onSelectNiche, onSelectStrategy 
                     trackClick('footer_link_qa', 'Quality Assurance & Testing', 'Footer Navigation');
                     onSelectNiche?.('niche-qa');
                   }}
-                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                  className="text-white/90 hover:text-[#FED74C] transition-colors text-left cursor-pointer hover:underline underline-offset-4"
                 >
-                  <span>Quality Assurance & Testing</span>
+                  Quality Assurance & Testing
                 </button>
               </li>
             </ul>
           </div>
 
-          {/* Column 3: Nigerian Realities & Framework */}
-          <div className="space-y-3.5">
-            <div className="flex items-center gap-2">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/80"></span>
-              <h3 className="text-xs font-mono font-medium uppercase tracking-wider text-stone-200">
-                Survival & Strategy
+          {/* Column 3: Survival & Strategy */}
+          <div className="space-y-3">
+            <div>
+              <h3 className="text-xs font-mono font-bold uppercase tracking-wider text-white">
+                SURVIVAL & STRATEGY
               </h3>
+              <div className="h-1 w-14 bg-[#FF6A55] rounded-full mt-1.5"></div>
             </div>
-            <ul className="space-y-2 text-sm font-sans">
+            <ul className="space-y-2.5 text-sm font-sans font-semibold">
               <li>
                 <button
                   id="footer-link-phone-guide"
@@ -213,9 +204,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectNiche, onSelectStrategy 
                     trackClick('footer_link_phone_guide', 'Phone-Only Tech Strategies', 'Footer Navigation');
                     onSelectStrategy?.('phone_friendly');
                   }}
-                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                  className="text-white/90 hover:text-[#FF6A55] transition-colors text-left cursor-pointer hover:underline underline-offset-4"
                 >
-                  <span>Phone-Only Tech Strategies</span>
+                  Phone-Only Tech Strategies
                 </button>
               </li>
               <li>
@@ -226,9 +217,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectNiche, onSelectStrategy 
                     trackClick('footer_link_power_data', 'Power & Data Hacks', 'Footer Navigation');
                     onSelectStrategy?.('power_data');
                   }}
-                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                  className="text-white/90 hover:text-[#FF6A55] transition-colors text-left cursor-pointer hover:underline underline-offset-4"
                 >
-                  <span>Power & Data Hacks</span>
+                  Power & Data Hacks
                 </button>
               </li>
               <li>
@@ -239,9 +230,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectNiche, onSelectStrategy 
                     trackClick('footer_link_career_switch', 'Career Switcher Guide', 'Footer Navigation');
                     onSelectStrategy?.('career_switch');
                   }}
-                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                  className="text-white/90 hover:text-[#FF6A55] transition-colors text-left cursor-pointer hover:underline underline-offset-4"
                 >
-                  <span>Career Switcher Guide</span>
+                  Career Switcher Guide
                 </button>
               </li>
               <li>
@@ -252,9 +243,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectNiche, onSelectStrategy 
                     trackClick('footer_link_portfolio', 'First Portfolio Proofs', 'Footer Navigation');
                     onSelectStrategy?.('first_portfolio');
                   }}
-                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                  className="text-white/90 hover:text-[#FF6A55] transition-colors text-left cursor-pointer hover:underline underline-offset-4"
                 >
-                  <span>First Portfolio Proofs</span>
+                  First Portfolio Proofs
                 </button>
               </li>
               <li>
@@ -265,9 +256,9 @@ export const Footer: React.FC<FooterProps> = ({ onSelectNiche, onSelectStrategy 
                     trackClick('footer_link_remote', 'Receiving Foreign Payments', 'Footer Navigation');
                     onSelectStrategy?.('foreign_payments');
                   }}
-                  className="text-stone-400 hover:text-stone-100 hover:translate-x-0.5 transition-all text-left cursor-pointer flex items-center gap-1.5"
+                  className="text-white/90 hover:text-[#FF6A55] transition-colors text-left cursor-pointer hover:underline underline-offset-4"
                 >
-                  <span>Receiving Foreign Payments</span>
+                  Receiving Foreign Payments
                 </button>
               </li>
             </ul>
@@ -276,14 +267,26 @@ export const Footer: React.FC<FooterProps> = ({ onSelectNiche, onSelectStrategy 
         </div>
 
         {/* Bottom Bar */}
-        <div className="mt-14 pt-8 border-t border-[#272b27] flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-stone-400">
-          <div className="flex flex-wrap items-center gap-2 text-stone-400">
-            <span>© {new Date().getFullYear()} TIZZITECH.</span>
+        <div className="mt-14 pt-8 border-t-2 border-black/20 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs font-medium text-white/80">
+          <div className="flex flex-wrap items-center gap-2">
+            <span>© 2026 TIZZITECH.</span>
             <span className="hidden sm:inline">·</span>
             <span>Dedicated to empowering young Nigerian talent.</span>
           </div>
 
           <div className="flex flex-wrap items-center gap-4">
+            <a 
+              href="/admin" 
+              onClick={(e) => {
+                e.preventDefault();
+                window.history.pushState(null, '', '/admin');
+                window.dispatchEvent(new PopStateEvent('popstate'));
+              }}
+              className="hover:text-[#D4F938] transition-colors font-mono font-bold"
+            >
+              Admin Portal
+            </a>
+            <span className="text-white/40 hidden sm:inline">|</span>
             <button
               id="footer-back-to-top-btn"
               type="button"
@@ -291,16 +294,12 @@ export const Footer: React.FC<FooterProps> = ({ onSelectNiche, onSelectStrategy 
                 trackClick('footer_back_to_top_btn', 'Footer Back to Top', 'Navigation');
                 window.scrollTo({ top: 0, behavior: 'smooth' });
               }}
-              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg bg-stone-800/80 hover:bg-stone-700/80 text-stone-300 hover:text-white border border-stone-700/70 transition-colors font-medium text-xs cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-black text-white hover:bg-stone-900 border-2 border-black shadow-neo-sm transition-all font-bold text-xs cursor-pointer active:translate-x-0.5"
               title="Scroll back to top of page"
             >
-              <ArrowUp className="w-3.5 h-3.5 text-stone-400" />
+              <ArrowUp className="w-3.5 h-3.5 text-white" />
               <span>Back to Top</span>
             </button>
-
-            <span className="text-stone-500 hidden sm:inline font-sans">
-              Built for the Nigerian Tech Community
-            </span>
           </div>
         </div>
       </div>
