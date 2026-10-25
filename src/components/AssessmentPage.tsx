@@ -849,7 +849,8 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               type="button"
               onClick={onBackToHome}
               className="cursor-pointer hover:opacity-90 transition-opacity text-left flex items-center"
-              title="TechNav Home"
+              title="Naija Path Home"
+              aria-label="Naija Path Home"
             >
               <TechNavLogo size="sm" />
             </button>

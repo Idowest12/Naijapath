@@ -216,14 +216,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
       // Server unreachable or static hosting (Vercel)
     }
 
-    // Resilient fallback: compute stats directly from local browser storage & submissions
     if (!serverSuccess) {
-      try {
-        const localStats = getLocalAnalyticsStats();
-        setStats(localStats);
-      } catch {
-        setStatsError('Failed to load telemetry statistics.');
-      }
+      setToken(null);
+      localStorage.removeItem(ADMIN_TOKEN_STORAGE_KEY);
+      setStats(null);
+      setStatsError('Unable to verify admin session with server. Please sign in.');
     }
 
     if (!silent) setIsLoadingStats(false);
@@ -240,7 +237,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
     setIsLoggingIn(true);
     setLoginError(null);
 
-    // 1. Try server verification first (if running on a server-backed environment)
     try {
       const res = await fetch('/api/admin/login', {
         method: 'POST',
@@ -249,7 +245,6 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
       });
 
       const contentType = res.headers.get('content-type') || '';
-      // Only process as JSON if response is actual JSON (not HTML from SPA rewrites)
       if (contentType.includes('application/json')) {
         const data = await res.json();
         if (data.success && data.token) {
@@ -259,7 +254,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
           setLoginError(null);
           setIsLoggingIn(false);
           return;
-        } else if (res.status === 401 || (data && !data.success)) {
+        } else {
           setLoginError(data.error || 'Invalid admin passkey.');
           if (data.lockedUntil) {
             setLockedUntil(data.lockedUntil);
@@ -267,24 +262,11 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
           setIsLoggingIn(false);
           return;
         }
+      } else {
+        setLoginError('Unable to reach admin authentication service.');
       }
     } catch {
-      // Server unreachable (e.g. static Vercel host), fallback to local passkey validation
-    }
-
-    // 2. Resilient Passkey Verification for static deployments (Vercel) & offline modes
-    const customPasskey = localStorage.getItem('naija_admin_custom_passkey');
-    const validPasskeys = ['naija-admin-2026'];
-    if (customPasskey) validPasskeys.push(customPasskey);
-
-    if (validPasskeys.includes(enteredPasskey)) {
-      const localToken = `admin_session_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
-      setToken(localToken);
-      localStorage.setItem(ADMIN_TOKEN_STORAGE_KEY, localToken);
-      setPasskeyInput('');
-      setLoginError(null);
-    } else {
-      setLoginError('Invalid admin passkey. Please check and try again.');
+      setLoginError('Server unreachable. Please check your network connection.');
     }
 
     setIsLoggingIn(false);
@@ -302,37 +284,40 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
       setPasskeyStatusMsg({ type: 'error', text: 'Passkeys do not match.' });
       return;
     }
-    if (newPasskey.length < 6) {
-      setPasskeyStatusMsg({ type: 'error', text: 'Passkey must be at least 6 characters.' });
+    if (newPasskey.length < 12) {
+      setPasskeyStatusMsg({ type: 'error', text: 'Passkey must be at least 12 characters.' });
       return;
     }
 
     setIsUpdatingPasskey(true);
     setPasskeyStatusMsg(null);
 
-    // Save in local storage immediately
-    localStorage.setItem('naija_admin_custom_passkey', newPasskey);
-
-    // Also attempt server sync in background if server exists
     try {
-      fetch('/api/admin/update-passkey', {
+      const res = await fetch('/api/admin/update-passkey', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'x-admin-token': token || '',
         },
         body: JSON.stringify({ newPasskey }),
-      }).catch(() => {});
-    } catch {}
-
-    setPasskeyStatusMsg({ type: 'success', text: 'Passkey successfully updated! Save it safely.' });
-    setNewPasskey('');
-    setConfirmPasskey('');
-    setTimeout(() => {
-      setShowPasskeyModal(false);
-      setPasskeyStatusMsg(null);
-    }, 2000);
-    setIsUpdatingPasskey(false);
+      });
+      const data = await res.json();
+      if (data.success) {
+        setPasskeyStatusMsg({ type: 'success', text: 'Passkey successfully updated!' });
+        setNewPasskey('');
+        setConfirmPasskey('');
+        setTimeout(() => {
+          setShowPasskeyModal(false);
+          setPasskeyStatusMsg(null);
+        }, 2000);
+      } else {
+        setPasskeyStatusMsg({ type: 'error', text: data.error || 'Cannot update passkey.' });
+      }
+    } catch {
+      setPasskeyStatusMsg({ type: 'error', text: 'Failed to contact server.' });
+    } finally {
+      setIsUpdatingPasskey(false);
+    }
   };
 
   const handleResetStats = async () => {
@@ -469,10 +454,7 @@ export const AdminPortal: React.FC<AdminPortalProps> = ({ onBackToSite }) => {
                 <div className="space-y-1">
                   <span className="font-bold font-display uppercase tracking-wider block">Protection Enabled</span>
                   <p className="text-black/75 font-sans">
-                    Five consecutive failed attempts trigger a temporary lockdown.
-                  </p>
-                  <p className="font-mono-tech text-[10px] mt-1 pt-1 border-t border-black/10 font-bold">
-                    Default Master Key: <span className="bg-[#FED74C] px-1 py-0.5 rounded border border-black">naija-admin-2026</span>
+                    Five consecutive failed attempts trigger a temporary lockdown. Configured securely via server environment variables.
                   </p>
                 </div>
               </div>

@@ -1,5 +1,6 @@
 import fs from 'fs';
 import path from 'path';
+import crypto from 'crypto';
 
 export interface AnalyticsEvent {
   type: 'pageview' | 'click' | 'assessment_start' | 'assessment_complete' | 'chat_query';
@@ -84,7 +85,7 @@ const DATA_FILE = path.join(DATA_DIR, 'analytics.json');
 function getDefaultData(): StoredAnalytics {
   return {
     version: 2,
-    adminPasskeyHash: process.env.ADMIN_SECRET_KEY || 'naija-admin-2026',
+    adminPasskeyHash: '',
     failedLoginAttempts: { count: 0, lockedUntil: 0 },
     totals: {
       pageviews: 0,
@@ -171,13 +172,23 @@ class AnalyticsManager {
       };
     }
 
-    const currentPasskey = this.data.adminPasskeyHash || process.env.ADMIN_SECRET_KEY || 'naija-admin-2026';
+    const configuredKey = process.env.ADMIN_SECRET_KEY;
+    if (!configuredKey || configuredKey.trim().length < 12) {
+      return {
+        success: false,
+        error: 'Admin portal is not configured. Set ADMIN_SECRET_KEY in server environment variables (minimum 12 characters).',
+      };
+    }
 
-    if (passkey.trim() === currentPasskey.trim()) {
+    const inputBuf = Buffer.from(passkey.trim(), 'utf-8');
+    const expectedBuf = Buffer.from(configuredKey.trim(), 'utf-8');
+    const matches = inputBuf.length === expectedBuf.length && crypto.timingSafeEqual(inputBuf, expectedBuf);
+
+    if (matches) {
       this.data.failedLoginAttempts = { count: 0, lockedUntil: 0 };
       this.scheduleSave();
 
-      const token = `adm_${Date.now()}_${Math.random().toString(36).substring(2, 15)}`;
+      const token = `adm_${Date.now()}_${crypto.randomBytes(32).toString('hex')}`;
       this.activeTokens.set(token, { expiresAt: now + 24 * 60 * 60 * 1000 });
       return { success: true, token };
     } else {
@@ -211,16 +222,14 @@ class AnalyticsManager {
     return true;
   }
 
-  public updatePasskey(token: string, newPasskey: string): { success: boolean; error?: string } {
+  public updatePasskey(token: string, _newPasskey: string): { success: boolean; error?: string } {
     if (!this.validateToken(token)) {
       return { success: false, error: 'Unauthorized session.' };
     }
-    if (!newPasskey || newPasskey.trim().length < 6) {
-      return { success: false, error: 'Passkey must be at least 6 characters.' };
-    }
-    this.data.adminPasskeyHash = newPasskey.trim();
-    this.scheduleSave();
-    return { success: true };
+    return {
+      success: false,
+      error: 'Passkey cannot be modified at runtime. Update ADMIN_SECRET_KEY in your hosting environment variables.',
+    };
   }
 
   // --- Real Telemetry Tracking ---
@@ -428,7 +437,6 @@ class AnalyticsManager {
       return { success: false, error: 'Unauthorized.' };
     }
     const clean = getDefaultData();
-    clean.adminPasskeyHash = this.data.adminPasskeyHash;
     this.data = clean;
     this.saveDataDirect(clean);
     return { success: true };

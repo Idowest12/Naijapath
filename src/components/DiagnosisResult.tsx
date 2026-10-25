@@ -88,7 +88,7 @@ export const DiagnosisResult: React.FC<DiagnosisResultProps> = ({
   // Handle WhatsApp Share
   const handleWhatsAppShare = () => {
     trackClick('result_share_whatsapp', 'Share on WhatsApp', 'Share');
-    const text = `Hey! I just took the TechNav diagnostic and my top tech match is ${activeNiche.title} (${activeScore}% match) based on my phone and schedule. Find your lane for free here: ${window.location.origin}`;
+    const text = `Hey! I just took the Naija Path diagnostic and my top tech match is ${activeNiche.title} (${activeScore}% match) based on my phone and schedule. Find your lane for free here: ${window.location.origin}`;
     window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(text)}`, '_blank');
   };
 

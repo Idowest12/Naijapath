@@ -119,10 +119,9 @@ export const Header: React.FC<HeaderProps> = ({
                 trackClick('header_start_assessment_btn', 'Take the quiz', 'CTA');
                 onStartAssessment?.();
               }}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-black text-white text-xs sm:text-sm font-bold hover:bg-[#13141F] active:translate-x-0.5 active:translate-y-0.5 transition-all shadow-neo-sm cursor-pointer border-2 border-black"
+              className="inline-flex items-center justify-center px-6 py-2.5 rounded-full bg-black text-white text-xs sm:text-sm font-bold hover:bg-stone-900 active:translate-x-0.5 active:translate-y-0.5 transition-all shadow-neo-sm cursor-pointer border-2 border-black"
             >
-              <span>Take the quiz</span>
-              <ArrowRight className="w-4 h-4 text-white" />
+              Take the quiz
             </button>
           </div>
 

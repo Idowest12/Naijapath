@@ -1,5 +1,6 @@
 import { GoogleGenAI } from '@google/genai';
 import { generateSmartMentorResponse } from '../src/utils/mentorEngine';
+import { allowRequest, getClientIp, sanitizeChatPayload } from '../src/utils/chatGuard';
 
 function buildGeminiContents(rawMessages: Array<{ role: string; content: string }>) {
   const sanitized: Array<{ role: 'user' | 'model'; parts: [{ text: string }] }> = [];
@@ -39,21 +40,14 @@ function buildGeminiContents(rawMessages: Array<{ role: string; content: string 
 }
 
 export default async function handler(req: any, res: any) {
-  // CORS setup
-  res.setHeader('Access-Control-Allow-Credentials', 'true');
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET,OPTIONS,PATCH,DELETE,POST,PUT');
-  res.setHeader(
-    'Access-Control-Allow-Headers',
-    'X-CSRF-Token, X-Requested-With, Accept, Accept-Version, Content-Length, Content-MD5, Content-Type, Date, X-Api-Version'
-  );
-
-  if (req.method === 'OPTIONS') {
-    return res.status(200).end();
-  }
+  // Same-origin only: the site calls this endpoint from its own domain, so no CORS headers are sent.
 
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
+  }
+
+  if (!allowRequest(getClientIp(req))) {
+    return res.status(429).json({ error: 'Too many messages. Please wait a few minutes and try again.' });
   }
 
   let lastUserMsg = "How do I start tech in Nigeria?";
@@ -61,12 +55,12 @@ export default async function handler(req: any, res: any) {
 
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
-    const messages = body?.messages;
-    context = body?.context;
-
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    const payload = sanitizeChatPayload(body);
+    if (!payload) {
       return res.status(400).json({ error: 'Invalid or empty messages array.' });
     }
+    const messages = payload.messages;
+    context = payload.context;
 
     const lastMsg = messages[messages.length - 1];
     if (lastMsg && lastMsg.content) {

@@ -4,6 +4,7 @@ import { createServer as createViteServer } from "vite";
 import { GoogleGenAI } from "@google/genai";
 import { analyticsManager, AnalyticsEvent } from "./server/analytics";
 import { generateSmartMentorResponse } from "./src/utils/mentorEngine";
+import { allowRequest, getClientIp, sanitizeChatPayload } from "./src/utils/chatGuard";
 
 const app = express();
 const PORT = 3000;
@@ -203,6 +204,9 @@ function buildGeminiContents(rawMessages: Array<{ role: string; content: string 
 
 // Chat endpoint for Naija Tech AI Mentor
 app.post("/api/chat", async (req, res) => {
+  if (!allowRequest(getClientIp(req))) {
+    return res.status(429).json({ error: "Too many messages. Please wait a few minutes and try again." });
+  }
   let lastUserMsg = "How do I start tech in Nigeria?";
   let context: any = undefined;
 
@@ -218,12 +222,12 @@ app.post("/api/chat", async (req, res) => {
       };
     };
 
-    const messages = body.messages;
-    context = body.context;
-
-    if (!messages || !Array.isArray(messages) || messages.length === 0) {
+    const payload = sanitizeChatPayload(body);
+    if (!payload) {
       return res.status(400).json({ error: "Invalid or empty messages array." });
     }
+    const messages = payload.messages;
+    context = payload.context;
 
     const lastMsg = messages[messages.length - 1];
     if (lastMsg && lastMsg.content) {

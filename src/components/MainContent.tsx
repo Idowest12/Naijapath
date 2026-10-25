@@ -46,37 +46,38 @@ export const MainContent: React.FC<MainContentProps> = ({
   return (
     <main id="main-content" className="flex-1 bg-[#FFFFFF] selection:bg-[#D4F938] selection:text-black">
       
-      {/* HERO SECTION MATCHING Figma Landing_page_1x_41e999df.png */}
-      <section id="hero-section" className="relative pt-10 sm:pt-16 pb-16 sm:pb-24 overflow-hidden border-b-2 border-black">
+      {/* HERO SECTION MATCHING image_a99f5170.png */}
+      <section id="hero-section" className="relative pt-8 sm:pt-14 pb-16 sm:pb-24 overflow-hidden border-b-2 border-black bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
             
             {/* Left Copy Column */}
             <div className="lg:col-span-7 space-y-6 text-left">
               
               {/* Eyebrow tag */}
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full border-2 border-black bg-white shadow-neo-sm">
-                <span className="w-2 h-2 rounded-full bg-[#D4F938] border border-black"></span>
-                <span className="text-xs font-mono font-bold tracking-wider uppercase text-black">
+              <div>
+                <div className="inline-block px-4 py-1.5 rounded-full border-2 border-black bg-[#FED74C] text-xs font-mono font-bold tracking-wider uppercase text-black shadow-neo-sm">
                   MADE FOR NIGERIAN BEGINNERS
-                </span>
+                </div>
               </div>
 
-              {/* Massive Headline */}
-              <h1 className="font-display text-4xl sm:text-6xl lg:text-7xl font-black text-black leading-[1.08] tracking-tight">
-                Find your lane in{' '}
-                <span className="inline-block bg-[#D4F938] px-3 sm:px-4 py-0.5 rounded-xl border-2 border-black shadow-neo-sm rotate-[-1deg]">
+              {/* Headline */}
+              <h1 className="font-display text-5xl sm:text-7xl lg:text-8xl font-black text-black leading-[1.02] tracking-tight">
+                Find your<br />
+                lane in<br />
+                <span className="inline-block bg-[#D4F938] border-2 border-black px-3 sm:px-4 py-0.5 rounded-md shadow-[2px_2px_0px_#000] mt-1">
                   tech.
                 </span>
               </h1>
 
               {/* Subtitle */}
-              <p className="text-base sm:text-xl text-stone-700 font-sans max-w-xl font-medium leading-relaxed">
+              <p className="text-base sm:text-xl text-stone-800 font-sans max-w-xl font-medium leading-relaxed">
                 3 minutes. No jargon. A path that fits your phone, your data and your power supply.
               </p>
 
-              {/* CTAs */}
-              <div className="pt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-3.5 max-w-md sm:max-w-none">
+              {/* The Two Primary Action Buttons */}
+              <div className="pt-2 flex flex-col items-start gap-3.5 w-full sm:w-auto">
+                {/* Button 1: Take the 3-min quiz */}
                 <button
                   id="hero-start-quiz-btn"
                   type="button"
@@ -84,12 +85,13 @@ export const MainContent: React.FC<MainContentProps> = ({
                     trackClick('hero_start_quiz_btn', 'Take the 3-min quiz', 'CTA');
                     onStartAssessment?.();
                   }}
-                  className="inline-flex items-center justify-center gap-3 px-6 sm:px-8 py-4 rounded-full bg-black text-white font-display font-bold text-base sm:text-lg border-2 border-black shadow-neo hover:translate-x-0.5 hover:translate-y-0.5 active:translate-x-1 active:translate-y-1 transition-all cursor-pointer"
+                  className="group inline-flex items-center justify-between gap-4 px-7 sm:px-8 py-4 rounded-2xl bg-[#0F1015] text-white font-display font-bold text-base sm:text-lg border-2 border-black shadow-[5px_5px_0px_0px_#5D45FD] hover:translate-x-0.5 hover:translate-y-0.5 hover:shadow-[3px_3px_0px_0px_#5D45FD] active:translate-x-1.5 active:translate-y-1.5 active:shadow-none transition-all cursor-pointer w-full sm:w-auto sm:min-w-[270px]"
                 >
                   <span>Take the 3-min quiz</span>
-                  <ArrowRight className="w-5 h-5 text-white" />
+                  <span className="text-xl leading-none font-sans font-bold group-hover:translate-x-1 transition-transform">&rarr;</span>
                 </button>
 
+                {/* Button 2: Ask Mentor Tizzi (AI Mentor) */}
                 {onOpenChatbot && (
                   <button
                     id="hero-ask-mentor-btn"
@@ -98,9 +100,9 @@ export const MainContent: React.FC<MainContentProps> = ({
                       trackClick('hero_ask_mentor_btn', 'Ask Mentor Tizzi', 'AI Mentor');
                       onOpenChatbot();
                     }}
-                    className="inline-flex items-center justify-center gap-2.5 px-6 py-4 rounded-full bg-white text-black font-display font-bold text-base border-2 border-black shadow-neo hover:bg-stone-50 active:translate-x-0.5 active:translate-y-0.5 transition-all cursor-pointer"
+                    className="inline-flex items-center justify-center px-7 sm:px-8 py-3.5 rounded-2xl bg-white text-black font-display font-bold text-base sm:text-lg border-2 border-black shadow-none hover:bg-stone-50 active:translate-x-0.5 active:translate-y-0.5 transition-all cursor-pointer w-full sm:w-auto sm:min-w-[270px]"
+                    title="Ask your AI Mentor - Mentor Tizzi"
                   >
-                    <Bot className="w-5 h-5 text-black" />
                     <span>Ask Mentor Tizzi</span>
                   </button>
                 )}
@@ -120,83 +122,81 @@ export const MainContent: React.FC<MainContentProps> = ({
               </div>
             </div>
 
-            {/* Right Hero Graphic: Tilted Card Preview matching Figma */}
-            <div className="lg:col-span-5 flex justify-center">
-              <div className="relative w-full max-w-sm sm:max-w-md transform rotate-[2deg] hover:rotate-0 transition-transform duration-300">
+            {/* Right Hero Graphic: Matching image_a99f5170.png White Match Card */}
+            <div className="lg:col-span-5 flex flex-col items-center">
+              <div className="relative w-full max-w-sm sm:max-w-md pt-4">
                 
-                {/* Purple Result Card Mockup */}
-                <div className="bg-[#5D45FD] text-white rounded-3xl border-2 border-black shadow-neo-xl p-6 sm:p-7 relative overflow-hidden">
-                  
-                  {/* Red Task Ribbon */}
-                  <div className="inline-block bg-[#FF6A55] text-white px-3 py-1 rounded-full text-xs font-mono font-bold border border-black shadow-neo-sm mb-4">
-                    Day-One task: 20 mins
+                {/* Coral Day-One Ribbon on top-right */}
+                <div className="absolute top-0 right-4 sm:right-6 bg-[#FF6A55] text-black border-2 border-black rounded-xl px-4 py-1.5 text-xs font-mono font-bold shadow-neo-sm rotate-[4deg] z-10">
+                  Day-One task: 20 mins
+                </div>
+
+                {/* White Result Card Mockup */}
+                <div className="bg-white text-black rounded-3xl border-2 border-black shadow-[8px_8px_0px_0px_#111116] p-7 sm:p-8 relative">
+                  <div className="text-xs font-mono font-bold tracking-wider text-stone-500 uppercase mb-3">
+                    YOUR MATCH
                   </div>
 
-                  <h3 className="font-display text-2xl sm:text-3xl font-black leading-tight tracking-tight mb-5">
+                  <h3 className="font-display text-2xl sm:text-3xl font-black leading-tight tracking-tight mb-5 text-black">
                     Social Media &amp; Community Ops
                   </h3>
 
-                  {/* Circular Match Gauge + Bars */}
-                  <div className="flex items-center gap-5 mb-6">
-                    {/* Gauge */}
-                    <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-[#D4F938] border-2 border-black flex flex-col items-center justify-center text-black shrink-0 shadow-neo-sm">
-                      <span className="font-display text-2xl sm:text-3xl font-black leading-none">92%</span>
-                      <span className="text-[10px] font-mono font-bold uppercase tracking-wider">fit</span>
+                  {/* Score */}
+                  <div className="flex items-baseline gap-2 mb-6">
+                    <span className="font-display text-5xl sm:text-6xl font-black text-[#5D45FD] leading-none">
+                      92%
+                    </span>
+                    <span className="text-base sm:text-lg font-bold text-stone-700">fit</span>
+                  </div>
+
+                  {/* Progress Bars */}
+                  <div className="space-y-4 mb-6">
+                    <div>
+                      <div className="text-xs font-mono font-semibold text-stone-800 mb-1">
+                        Aptitude
+                      </div>
+                      <div className="w-full bg-stone-100 h-3.5 rounded-full overflow-hidden border-2 border-black p-0.5">
+                        <div className="bg-[#5D45FD] h-full rounded-full" style={{ width: '92%' }}></div>
+                      </div>
                     </div>
 
-                    {/* Progress Bars */}
-                    <div className="flex-1 space-y-2">
-                      <div>
-                        <div className="flex justify-between text-[11px] font-mono font-semibold text-white/90 mb-0.5">
-                          <span>Aptitude</span>
-                          <span>95%</span>
-                        </div>
-                        <div className="w-full bg-black/20 h-2 rounded-full overflow-hidden border border-black/30">
-                          <div className="bg-[#FED74C] h-full rounded-full" style={{ width: '95%' }}></div>
-                        </div>
+                    <div>
+                      <div className="text-xs font-mono font-semibold text-stone-800 mb-1">
+                        Your resources
                       </div>
-
-                      <div>
-                        <div className="flex justify-between text-[11px] font-mono font-semibold text-white/90 mb-0.5">
-                          <span>Your resources</span>
-                          <span>90%</span>
-                        </div>
-                        <div className="w-full bg-black/20 h-2 rounded-full overflow-hidden border border-black/30">
-                          <div className="bg-[#60C6F8] h-full rounded-full" style={{ width: '90%' }}></div>
-                        </div>
+                      <div className="w-full bg-stone-100 h-3.5 rounded-full overflow-hidden border-2 border-black p-0.5">
+                        <div className="bg-[#D4F938] h-full rounded-full" style={{ width: '88%' }}></div>
                       </div>
+                    </div>
 
-                      <div>
-                        <div className="flex justify-between text-[11px] font-mono font-semibold text-white/90 mb-0.5">
-                          <span>Market demand</span>
-                          <span>91%</span>
-                        </div>
-                        <div className="w-full bg-black/20 h-2 rounded-full overflow-hidden border border-black/30">
-                          <div className="bg-[#FF6A55] h-full rounded-full" style={{ width: '91%' }}></div>
-                        </div>
+                    <div>
+                      <div className="text-xs font-mono font-semibold text-stone-800 mb-1">
+                        Market demand
+                      </div>
+                      <div className="w-full bg-stone-100 h-3.5 rounded-full overflow-hidden border-2 border-black p-0.5">
+                        <div className="bg-[#FF6A55] h-full rounded-full" style={{ width: '82%' }}></div>
                       </div>
                     </div>
                   </div>
 
                   {/* Card bottom pill badge */}
-                  <div className="pt-3 border-t border-white/20 flex items-center justify-between">
-                    <span className="inline-block bg-black text-white px-3 py-1 rounded-full text-xs font-mono font-bold border border-black">
+                  <div className="pt-2 flex items-center justify-between">
+                    <span className="inline-block bg-[#D4F938] text-black border-2 border-black rounded-full px-4 py-1 text-xs font-mono font-bold">
                       100% phone viable
                     </span>
                     <button
                       type="button"
                       onClick={() => onStartAssessment?.()}
-                      className="text-xs font-display font-bold text-[#D4F938] hover:underline flex items-center gap-1 cursor-pointer"
+                      className="text-xs font-display font-bold text-[#5D45FD] hover:underline flex items-center gap-1 cursor-pointer"
                     >
                       <span>Take quiz to see yours</span>
                       <ArrowRight className="w-3.5 h-3.5" />
                     </button>
                   </div>
-
                 </div>
 
-                {/* Decorative floating stickers */}
-                <div className="absolute -bottom-4 -left-3 bg-[#FED74C] text-black border-2 border-black rounded-xl px-3 py-1 text-xs font-mono font-bold shadow-neo rotate-[-6deg]">
+                {/* Decorative floating sticker */}
+                <div className="absolute -bottom-3 -left-3 bg-[#FED74C] text-black border-2 border-black rounded-xl px-3 py-1 text-xs font-mono font-bold shadow-neo rotate-[-5deg]">
                   No coding needed
                 </div>
               </div>
