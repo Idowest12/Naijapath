@@ -74,7 +74,13 @@ export const PathwayDetailPage: React.FC<PathwayDetailPageProps> = ({
               <button
                 id="pathway-back-btn"
                 type="button"
-                onClick={onBack}
+                onClick={() => {
+                  if (window.history.state && window.history.length > 1) {
+                    window.history.back();
+                  } else {
+                    onBack();
+                  }
+                }}
                 className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white hover:bg-[#D4F938] text-black border-2 border-black text-xs sm:text-sm font-display font-extrabold transition-all shadow-neo-sm cursor-pointer active:translate-x-0.5 active:translate-y-0.5"
                 title="Return to home and all pathways"
               >

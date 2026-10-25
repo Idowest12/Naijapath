@@ -84,14 +84,31 @@ export default function App() {
     });
   };
 
-  // Sync with browser URL popstate & hashchange (e.g. /admin, #admin, browser Back/Forward)
+  // Sync with browser URL popstate & hashchange (e.g. /admin, #admin, browser Back/Forward & phone swipe gestures)
   useEffect(() => {
-    const handleUrlChange = () => {
+    // Anchor initial entry in browser history if no state exists yet
+    if (typeof window !== 'undefined' && !window.history.state) {
+      window.history.replaceState({ ...getInitialViewState(), root: true }, '', window.location.href);
+    }
+
+    const handleUrlChange = (event: PopStateEvent) => {
+      // If AI Mentor chatbot was open and user swiped back or pressed phone back, close the modal first
+      if (isChatbotOpen && (!event.state || !event.state.modal)) {
+        setIsChatbotOpen(false);
+        setInitialChatbotPrompt(undefined);
+        return;
+      }
+      if (event.state?.modal === 'chatbot') {
+        setIsChatbotOpen(true);
+        return;
+      }
+
       const next = getInitialViewState();
       setCurrentView(next.view);
       if (next.pathwayId) {
         setSelectedPathwayId(next.pathwayId);
       }
+      trackPageView(window.location.pathname || '/');
     };
 
     window.addEventListener('popstate', handleUrlChange);
@@ -100,7 +117,7 @@ export default function App() {
       window.removeEventListener('popstate', handleUrlChange);
       window.removeEventListener('hashchange', handleUrlChange);
     };
-  }, []);
+  }, [isChatbotOpen]);
 
   // Discreet Admin Shortcut for site administrators (Ctrl + Shift + A or Cmd + Shift + A)
   useEffect(() => {
@@ -108,11 +125,9 @@ export default function App() {
       if ((e.ctrlKey || e.metaKey) && e.shiftKey && (e.key === 'A' || e.key === 'a')) {
         e.preventDefault();
         if (currentView === 'admin') {
-          window.history.pushState(null, '', '/');
-          setCurrentView('home');
+          handleBackToHome();
         } else {
-          window.history.pushState(null, '', '/admin');
-          setCurrentView('admin');
+          handleNavigateAdmin();
         }
       }
     };
@@ -149,21 +164,32 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleStartAssessment = () => {
+  const handleStartAssessment = (stage?: unknown) => {
     trackClick('start_assessment_btn', 'Start Career Assessment', 'CTA');
-    window.history.pushState(null, '', '/assessment');
+    try {
+      if (typeof stage === 'string') sessionStorage.setItem('technav_start_stage', stage);
+    } catch {}
+    window.history.pushState({ view: 'assessment', fromAppNav: true }, '', '/assessment?step=1&q=0');
     setCurrentView('assessment');
+    trackPageView('/assessment');
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleBackToHome = () => {
-    window.history.pushState(null, '', '/');
-    setCurrentView('home');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    trackClick('app_back_to_home_btn', 'Back to Home', 'Navigation');
+    // If we came from an in-app navigation, use browser back so forward button/gesture remains enabled!
+    if (window.history.state && (window.history.state.fromAppNav || window.history.state.fromAssessmentNav) && window.history.length > 1) {
+      window.history.back();
+    } else {
+      window.history.pushState({ view: 'home', root: true }, '', '/');
+      setCurrentView('home');
+      trackPageView('/');
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
   };
 
   const handleNavigateAdmin = () => {
-    window.history.pushState(null, '', '/admin');
+    window.history.pushState({ view: 'admin', fromAppNav: true }, '', '/admin');
     setCurrentView('admin');
     trackPageView('/admin');
     window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -173,22 +199,28 @@ export default function App() {
     trackClick('open_tizzi_chatbot_btn', 'Open Tizzi AI Mentor', 'AI Mentor');
     if (context) setChatbotContext(context);
     if (prompt) setInitialChatbotPrompt(prompt);
+    // Push modal state so user's phone back gesture closes the chatbot modal first
+    window.history.pushState({ ...(window.history.state || {}), modal: 'chatbot' }, '', window.location.href);
     setIsChatbotOpen(true);
   };
 
   const handleCloseChatbot = () => {
-    setIsChatbotOpen(false);
-    setInitialChatbotPrompt(undefined);
+    if (window.history.state?.modal === 'chatbot') {
+      window.history.back();
+    } else {
+      setIsChatbotOpen(false);
+      setInitialChatbotPrompt(undefined);
+    }
   };
 
   const handleNavigateSection = (sectionId: string) => {
     if (currentView !== 'home') {
-      window.history.pushState(null, '', '/');
+      window.history.pushState({ view: 'home', fromAppNav: true }, '', '/');
       setCurrentView('home');
       setTimeout(() => {
         const el = document.getElementById(sectionId);
         el?.scrollIntoView({ behavior: 'smooth' });
-      }, 50);
+      }, 60);
     } else {
       const el = document.getElementById(sectionId);
       el?.scrollIntoView({ behavior: 'smooth' });
@@ -198,8 +230,9 @@ export default function App() {
   const handleNavigateToPathway = (nicheId: string) => {
     trackClick(`navigate_to_pathway_${nicheId}`, `View Pathway ${nicheId}`, 'Navigation');
     setSelectedPathwayId(nicheId);
-    window.history.pushState(null, '', `/pathway/${nicheId}`);
+    window.history.pushState({ view: 'pathway', pathwayId: nicheId, fromAppNav: true }, '', `/pathway/${nicheId}`);
     setCurrentView('pathway');
+    trackPageView(`/pathway/${nicheId}`);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -209,7 +242,7 @@ export default function App() {
 
   const handleSelectStrategyFromFooter = (strategyKey: string) => {
     if (currentView !== 'home') {
-      window.history.pushState(null, '', '/');
+      window.history.pushState({ view: 'home', fromAppNav: true }, '', '/');
       setCurrentView('home');
     }
     setTargetStrategyKey(strategyKey);

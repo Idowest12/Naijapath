@@ -256,6 +256,9 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
     });
     setDiagnosisResult(computed);
     setCurrentStep(5);
+    try {
+      window.history.pushState({ view: 'assessment', step: 5, fromAssessmentNav: true }, '', '/assessment?step=5');
+    } catch {}
   };
 
   // Step 1 Questions: Conversational, relatable, psychological
@@ -731,6 +734,9 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
       preferredDailyActivity: ''
     });
     setDiagnosisResult(null);
+    try {
+      window.history.replaceState({ view: 'assessment', step: 1, q: 0, fromAssessmentNav: true }, '', '/assessment?step=1&q=0');
+    } catch {}
     setCurrentStep(1);
     setStep1SubIndex(0);
     setConstraintSubIndex(0);
@@ -802,23 +808,119 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
     return '';
   };
 
+  // Helper to construct URL for assessment step and question
+  const getAssessmentUrl = (step: number, q: number) => {
+    return step >= 4 ? `/assessment?step=${step}` : `/assessment?step=${step}&q=${q}`;
+  };
+
+  // Push new question state to browser history so phone back/forward controls work seamlessly
+  const pushStepState = (nextStep: number, nextSubIndex: number = 0) => {
+    setValidationError(null);
+    const url = getAssessmentUrl(nextStep, nextSubIndex);
+    try {
+      window.history.pushState(
+        { view: 'assessment', step: nextStep, q: nextSubIndex, fromAssessmentNav: true },
+        '',
+        url
+      );
+    } catch {}
+    setCurrentStep(nextStep);
+    if (nextStep === 1) setStep1SubIndex(nextSubIndex);
+    else if (nextStep === 2) setConstraintSubIndex(nextSubIndex);
+    else if (nextStep === 3) setScenarioSubIndex(nextSubIndex);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // Handle navigating backward seamlessly with browser history
+  const handleNavigateBack = (isAtFirstQuestion: boolean) => {
+    setValidationError(null);
+    if (isAtFirstQuestion) {
+      onBackToHome();
+    } else {
+      // If browser history has our assessment entries, window.history.back() will step backward
+      // and keep browser forward navigation enabled!
+      if (window.history.state?.fromAssessmentNav) {
+        window.history.back();
+      } else {
+        // Direct entry fallback
+        if (currentStep === 1 && safeStep1Index > 0) {
+          pushStepState(1, safeStep1Index - 1);
+        } else if (currentStep === 2) {
+          if (safeConstraintIndex > 0) pushStepState(2, safeConstraintIndex - 1);
+          else pushStepState(1, step1Questions.length - 1);
+        } else if (currentStep === 3) {
+          if (safeScenarioIndex > 0) pushStepState(3, safeScenarioIndex - 1);
+          else pushStepState(2, constraintQuestions.length - 1);
+        } else if (currentStep === 4) {
+          pushStepState(3, SCENARIO_QUESTIONS.length - 1);
+        } else if (currentStep === 5) {
+          pushStepState(4, 0);
+        }
+      }
+    }
+  };
+
+  // Listen for browser popstate (phone gesture swipe back/forward, phone hardware back button, browser arrow buttons)
+  useEffect(() => {
+    // If URL has step/q params upon mounting, sync with them
+    const params = new URLSearchParams(window.location.search);
+    const stepParam = params.get('step');
+    const qParam = params.get('q');
+    if (stepParam) {
+      const parsedStep = parseInt(stepParam, 10);
+      const parsedQ = qParam !== null ? parseInt(qParam, 10) : 0;
+      if (parsedStep >= 1 && parsedStep <= 5) {
+        setCurrentStep(parsedStep);
+        if (parsedStep === 1) setStep1SubIndex(Math.max(0, Math.min(step1Questions.length - 1, parsedQ)));
+        else if (parsedStep === 2) setConstraintSubIndex(Math.max(0, Math.min(constraintQuestions.length - 1, parsedQ)));
+        else if (parsedStep === 3) setScenarioSubIndex(Math.max(0, Math.min(SCENARIO_QUESTIONS.length - 1, parsedQ)));
+      }
+    } else {
+      // Anchor current question into history
+      const initialSub = currentStep === 1 ? safeStep1Index : currentStep === 2 ? safeConstraintIndex : safeScenarioIndex;
+      try {
+        window.history.replaceState(
+          { view: 'assessment', step: currentStep, q: initialSub, fromAssessmentNav: true },
+          '',
+          getAssessmentUrl(currentStep, initialSub)
+        );
+      } catch {}
+    }
+
+    const handlePopState = (e: PopStateEvent) => {
+      // If user navigated outside /assessment (e.g. back to home /), let App.tsx handle it
+      if (window.location.pathname !== '/assessment') return;
+
+      const p = new URLSearchParams(window.location.search);
+      const s = p.get('step');
+      const q = p.get('q');
+      const targetStep = s ? parseInt(s, 10) : (e.state?.step ?? 1);
+      const targetQ = q !== null ? parseInt(q, 10) : (e.state?.q ?? 0);
+
+      setValidationError(null);
+      if (targetStep >= 1 && targetStep <= 5) {
+        setCurrentStep(targetStep);
+        if (targetStep === 1) setStep1SubIndex(Math.max(0, Math.min(step1Questions.length - 1, targetQ)));
+        else if (targetStep === 2) setConstraintSubIndex(Math.max(0, Math.min(constraintQuestions.length - 1, targetQ)));
+        else if (targetStep === 3) setScenarioSubIndex(Math.max(0, Math.min(SCENARIO_QUESTIONS.length - 1, targetQ)));
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const handleJumpToGlobalIndex = (globalIdx: number) => {
     setValidationError(null);
     if (globalIdx >= 0 && globalIdx < 7) {
-      setCurrentStep(1);
-      setStep1SubIndex(globalIdx);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      pushStepState(1, globalIdx);
     } else if (globalIdx >= 7 && globalIdx < 12) {
-      setCurrentStep(2);
-      setConstraintSubIndex(globalIdx - 7);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      pushStepState(2, globalIdx - 7);
     } else if (globalIdx >= 12 && globalIdx < 18) {
-      setCurrentStep(3);
-      setScenarioSubIndex(globalIdx - 12);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      pushStepState(3, globalIdx - 12);
     } else if (globalIdx === 18) {
-      setCurrentStep(4);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      pushStepState(4, 0);
     }
   };
 
@@ -837,9 +939,9 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
           <div className="flex items-center gap-2.5 sm:gap-3.5">
             <button
               type="button"
-              onClick={onBackToHome}
+              onClick={() => handleNavigateBack(currentStep === 1 && safeStep1Index === 0)}
               className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border-2 border-black bg-white text-black hover:bg-stone-50 transition-all text-xs sm:text-sm font-bold shadow-neo-sm cursor-pointer"
-              title="Return to Guide"
+              title="Return or Step Back"
             >
               <ArrowLeft className="w-4 h-4" />
               <span className="hidden sm:inline">Back</span>
@@ -979,30 +1081,20 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
                 }
                 setValidationError(null);
                 if (safeStep1Index < step1Questions.length - 1) {
-                  setStep1SubIndex(safeStep1Index + 1);
+                  pushStepState(1, safeStep1Index + 1);
                 } else {
                   // Move directly into Step 2 without interstitial stop
-                  setCurrentStep(2);
-                  setConstraintSubIndex(0);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  pushStepState(2, 0);
                 }
               }}
-              onPrev={() => {
-                setValidationError(null);
-                if (safeStep1Index > 0) {
-                  setStep1SubIndex(safeStep1Index - 1);
-                } else {
-                  onBackToHome();
-                }
-              }}
+              onPrev={() => handleNavigateBack(safeStep1Index === 0)}
               isFirst={safeStep1Index === 0}
               isLast={safeStep1Index === step1Questions.length - 1}
               nextButtonLabel={safeStep1Index === step1Questions.length - 1 ? 'Go to Section 2' : 'Next Question'}
               prevButtonLabel={safeStep1Index === 0 ? 'Home' : 'Back'}
               answeredIndices={step1Questions.map(q => Boolean(biodata[q.field]))}
               onJumpToQuestion={(idx) => {
-                setValidationError(null);
-                setStep1SubIndex(Math.max(0, Math.min(step1Questions.length - 1, idx)));
+                pushStepState(1, Math.max(0, Math.min(step1Questions.length - 1, idx)));
               }}
               autoAdvanceOnSelect={true}
             />
@@ -1035,32 +1127,20 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
                 }
                 setValidationError(null);
                 if (safeConstraintIndex < constraintQuestions.length - 1) {
-                  setConstraintSubIndex(safeConstraintIndex + 1);
+                  pushStepState(2, safeConstraintIndex + 1);
                 } else {
                   // Move directly into Step 3 without interstitial stop
-                  setCurrentStep(3);
-                  setScenarioSubIndex(0);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  pushStepState(3, 0);
                 }
               }}
-              onPrev={() => {
-                setValidationError(null);
-                if (safeConstraintIndex > 0) {
-                  setConstraintSubIndex(safeConstraintIndex - 1);
-                } else {
-                  setCurrentStep(1);
-                  setStep1SubIndex(step1Questions.length - 1);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-              }}
+              onPrev={() => handleNavigateBack(false)}
               isFirst={false}
               isLast={safeConstraintIndex === constraintQuestions.length - 1}
               nextButtonLabel={safeConstraintIndex === constraintQuestions.length - 1 ? 'Go to Scenarios' : 'Next Question'}
               prevButtonLabel={safeConstraintIndex === 0 ? 'Section 1' : 'Back'}
               answeredIndices={constraintQuestions.map(q => Boolean(constraints[q.field]))}
               onJumpToQuestion={(idx) => {
-                setValidationError(null);
-                setConstraintSubIndex(Math.max(0, Math.min(constraintQuestions.length - 1, idx)));
+                pushStepState(2, Math.max(0, Math.min(constraintQuestions.length - 1, idx)));
               }}
               autoAdvanceOnSelect={true}
             />
@@ -1098,7 +1178,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
                 }
                 setValidationError(null);
                 if (safeScenarioIndex < SCENARIO_QUESTIONS.length - 1) {
-                  setScenarioSubIndex(safeScenarioIndex + 1);
+                  pushStepState(3, safeScenarioIndex + 1);
                 } else {
                   // Check if all scenario questions are answered
                   const answeredAll = SCENARIO_QUESTIONS.every(q => scenarioAnswers[q.id] !== undefined);
@@ -1107,28 +1187,17 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
                     return;
                   }
                   // Move directly into Step 4
-                  setCurrentStep(4);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                  pushStepState(4, 0);
                 }
               }}
-              onPrev={() => {
-                setValidationError(null);
-                if (safeScenarioIndex > 0) {
-                  setScenarioSubIndex(safeScenarioIndex - 1);
-                } else {
-                  setCurrentStep(2);
-                  setConstraintSubIndex(constraintQuestions.length - 1);
-                  window.scrollTo({ top: 0, behavior: 'smooth' });
-                }
-              }}
+              onPrev={() => handleNavigateBack(false)}
               isFirst={false}
               isLast={safeScenarioIndex === SCENARIO_QUESTIONS.length - 1}
               nextButtonLabel={safeScenarioIndex === SCENARIO_QUESTIONS.length - 1 ? 'Go to Final Step' : 'Next Question'}
               prevButtonLabel={safeScenarioIndex === 0 ? 'Section 2' : 'Back'}
               answeredIndices={SCENARIO_QUESTIONS.map(q => scenarioAnswers[q.id] !== undefined)}
               onJumpToQuestion={(idx) => {
-                setValidationError(null);
-                setScenarioSubIndex(Math.max(0, Math.min(SCENARIO_QUESTIONS.length - 1, idx)));
+                pushStepState(3, Math.max(0, Math.min(SCENARIO_QUESTIONS.length - 1, idx)));
               }}
               autoAdvanceOnSelect={true}
             />
@@ -1303,11 +1372,7 @@ export const AssessmentPage: React.FC<AssessmentPageProps> = ({
               <div className="pt-6 border-t-2 border-black/10 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <button
                   type="button"
-                  onClick={() => {
-                    setCurrentStep(3);
-                    setScenarioSubIndex(SCENARIO_QUESTIONS.length - 1);
-                    window.scrollTo({ top: 0, behavior: 'smooth' });
-                  }}
+                  onClick={() => handleNavigateBack(false)}
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-1.5 px-4 py-3 rounded-xl border-2 border-black bg-white text-black text-xs sm:text-sm font-bold shadow-neo-sm hover:bg-stone-50 transition-all cursor-pointer"
                 >
                   <ArrowLeft className="w-4 h-4" />

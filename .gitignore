@@ -8,4 +8,5 @@ bun.lock
 bun.lockb
 .env*
 !.env.example
-data/
+# Ignore root data folder for server runtime JSON storage, but keep src/data/
+/data/
