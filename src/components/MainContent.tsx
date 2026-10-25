@@ -17,8 +17,10 @@ import {
   Sparkles,
   ChevronRight
 } from 'lucide-react';
+import { motion } from 'motion/react';
 import { ALL_NICHES } from '../data/nichesData';
 import { trackClick } from '../utils/analytics';
+import { ScrollExperience } from './ScrollExperience';
 
 interface MainContentProps {
   onStartAssessment?: () => void;
@@ -44,39 +46,68 @@ export const MainContent: React.FC<MainContentProps> = ({
   });
 
   return (
-    <main id="main-content" className="flex-1 bg-[#FFFFFF] selection:bg-[#D4F938] selection:text-black">
+    <main id="main-content" className="flex-1 bg-[#FFFFFF] selection:bg-[#D4F938] selection:text-black relative">
       
-      {/* HERO SECTION MATCHING image_a99f5170.png */}
+      {/* Scroll Progress Bar and Belonging / Affirmation Companion */}
+      <ScrollExperience 
+        onOpenChatbot={onOpenChatbot} 
+        onStartAssessment={onStartAssessment} 
+      />
+
+      {/* HERO SECTION MATCHING image_a99f5170.png with Tactile Scroll & Motion Feedback */}
       <section id="hero-section" className="relative pt-8 sm:pt-14 pb-16 sm:pb-24 overflow-hidden border-b-2 border-black bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-center">
             
             {/* Left Copy Column */}
-            <div className="lg:col-span-7 space-y-6 text-left">
+            <motion.div 
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+              className="lg:col-span-7 space-y-6 text-left"
+            >
               
               {/* Eyebrow tag */}
-              <div>
+              <motion.div
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ duration: 0.4, delay: 0.05 }}
+              >
                 <div className="inline-block px-4 py-1.5 rounded-full border-2 border-black bg-[#FED74C] text-xs font-mono font-bold tracking-wider uppercase text-black shadow-neo-sm">
                   MADE FOR NIGERIAN BEGINNERS
                 </div>
-              </div>
+              </motion.div>
 
               {/* Headline */}
-              <h1 className="font-display text-5xl sm:text-7xl lg:text-8xl font-black text-black leading-[1.02] tracking-tight">
-                Find your<br />
-                lane in<br />
-                <span className="inline-block bg-[#D4F938] border-2 border-black px-3 sm:px-4 py-0.5 rounded-md shadow-[2px_2px_0px_#000] mt-1">
-                  tech.
+              <motion.h1 
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.55, delay: 0.12 }}
+                className="font-display text-4xl sm:text-6xl lg:text-7xl font-black text-black leading-[1.08] tracking-tight"
+              >
+                Want to go into Tech and a little confused?{' '}
+                <span className="inline-block bg-[#D4F938] border-2 border-black px-3 sm:px-4 py-0.5 rounded-md shadow-[2px_2px_0px_#000] mt-1 sm:mt-2">
+                  Say no more.
                 </span>
-              </h1>
+              </motion.h1>
 
               {/* Subtitle */}
-              <p className="text-base sm:text-xl text-stone-800 font-sans max-w-xl font-medium leading-relaxed">
-                3 minutes. No jargon. A path that fits your phone, your data and your power supply.
-              </p>
+              <motion.p 
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.2 }}
+                className="text-base sm:text-xl text-stone-800 font-sans max-w-xl font-medium leading-relaxed"
+              >
+                With just 3 mins, honestly, you can find a way.
+              </motion.p>
 
               {/* The Two Primary Action Buttons */}
-              <div className="pt-2 flex flex-col items-start gap-3.5 w-full sm:w-auto">
+              <motion.div 
+                initial={{ opacity: 0, y: 16 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: 0.28 }}
+                className="pt-2 flex flex-col items-start gap-3.5 w-full sm:w-auto"
+              >
                 {/* Button 1: Take the 3-min quiz */}
                 <button
                   id="hero-start-quiz-btn"
@@ -106,10 +137,15 @@ export const MainContent: React.FC<MainContentProps> = ({
                     <span>Ask Mentor Tizzi</span>
                   </button>
                 )}
-              </div>
+              </motion.div>
 
               {/* Bottom quick value markers */}
-              <div className="pt-4 flex flex-wrap items-center gap-4 text-xs font-mono font-bold text-stone-600">
+              <motion.div 
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{ duration: 0.5, delay: 0.4 }}
+                className="pt-4 flex flex-wrap items-center gap-4 text-xs font-mono font-bold text-stone-600"
+              >
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#5D45FD]"></span> 14 Pathways Analyzed
                 </span>
@@ -119,17 +155,34 @@ export const MainContent: React.FC<MainContentProps> = ({
                 <span className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-[#FF6A55]"></span> Concrete Day-One Tasks
                 </span>
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
 
-            {/* Right Hero Graphic: Matching image_a99f5170.png White Match Card */}
+            {/* Right Hero Graphic: Matching image_a99f5170.png White Match Card with Gentle Floating Motion */}
             <div className="lg:col-span-5 flex flex-col items-center">
-              <div className="relative w-full max-w-sm sm:max-w-md pt-4">
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.94, y: 30 }}
+                animate={{ 
+                  opacity: 1, 
+                  scale: 1, 
+                  y: [0, -6, 0] 
+                }}
+                transition={{ 
+                  y: { repeat: Infinity, duration: 4.5, ease: 'easeInOut' },
+                  default: { duration: 0.65, ease: 'easeOut', delay: 0.15 }
+                }}
+                className="relative w-full max-w-sm sm:max-w-md pt-4"
+              >
                 
                 {/* Coral Day-One Ribbon on top-right */}
-                <div className="absolute top-0 right-4 sm:right-6 bg-[#FF6A55] text-black border-2 border-black rounded-xl px-4 py-1.5 text-xs font-mono font-bold shadow-neo-sm rotate-[4deg] z-10">
+                <motion.div 
+                  initial={{ rotate: 0, scale: 0.8 }}
+                  animate={{ rotate: 4, scale: 1 }}
+                  transition={{ delay: 0.35, type: 'spring', stiffness: 200 }}
+                  className="absolute top-0 right-4 sm:right-6 bg-[#FF6A55] text-black border-2 border-black rounded-xl px-4 py-1.5 text-xs font-mono font-bold shadow-neo-sm z-10"
+                >
                   Day-One task: 20 mins
-                </div>
+                </motion.div>
 
                 {/* White Result Card Mockup */}
                 <div className="bg-white text-black rounded-3xl border-2 border-black shadow-[8px_8px_0px_0px_#111116] p-7 sm:p-8 relative">
@@ -149,14 +202,19 @@ export const MainContent: React.FC<MainContentProps> = ({
                     <span className="text-base sm:text-lg font-bold text-stone-700">fit</span>
                   </div>
 
-                  {/* Progress Bars */}
+                  {/* Progress Bars with Animated Fill on View */}
                   <div className="space-y-4 mb-6">
                     <div>
                       <div className="text-xs font-mono font-semibold text-stone-800 mb-1">
                         Aptitude
                       </div>
                       <div className="w-full bg-stone-100 h-3.5 rounded-full overflow-hidden border-2 border-black p-0.5">
-                        <div className="bg-[#5D45FD] h-full rounded-full" style={{ width: '92%' }}></div>
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: '92%' }}
+                          transition={{ duration: 1.1, ease: 'easeOut', delay: 0.3 }}
+                          className="bg-[#5D45FD] h-full rounded-full" 
+                        />
                       </div>
                     </div>
 
@@ -165,7 +223,12 @@ export const MainContent: React.FC<MainContentProps> = ({
                         Your resources
                       </div>
                       <div className="w-full bg-stone-100 h-3.5 rounded-full overflow-hidden border-2 border-black p-0.5">
-                        <div className="bg-[#D4F938] h-full rounded-full" style={{ width: '88%' }}></div>
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: '88%' }}
+                          transition={{ duration: 1.1, ease: 'easeOut', delay: 0.45 }}
+                          className="bg-[#D4F938] h-full rounded-full" 
+                        />
                       </div>
                     </div>
 
@@ -174,7 +237,12 @@ export const MainContent: React.FC<MainContentProps> = ({
                         Market demand
                       </div>
                       <div className="w-full bg-stone-100 h-3.5 rounded-full overflow-hidden border-2 border-black p-0.5">
-                        <div className="bg-[#FF6A55] h-full rounded-full" style={{ width: '82%' }}></div>
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: '82%' }}
+                          transition={{ duration: 1.1, ease: 'easeOut', delay: 0.6 }}
+                          className="bg-[#FF6A55] h-full rounded-full" 
+                        />
                       </div>
                     </div>
                   </div>
@@ -196,10 +264,15 @@ export const MainContent: React.FC<MainContentProps> = ({
                 </div>
 
                 {/* Decorative floating sticker */}
-                <div className="absolute -bottom-3 -left-3 bg-[#FED74C] text-black border-2 border-black rounded-xl px-3 py-1 text-xs font-mono font-bold shadow-neo rotate-[-5deg]">
+                <motion.div 
+                  initial={{ rotate: -10, opacity: 0 }}
+                  animate={{ rotate: -5, opacity: 1 }}
+                  transition={{ delay: 0.5, type: 'spring' }}
+                  className="absolute -bottom-3 -left-3 bg-[#FED74C] text-black border-2 border-black rounded-xl px-3 py-1 text-xs font-mono font-bold shadow-neo"
+                >
                   No coding needed
-                </div>
-              </div>
+                </motion.div>
+              </motion.div>
             </div>
 
           </div>
@@ -211,7 +284,13 @@ export const MainContent: React.FC<MainContentProps> = ({
       <section id="pathways" className="bg-[#13141F] text-white py-16 sm:py-24 border-b-2 border-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12">
+          <motion.div 
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.55 }}
+            className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-12"
+          >
             <div>
               <h2 className="font-display text-3xl sm:text-5xl font-black tracking-tight">
                 Pick a lane.{' '}
@@ -269,15 +348,21 @@ export const MainContent: React.FC<MainContentProps> = ({
                 Coding
               </button>
             </div>
-          </div>
+          </motion.div>
 
-          {/* 2-Column Neo-Brutalist Grid matching mockup */}
+          {/* 2-Column Neo-Brutalist Grid matching mockup with Staggered Scroll-In */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
             
             {/* Card 1: Software & Web Engineering (Purple #7C65F6) */}
-            <div 
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.45 }}
+              whileHover={{ y: -5, scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
               onClick={() => onSelectPathway?.('niche-fullstack')}
-              className="bg-[#7C65F6] text-white rounded-2xl border-2 border-black p-6 sm:p-8 shadow-neo-lg hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer flex flex-col justify-between group"
+              className="bg-[#7C65F6] text-white rounded-2xl border-2 border-black p-6 sm:p-8 shadow-neo-lg transition-shadow cursor-pointer flex flex-col justify-between group"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -300,12 +385,18 @@ export const MainContent: React.FC<MainContentProps> = ({
                   Explore pathway <ArrowRight className="w-4 h-4" />
                 </span>
               </div>
-            </div>
+            </motion.div>
 
             {/* Card 2: Social Media & Community Ops (Lime #D4F938) */}
-            <div 
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.45, delay: 0.1 }}
+              whileHover={{ y: -5, scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
               onClick={() => onSelectPathway?.('niche-smm')}
-              className="bg-[#D4F938] text-black rounded-2xl border-2 border-black p-6 sm:p-8 shadow-neo-lg hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer flex flex-col justify-between group"
+              className="bg-[#D4F938] text-black rounded-2xl border-2 border-black p-6 sm:p-8 shadow-neo-lg transition-shadow cursor-pointer flex flex-col justify-between group"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -328,12 +419,18 @@ export const MainContent: React.FC<MainContentProps> = ({
                   Explore pathway <ArrowRight className="w-4 h-4" />
                 </span>
               </div>
-            </div>
+            </motion.div>
 
             {/* Card 3: Product Design & Virtual Ops (Yellow #FED74C) */}
-            <div 
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.45, delay: 0.15 }}
+              whileHover={{ y: -5, scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
               onClick={() => onSelectPathway?.('niche-uiux')}
-              className="bg-[#FED74C] text-black rounded-2xl border-2 border-black p-6 sm:p-8 shadow-neo-lg hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer flex flex-col justify-between group"
+              className="bg-[#FED74C] text-black rounded-2xl border-2 border-black p-6 sm:p-8 shadow-neo-lg transition-shadow cursor-pointer flex flex-col justify-between group"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -356,12 +453,18 @@ export const MainContent: React.FC<MainContentProps> = ({
                   Explore pathway <ArrowRight className="w-4 h-4" />
                 </span>
               </div>
-            </div>
+            </motion.div>
 
             {/* Card 4: Virtual Assistance (Sky Cyan #60C6F8) */}
-            <div 
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.45, delay: 0.2 }}
+              whileHover={{ y: -5, scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
               onClick={() => onSelectPathway?.('niche-va')}
-              className="bg-[#60C6F8] text-black rounded-2xl border-2 border-black p-6 sm:p-8 shadow-neo-lg hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer flex flex-col justify-between group"
+              className="bg-[#60C6F8] text-black rounded-2xl border-2 border-black p-6 sm:p-8 shadow-neo-lg transition-shadow cursor-pointer flex flex-col justify-between group"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -384,12 +487,18 @@ export const MainContent: React.FC<MainContentProps> = ({
                   Explore pathway <ArrowRight className="w-4 h-4" />
                 </span>
               </div>
-            </div>
+            </motion.div>
 
             {/* Card 5: QA Testing & Product Quality (Coral Red #FF6A55) */}
-            <div 
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.45, delay: 0.25 }}
+              whileHover={{ y: -5, scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
               onClick={() => onSelectPathway?.('niche-qa')}
-              className="bg-[#FF6A55] text-white rounded-2xl border-2 border-black p-6 sm:p-8 shadow-neo-lg hover:translate-x-1 hover:translate-y-1 transition-all cursor-pointer flex flex-col justify-between group"
+              className="bg-[#FF6A55] text-white rounded-2xl border-2 border-black p-6 sm:p-8 shadow-neo-lg transition-shadow cursor-pointer flex flex-col justify-between group"
             >
               <div>
                 <div className="flex items-center justify-between mb-4">
@@ -412,10 +521,16 @@ export const MainContent: React.FC<MainContentProps> = ({
                   Explore pathway <ArrowRight className="w-4 h-4" />
                 </span>
               </div>
-            </div>
+            </motion.div>
 
             {/* Card 6: +6 more pathways waiting (White outline dashed card) */}
-            <div 
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.15 }}
+              transition={{ duration: 0.45, delay: 0.3 }}
+              whileHover={{ y: -5, scale: 1.01 }}
+              whileTap={{ scale: 0.99 }}
               onClick={() => onStartAssessment?.()}
               className="bg-transparent rounded-2xl border-2 border-dashed border-white/40 p-6 sm:p-8 hover:border-[#D4F938] hover:bg-white/5 transition-all cursor-pointer flex flex-col justify-between group"
             >
@@ -440,7 +555,7 @@ export const MainContent: React.FC<MainContentProps> = ({
                   Take the quiz to match <ArrowRight className="w-4 h-4" />
                 </span>
               </div>
-            </div>
+            </motion.div>
 
           </div>
 
@@ -452,7 +567,13 @@ export const MainContent: React.FC<MainContentProps> = ({
       <section id="framework" className="py-16 sm:py-24 border-b-2 border-black bg-[#F8FAFC]">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           
-          <div className="text-center max-w-3xl mx-auto mb-12 sm:mb-16">
+          <motion.div 
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.55 }}
+            className="text-center max-w-3xl mx-auto mb-12 sm:mb-16"
+          >
             <h2 className="font-display text-3xl sm:text-5xl font-black text-black tracking-tight">
               4 quick steps.{' '}
               <span className="inline-block bg-[#FED74C] px-3 py-0.5 rounded-xl border-2 border-black shadow-neo-sm">
@@ -462,12 +583,19 @@ export const MainContent: React.FC<MainContentProps> = ({
             <p className="text-stone-600 font-sans text-base sm:text-lg mt-3 font-medium">
               We don't sell courses. We diagnose what actually fits you, then hand you free resources and a Day-One mission.
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
             
             {/* Step 1 */}
-            <div className="bg-white rounded-2xl border-2 border-black p-6 sm:p-7 shadow-neo flex flex-col justify-between">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.45, delay: 0.05 }}
+              whileHover={{ y: -4 }}
+              className="bg-white rounded-2xl border-2 border-black p-6 sm:p-7 shadow-neo flex flex-col justify-between"
+            >
               <div>
                 <div className="w-10 h-10 rounded-xl bg-[#5D45FD] text-white font-display font-black text-lg flex items-center justify-center border-2 border-black shadow-neo-sm mb-4">
                   1
@@ -482,10 +610,17 @@ export const MainContent: React.FC<MainContentProps> = ({
               <div className="mt-4 pt-3 border-t border-stone-100 text-xs font-mono font-bold text-[#5D45FD]">
                 Phase 1: 30 seconds
               </div>
-            </div>
+            </motion.div>
 
             {/* Step 2 */}
-            <div className="bg-white rounded-2xl border-2 border-black p-6 sm:p-7 shadow-neo flex flex-col justify-between">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.45, delay: 0.15 }}
+              whileHover={{ y: -4 }}
+              className="bg-white rounded-2xl border-2 border-black p-6 sm:p-7 shadow-neo flex flex-col justify-between"
+            >
               <div>
                 <div className="w-10 h-10 rounded-xl bg-[#D4F938] text-black font-display font-black text-lg flex items-center justify-center border-2 border-black shadow-neo-sm mb-4">
                   2
@@ -500,10 +635,17 @@ export const MainContent: React.FC<MainContentProps> = ({
               <div className="mt-4 pt-3 border-t border-stone-100 text-xs font-mono font-bold text-black">
                 Phase 2: Real constraints
               </div>
-            </div>
+            </motion.div>
 
             {/* Step 3 */}
-            <div className="bg-white rounded-2xl border-2 border-black p-6 sm:p-7 shadow-neo flex flex-col justify-between">
+            <motion.div 
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.45, delay: 0.25 }}
+              whileHover={{ y: -4 }}
+              className="bg-white rounded-2xl border-2 border-black p-6 sm:p-7 shadow-neo flex flex-col justify-between"
+            >
               <div>
                 <div className="w-10 h-10 rounded-xl bg-[#FF6A55] text-white font-display font-black text-lg flex items-center justify-center border-2 border-black shadow-neo-sm mb-4">
                   3
@@ -518,12 +660,18 @@ export const MainContent: React.FC<MainContentProps> = ({
               <div className="mt-4 pt-3 border-t border-stone-100 text-xs font-mono font-bold text-[#FF6A55]">
                 Phase 3: Work preferences
               </div>
-            </div>
+            </motion.div>
 
           </div>
 
           {/* Step 4 Full-Width Banner */}
-          <div className="bg-[#FED74C] rounded-2xl border-2 border-black p-6 sm:p-8 shadow-neo flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <motion.div 
+            initial={{ opacity: 0, y: 25 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.2 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="bg-[#FED74C] rounded-2xl border-2 border-black p-6 sm:p-8 shadow-neo flex flex-col sm:flex-row sm:items-center justify-between gap-6"
+          >
             <div className="flex items-start sm:items-center gap-4">
               <div className="w-12 h-12 rounded-xl bg-black text-white font-display font-black text-2xl flex items-center justify-center border-2 border-black shrink-0">
                 4
@@ -546,7 +694,7 @@ export const MainContent: React.FC<MainContentProps> = ({
               <span>Get started</span>
               <ArrowRight className="w-4 h-4 text-white" />
             </button>
-          </div>
+          </motion.div>
 
         </div>
       </section>
@@ -555,7 +703,13 @@ export const MainContent: React.FC<MainContentProps> = ({
       {/* SECTION: ELECTRIC LIME BANNER MATCHING Figma Landing_page_1x_41e999df.png */}
       <section className="py-12 sm:py-16 bg-white border-b-2 border-black">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="bg-[#D4F938] rounded-3xl border-2 border-black p-8 sm:p-14 shadow-neo-xl flex flex-col md:flex-row items-center justify-between gap-8">
+          <motion.div 
+            initial={{ opacity: 0, scale: 0.96, y: 20 }}
+            whileInView={{ opacity: 1, scale: 1, y: 0 }}
+            viewport={{ once: true, amount: 0.3 }}
+            transition={{ duration: 0.5, ease: 'easeOut' }}
+            className="bg-[#D4F938] rounded-3xl border-2 border-black p-8 sm:p-14 shadow-neo-xl flex flex-col md:flex-row items-center justify-between gap-8"
+          >
             <div className="max-w-2xl">
               <h2 className="font-display text-3xl sm:text-5xl font-black text-black tracking-tight leading-tight">
                 Ready? It takes less time than a TikTok scroll.
@@ -577,7 +731,7 @@ export const MainContent: React.FC<MainContentProps> = ({
               <span>Start the quiz</span>
               <ArrowRight className="w-5 h-5 text-white" />
             </button>
-          </div>
+          </motion.div>
         </div>
       </section>
 
@@ -588,7 +742,13 @@ export const MainContent: React.FC<MainContentProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
             
             {/* Left Headline Column */}
-            <div className="lg:col-span-6 space-y-6">
+            <motion.div 
+              initial={{ opacity: 0, x: -25 }}
+              whileInView={{ opacity: 1, x: 0 }}
+              viewport={{ once: true, amount: 0.2 }}
+              transition={{ duration: 0.55 }}
+              className="lg:col-span-6 space-y-6"
+            >
               
               <div className="inline-block bg-[#D4F938] text-black px-3.5 py-1.5 rounded-full text-xs font-mono font-bold border-2 border-black shadow-neo-sm">
                 THE DAY-ONE IDEA
@@ -621,13 +781,20 @@ export const MainContent: React.FC<MainContentProps> = ({
                 </button>
               </div>
 
-            </div>
+            </motion.div>
 
             {/* Right Stack of 3 Day-One Mission Cards matching mockup */}
             <div className="lg:col-span-6 space-y-4">
               
               {/* Card 1: UI/UX Product Design (Yellow #FED74C) */}
-              <div className="bg-[#FED74C] text-black rounded-2xl border-2 border-black p-5 sm:p-6 shadow-neo-lg">
+              <motion.div 
+                initial={{ opacity: 0, x: 25 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.45, delay: 0.05 }}
+                whileHover={{ y: -4, scale: 1.01 }}
+                className="bg-[#FED74C] text-black rounded-2xl border-2 border-black p-5 sm:p-6 shadow-neo-lg"
+              >
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-display text-xl sm:text-2xl font-black">
                     UI/UX Product Design
@@ -639,10 +806,17 @@ export const MainContent: React.FC<MainContentProps> = ({
                 <p className="text-black/90 text-sm sm:text-base font-medium leading-relaxed">
                   Screenshot your bank app's transfer screen. Spot two confusing buttons. Sketch a cleaner one on paper.
                 </p>
-              </div>
+              </motion.div>
 
               {/* Card 2: Virtual Assistance (Sky Cyan #60C6F8) */}
-              <div className="bg-[#60C6F8] text-black rounded-2xl border-2 border-black p-5 sm:p-6 shadow-neo-lg">
+              <motion.div 
+                initial={{ opacity: 0, x: 25 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.45, delay: 0.15 }}
+                whileHover={{ y: -4, scale: 1.01 }}
+                className="bg-[#60C6F8] text-black rounded-2xl border-2 border-black p-5 sm:p-6 shadow-neo-lg"
+              >
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-display text-xl sm:text-2xl font-black">
                     Virtual Assistance
@@ -654,10 +828,17 @@ export const MainContent: React.FC<MainContentProps> = ({
                 <p className="text-black/90 text-sm sm:text-base font-medium leading-relaxed">
                   Build a weekly agenda with priority tags in Google Keep or Notion on your phone.
                 </p>
-              </div>
+              </motion.div>
 
               {/* Card 3: Data Analytics (Lime #D4F938) */}
-              <div className="bg-[#D4F938] text-black rounded-2xl border-2 border-black p-5 sm:p-6 shadow-neo-lg">
+              <motion.div 
+                initial={{ opacity: 0, x: 25 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true, amount: 0.2 }}
+                transition={{ duration: 0.45, delay: 0.25 }}
+                whileHover={{ y: -4, scale: 1.01 }}
+                className="bg-[#D4F938] text-black rounded-2xl border-2 border-black p-5 sm:p-6 shadow-neo-lg"
+              >
                 <div className="flex items-center justify-between mb-2">
                   <h4 className="font-display text-xl sm:text-2xl font-black">
                     Data Analytics
@@ -669,7 +850,7 @@ export const MainContent: React.FC<MainContentProps> = ({
                 <p className="text-black/90 text-sm sm:text-base font-medium leading-relaxed">
                   Enter 10 grocery prices in a free Google Sheet, then use SUM and AVERAGE on your basket.
                 </p>
-              </div>
+              </motion.div>
 
             </div>
 
