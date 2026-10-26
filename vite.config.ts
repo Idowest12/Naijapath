@@ -7,9 +7,15 @@ export default defineConfig(() => {
   return {
     plugins: [react(), tailwindcss()],
     resolve: {
-      alias: {
-        '@': path.resolve(__dirname, '.'),
-      },
+      alias: [
+        { find: /^(\.\.\/)+data\/niches[dD]ata(\.ts)?$/, replacement: path.resolve(__dirname, 'src/pathways/nichesData.ts') },
+        { find: /^(\.\.\/)+data(\/index)?(\.ts)?$/, replacement: path.resolve(__dirname, 'src/pathways/index.ts') },
+        { find: /^(\.\/)+niches[dD]ata(\.ts)?$/, replacement: path.resolve(__dirname, 'src/pathways/nichesData.ts') },
+        { find: '@/src', replacement: path.resolve(__dirname, 'src') },
+        { find: '@/data', replacement: path.resolve(__dirname, 'src/pathways') },
+        { find: '@/pathways', replacement: path.resolve(__dirname, 'src/pathways') },
+        { find: '@', replacement: path.resolve(__dirname, '.') },
+      ],
     },
     server: {
       // HMR is disabled in AI Studio via DISABLE_HMR env var.

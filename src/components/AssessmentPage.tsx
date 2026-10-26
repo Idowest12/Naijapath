@@ -67,7 +67,7 @@ import {
   REGION_OPTIONS, 
   SCENARIO_QUESTIONS,
   calculateNicheRecommendation
-} from '../data/assessmentQuestions';
+} from '../pathways/assessmentQuestions';
 import { DiagnosisResult } from './DiagnosisResult';
 import { saveAssessmentRecord } from '../utils/submissionStorage';
 import { saveAssessmentDraft, getAssessmentDraft, clearAssessmentDraft } from '../utils/assessmentDraftStorage';
