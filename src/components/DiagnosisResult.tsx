@@ -18,7 +18,7 @@ import {
   Award
 } from 'lucide-react';
 import { RecommendationResult } from '../types';
-import { ALL_NICHES } from '../data/nichesData';
+import { ALL_NICHES } from '../data';
 import { trackClick } from '../utils/analytics';
 import { TechNavLogo } from './TechNavLogo';
 

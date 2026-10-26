@@ -18,7 +18,7 @@ import {
   ChevronRight
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { ALL_NICHES } from '../data/nichesData';
+import { ALL_NICHES } from '../data';
 import { PathwayNiche } from '../types';
 import { trackClick } from '../utils/analytics';
 import { ScrollExperience } from './ScrollExperience';

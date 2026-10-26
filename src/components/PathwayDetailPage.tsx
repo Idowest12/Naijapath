@@ -20,7 +20,7 @@ import {
   Award
 } from 'lucide-react';
 import { PathwayNiche } from '../types';
-import { ALL_NICHES } from '../data/nichesData';
+import { ALL_NICHES } from '../data';
 import { trackClick } from '../utils/analytics';
 import { Footer } from './Footer';
 
